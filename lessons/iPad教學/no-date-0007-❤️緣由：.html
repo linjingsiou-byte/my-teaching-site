@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>❤️緣由： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">❤️緣由：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: iPad教學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #屏科實中國小部 #四年級綜合數學 #iPadSeeding2526 #MojoNine第九組 #5月分享文</h1>
+<p>❤️緣由：<br />
+暑假班遊要去義大世界，但怎麼自己去才能找到付錢的老師(我)？與其直接安排遊覽車讓孩子上車睡覺，不如讓他們變身「旅遊導航大師」！🧭加上老師也是個愛好自助旅行者，於是乎， 旅遊規劃特訓班起動！</p>
+<p>❤️教學流程：<br />
+快來看看這群「小小背包客」學會了哪些旅遊技能：</p>
+<p>📍 第一招：開啟 Maps 的「傳送門」</p>
+<p>🗺️ 地圖切換： 孩子們練習搜尋目的地，玩玩看 2D 與 3D 模式 的切換，空間感瞬間提升！也練習如何從A點移動到B點的前往方式及所需時間(搭大眾運輸、開車、騎車、走路)。</p>
+<p>🏙️ 街景探險： 用 街景模式 看看火車站門口、義大世界……長怎樣，到時候集合保證一眼就認出，完全不怕走錯(也練習看看自己想看的名勝，以及自己的家…哈)。</p>
+<p>🚂 第二招：成為「時刻表神探」</p>
+<p>🕒 火車攻略： 練習查詢火車時刻表。給他們一個指定時間，挑戰找出哪一班車能準時抵達車站！</p>
+<p>🚌 客運接駁： 下了火車後怎麼辦？手把手教孩子查客運路線與班次，找出可以搭乘的客運並算出幾點要上車才能在義大世界第一時間開門時入場，好好大玩特玩。</p>
+<p>✈️ 驚喜加碼：小小機票達人</p>
+<p>🌐 Google Flights 初體驗： 雖然這次坐火車、客運，但我們也順便練習看航班資訊！看看去國外玩的票價是多少？讓孩子對「環遊世界」也有了初步的想像。</p>
+<p>❤️心得：<br />
+看著孩子們專注盯著螢幕、興奮討論的樣子，討價還價希望老師最後給的(預定集合火車站仍是個謎唷)「解密任務」不要太難。真的覺得善用數位工具後，孩子的視野變得很不一樣。看著孩子們這麼投入，已經開始在期待跟同學一起出遊的畫面，身為老師的我也被這份熱情感染了！🥰 與其幫孩子把路鋪好，不如教他們 如何自己找路。這份「帶得走的能力」，就是送給他們升上五年級最好的暑假禮物。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

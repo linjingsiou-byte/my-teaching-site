@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一、備課： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">一、備課：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #iPad種子教師 #南四組 #四月分享文 #小一數學 #說數學 #生生用平板 #NumberFrames #Numbers #課堂</h1>
+<p>一、備課：<br />
+和夢n小數一年級夥伴們共備18以內的加減法時<br />
+扶堂主任分享自己的教學經驗<br />
+透過角色扮演<br />
+老師(或一個學生)扮演老板<br />
+一個學生扮演顧客<br />
+顧客只能有10元和1元的總數<br />
+跟老板買一樣9元以內的物品<br />
+藉由實際顧客付錢老板找錢<br />
+讓孩子理解顧客要付10元而不是全部的錢都給老板<br />
+老板找回(正確)的錢再加上原來的錢<br />
+就會是剩下的錢(差)</p>
+<p>二、教學流程：</p>
+<p>1.老師進行18以內減法的布題<br />
+兩個學生一組共用平板<br />
+透過操作numberframes<br />
+練習18以內減法的被減數拆解再減去減數<br />
+求得差<br />
+請學生發表自己的解題過程<br />
+因多數學生會透過直接一個一個拿走的策略求解<br />
+老師引導先從左半部的十個圓圈圈中拿走後再求解</p>
+<p>2.老師扮演老板<br />
+帶著全部學生當顧客<br />
+大家一起玩起角色扮演<br />
+再邀請二位學生再扮演一次<br />
+讓學生能將習得的18以內的減法運用在生活中</p>
+<p>3.老師airdrop事先製作的電子學習單給各組<br />
+各組進行角色扮演並解題<br />
+老師透過「課堂」了解學生的解題過程<br />
+並請小組上台操作示範及說明解題歷程(透過課堂投影)<br />
+其他小組給予回饋</p>
+<p>三、省思：<br />
+透過角色扮演<br />
+學生更能理解為何要拆解被減數為10和多少<br />
+再利用其中的10先減掉減數<br />
+最後求得差</p>
+<p>因老師手邊沒有這麼多的錢幣可供學生操作<br />
+透過numbers製作的電子學習單<br />
+學生可以兩兩練習當老板及顧客<br />
+提供學生較多的練習機會<br />
+礙於尚未教導學生螢幕錄製的方法<br />
+如此一來<br />
+可以更詳細紀錄每組操作及說數學的歷程</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>備課最花時間的部分，從來不是「要教什麼」，<br />
+而是「要怎麼讓孩子說出來」。</p>
+<p>這節課我設計了一個開放的問題，<br />
+讓孩子先想，再說給同學聽。</p>
+<p>我在旁邊繞行，聽到各種有趣的說法：<br />
+有人說得精準，有人說得歪斜，有人說出了我沒想到的角度。</p>
+<p><strong>這些聲音，是最真實的課堂資料，<br />
+也是讓我一次次確認：說數學，沒有走錯路。</strong></p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>互動除法：三位數除以一位數 (隨機出題版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4;
+            touch-action: manipulation;
+            user-select: none;
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        /* 隱藏 number input 的上下箭頭 */
+        input[type=text] { -moz-appearance: textfield; outline: none; }
+        /* 硬幣樣式 */
+        .coin {
+            width: clamp(20px, 4vmin, 45px);
+            height: clamp(20px, 4vmin, 45px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.6rem, 1.5vmin, 1.2rem);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            position: relative;
+            z-index: 20;
+            flex-shrink: 0;
+            font-weight: 900;
+            margin: 1px;
+        }
+        .coin.interactive { cursor: pointer; animation: bounce-subtle 2s infinite; }
+        .coin.interactive:active { transform: scale(0.9) translateY(2px); box-shadow: 0 0px 0 rgba(0,0,0,0.2); }
+        .coin-100 { background-color: #86efac; border: 2px solid #16a34a; box-shadow: 0 2px 0 #14532d; color: #064e3b; }
+        .coin-10 { background-color: #fcd34d; border: 2px solid #d97706; box-shadow: 0 2px 0 #b45309; color: #dc2626; }
+        .coin-1 { background-color: #e5e7eb; border: 2px solid #9ca3af; box-shadow: 0 2px 0 #6b7280; color: #2563eb; }
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(0, 0, 0, 0); }
+        }
+        /* ================= 數學直式排版 ================= */
+        .math-table {
+            display: grid;
+            grid-template-columns: minmax(15px, auto) repeat(3, minmax(1.5rem, 2.5rem)) minmax(100px, 1fr);
+            justify-content: center;
+            column-gap: 2px;
+            row-gap: clamp(2px, 0.8vmin, 6px);
+            font-size: clamp(1.2rem, 4vw, 2.5rem); 
+            font-weight: 900;
+            line-height: 1.1;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .cell { 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: clamp(1.5rem, 5vw, 2rem);
+        } 
+        .div-bracket-start {
+            border-top: clamp(2px, 0.5vw, 3px) solid #334155;
+            border-left: clamp(2px, 0.5vw, 3px) solid #334155;
+            border-top-left-radius: 8px;
+            margin-left: -2px;
+            padding-left: 2px;
+        }
+        .div-bracket-mid {
+            border-top: clamp(2px, 0.5vw, 3px) solid #334155;
+        }
+        .math-line { 
+            display: block !important; 
+            height: 3px !important; 
+            min-height: 3px !important;
+            background-color: #334155; 
+            border-radius: 2px; 
+            margin: 2px 0;
+            width: 100%;
+            align-self: center;
+        }
+        .math-note {
+            font-size: clamp(0.75rem, 2vw, 1rem);
+            font-weight: 700;
+            text-align: left;
+            white-space: nowrap;
+            line-height: 1.2;
+            justify-content: flex-start;
+            padding-left: 8px !important;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: #475569;
+        }
+        .input-box {
+            width: clamp(1.2rem, 6vw, 2.2rem);
+            height: clamp(1.4rem, 7vw, 2.6rem);
+            border: 2px dashed currentColor;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .input-box.active {
+            background-color: #fef08a;
+            border-style: solid;
+            animation: pulse-border 1.5s infinite;
+        }
+        .fade-hidden { opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .fade-show { opacity: 1; transition: opacity 0.2s ease-in; }
+        .drop-hidden { opacity: 0; transform: translateY(-10px); }
+        .drop-show { opacity: 1; transform: translateY(0); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .collapse-row { display: none !important; }
+        @media (max-width: 768px) {
+            .math-table { grid-template-columns: minmax(10px, auto) repeat(3, minmax(1.2rem, 2rem)) minmax(90px, 1fr); }
+            .coin { margin: 0; }
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    </style>
+</head>
+<body class="flex flex-col p-1 md:p-2 gap-1 md:gap-2 text-slate-800">
+    <!-- 頂部：隨機出題控制區 -->
+    <div class="relative bg-indigo-100 rounded-lg md:rounded-xl p-2 md:p-3 flex flex-wrap items-center justify-between gap-2 shadow-sm border-2 border-indigo-200 shrink-0 z-40 w-full">
+        <div class="flex items-center gap-2">
+            <span class="text-xl">🎯</span>
+            <span class="font-black text-indigo-900 text-sm md:text-lg">三位數除以一位數 (隨機出題版)</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="bg-white border border-indigo-300 rounded-lg px-3 py-1 font-mono font-bold text-indigo-900 text-sm md:text-base shadow-inner">
+                目前題目：<span id="current-question-text" class="text-red-600">載入中...</span>
+            </div>
+            <button onclick="generateRandomProblem()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-4 rounded-lg shadow active:scale-95 transition text-[0.8rem] md:text-sm flex items-center gap-1">
+                🎲 隨機換一題
+            </button>
+        </div>
+    </div>
+    <!-- 遊戲主要內容區 -->
+    <div class="flex flex-col md:flex-row gap-1 md:gap-2 flex-1 min-h-0 overflow-hidden relative">
+        <!-- 左半邊 (大螢幕佔 2/3)：具體操作區 -->
+        <div class="flex-1 md:flex-[2] bg-white rounded-xl md:rounded-3xl shadow-lg border-2 md:border-4 border-green-200 flex flex-col min-h-[35%] md:min-h-0 overflow-hidden relative">
+            <div class="bg-green-100 p-1 md:p-2 border-b-2 md:border-b-4 border-green-200 flex flex-col items-center shrink-0 max-h-[45%] overflow-y-auto">
+                <h2 class="text-xs md:text-lg font-black text-green-800 mb-0.5 md:mb-1 sticky top-0 bg-green-100 w-full text-center z-10 pb-0.5 md:pb-1">💰 錢包（待分配）</h2>
+                <div id="bank" class="flex flex-wrap gap-0.5 md:gap-1 justify-center w-full px-1 min-h-[30px] md:min-h-[50px] content-start"></div>
+            </div>
+            <div class="flex-1 p-1 md:p-2 bg-green-50 flex flex-col justify-center min-h-0 overflow-y-auto">
+                <div id="monsters-container" class="flex justify-around items-stretch w-full h-full gap-0.5 md:gap-2"></div>
+            </div>
+        </div>
+        <!-- 右半邊 (大螢幕佔 1/3)：直式與互動問答區 -->
+        <div class="flex-1 md:flex-[1] flex flex-col gap-1 md:gap-2 min-h-[55%] md:min-h-0 relative">
+            <!-- 對話引導框 -->
+            <div class="bg-yellow-200 rounded-xl md:rounded-2xl shadow-md p-2 md:p-3 border-2 md:border-4 border-yellow-400 relative bubble-arrow flex flex-col shrink-0 z-30">
+                <div class="flex justify-center items-center mb-0.5 md:mb-1">
+                    <span class="text-lg md:text-2xl mr-1">🦉</span>
+                    <h3 class="font-black text-yellow-900 text-xs md:text-sm">貓頭鷹老師</h3>
+                </div>
+                <p id="dialog-text" class="text-[clamp(0.85rem,3.5vw,1.2rem)] font-black text-slate-700 min-h-[2.5rem] md:min-h-[3rem] w-full text-center break-words whitespace-normal leading-snug my-0.5 md:my-1"></p>
+                <div id="options-container" class="flex flex-col items-center justify-center gap-1.5 md:gap-2 mt-0.5 md:mt-1 fade-hidden"></div>
+            </div>
+            <!-- 數學直式黑板 -->
+            <div class="bg-slate-50 rounded-xl md:rounded-2xl shadow-md p-1 md:p-2 flex-1 flex flex-col items-start md:items-center justify-start border-2 md:border-4 border-slate-300 relative min-h-0 overflow-y-auto pb-20">
+                <div class="math-table font-mono w-full px-1 mx-auto pt-4 md:pt-6">
+                    <!-- Row 1: Quotient (商) -->
+                    <div id="m-q-spacer" class="cell"></div>
+                    <div id="m-q100-container" class="cell relative w-full flex-col justify-end pb-0.5 md:pb-1"><div id="lbl-q100" class="absolute bottom-[100%] left-1/2 -translate-x-1/2 mb-0.5 w-max text-center fade-hidden leading-tight text-[0.5rem] md:text-[0.65rem] font-bold text-green-600"></div><div id="m-q100" class="input-box text-green-600 fade-hidden"></div></div>
+                    <div id="m-q10-container" class="cell relative w-full flex-col justify-end pb-0.5 md:pb-1"><div id="lbl-q10" class="absolute bottom-[100%] left-1/2 -translate-x-1/2 mb-0.5 w-max text-center fade-hidden leading-tight text-[0.5rem] md:text-[0.65rem] font-bold text-red-600"></div><div id="m-q10" class="input-box text-red-600 fade-hidden"></div></div>
+                    <div id="m-q1-container" class="cell relative w-full flex-col justify-end pb-0.5 md:pb-1"><div id="lbl-q1" class="absolute bottom-[100%] left-1/2 -translate-x-1/2 mb-0.5 w-max text-center fade-hidden leading-tight text-[0.5rem] md:text-[0.65rem] font-bold text-blue-600"></div><div id="m-q1" class="input-box text-blue-600 fade-hidden"></div></div>
+                    <div class="cell"></div>
+                    <!-- Row 2: Divisor / Dividend -->
+                    <div id="m-divisor-container" class="cell pr-1 md:pr-2 font-bold text-slate-700 w-full" style="justify-content: flex-end;"><span id="m-divisor"></span></div>
+                    <div id="m-dividend-100" class="cell div-bracket-start font-bold text-green-500"></div>
+                    <div id="m-dividend-10" class="cell div-bracket-mid font-bold text-red-500"></div>
+                    <div id="m-dividend-1" class="cell div-bracket-mid font-bold text-blue-500"></div>
+                    <div id="m-total-note" class="cell math-note fade-hidden">👈 總金額</div>
+                    <!-- 群組 1: 百位運算 -->
+                    <div id="group-100s" style="display: contents;">
+                        <div class="cell"></div>
+                        <div id="m-s100" class="cell text-green-500 fade-hidden font-bold"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div id="m-n-s100" class="cell math-note fade-hidden text-green-600"></div>
+                        <div class="cell"></div>
+                        <div id="m-l1" class="math-line fade-hidden" style="grid-column: 2 / 5;"></div> 
+                        <div class="cell"></div>
+                        <!-- Row 5: Remainder 100s & Bring down 10s -->
+                        <div class="cell"></div>
+                        <div id="m-rem100" class="cell text-slate-400 fade-hidden font-bold"></div>
+                        <div id="m-b10" class="cell text-red-500 drop-hidden font-bold"></div>
+                        <div id="m-b1-row5" class="cell text-blue-500 drop-hidden font-bold"></div>
+                        <div class="cell relative w-full min-h-[1.2rem] md:min-h-[1.5rem]">
+                            <div id="m-n-rem100" class="math-note fade-hidden text-green-600 absolute inset-y-0 flex items-center w-full"></div>
+                            <div id="m-n-b10" class="math-note drop-hidden text-red-600 absolute inset-y-0 flex items-center w-full"></div>
+                        </div>
+                    </div>
+                    <!-- 群組 2: 十位運算 -->
+                    <div id="group-10s" style="display: contents;">
+                        <div class="cell"></div>
+                        <div id="m-s10-100" class="cell text-red-500 fade-hidden font-bold"></div> 
+                        <div id="m-s10-10" class="cell text-red-500 fade-hidden font-bold"></div>
+                        <div class="cell"></div>
+                        <div id="m-n-s10" class="cell math-note fade-hidden text-red-600"></div>
+                        <div class="cell"></div>
+                        <div id="m-l2" class="math-line fade-hidden" style="grid-column: 2 / 5;"></div>
+                        <div class="cell"></div>
+                        <!-- Row 8: Remainder 10s & Bring down 1s -->
+                        <div class="cell"></div>
+                        <div id="m-rem10-100" class="cell text-red-500 fade-hidden font-bold"></div>
+                        <div id="m-rem10" class="cell text-slate-400 fade-hidden font-bold"></div>
+                        <div id="m-b1" class="cell text-blue-500 drop-hidden font-bold"></div>
+                        <div class="cell relative w-full min-h-[1.2rem] md:min-h-[1.5rem]">
+                            <div id="m-n-rem10" class="math-note fade-hidden text-red-600 absolute inset-y-0 flex items-center w-full"></div>
+                            <div id="m-n-b1" class="math-note drop-hidden text-blue-600 absolute inset-y-0 flex items-center w-full"></div>
+                        </div>
+                    </div>
+                    <!-- 群組 3: 個位運算 -->
+                    <div id="group-1s" style="display: contents;">
+                        <div class="cell"></div>
+                        <div id="m-s1-100" class="cell text-blue-500 fade-hidden font-bold"></div>
+                        <div id="m-s1-10" class="cell text-blue-500 fade-hidden font-bold"></div>
+                        <div id="m-s1-1" class="cell text-blue-500 fade-hidden font-bold"></div>
+                        <div id="m-n-s1" class="cell math-note fade-hidden text-blue-600"></div>
+                        <div class="cell"></div>
+                        <div id="m-l3" class="math-line fade-hidden" style="grid-column: 2 / 5;"></div>
+                        <div class="cell"></div>
+                        <!-- Row 11: Final remainder -->
+                        <div class="cell"></div>
+                        <div id="m-r0-100" class="cell text-slate-700 fade-hidden font-bold"></div>
+                        <div id="m-r0-10" class="cell text-slate-700 fade-hidden font-bold"></div>
+                        <div id="m-r0" class="cell text-slate-700 fade-hidden font-bold"></div>
+                        <div id="m-n-r0" class="cell math-note fade-hidden text-slate-600 font-bold"></div>
+                    </div>
+                </div>
+                <!-- 絕對定位右下角 -->
+                <button id="restart-btn" onclick="generateRandomProblem()" class="absolute bottom-4 right-4 bg-slate-500 hover:bg-slate-600 text-white text-xs md:text-sm font-black py-2 px-4 rounded-full shadow-lg transform transition active:scale-95 fade-hidden z-40">
+                    挑戰下一題 ➡️
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const MONSTER_EMOJIS = ['👾', '🐙', '🐸', '🐰', '🐯', '🐻', '🐼', '🦊', '🐶'];
+        let prob = { total: 0, divisor: 0, d100: 0, d10: 0, d1: 0, q100: 0, q10: 0, q1: 0, rem100: 0, rem10: 0, rem1: 0 };
+        let state = { phase: 'setup', userGuess: null, current100s: 0, current10s: 0, current1s: 0, exchangeCount: 0, shortcut100: false, shortcut10: false };
+        let currentSetupInput = null;
+        const BANK = document.getElementById('bank');
+        const MONSTERS_BOX = document.getElementById('monsters-container');
+        const DIALOG = document.getElementById('dialog-text');
+        const OPTIONS = document.getElementById('options-container');
+        // === UI Helpers ===
+        function showFade(id) { let el = document.getElementById(id); if(el) { el.classList.remove('fade-hidden'); el.classList.add('fade-show'); } }
+        function hideFade(id) { let el = document.getElementById(id); if(el) { el.classList.remove('fade-show'); el.classList.add('fade-hidden'); } }
+        function showDrop(id) { let el = document.getElementById(id); if(el) { el.classList.remove('drop-hidden'); el.classList.add('drop-show'); } }
+        function hideDrop(id) { let el = document.getElementById(id); if(el) { el.classList.remove('drop-show'); el.classList.add('drop-hidden'); } }
+        // === 教學者出題鍵盤系統 ===
+        function generateRandomProblem() {
+            // 產生 100 到 999 之間的隨機被除數
+            const dividend = Math.floor(Math.random() * 900) + 100;
+            // 產生 2 到 9 之間的隨機除數
+            const divisor = Math.floor(Math.random() * 8) + 2;
+            
+            prob.total = dividend;
+            prob.divisor = divisor;
+            
+            // 更新畫面上顯示的題目
+            const textEl = document.getElementById('current-question-text');
+            if (textEl) {
+                textEl.innerText = `${dividend} ÷ ${divisor}`;
+            }
+            
+            // 隱藏黑板右下角的下一題按鈕
+            const restartBtn = document.getElementById('restart-btn');
+            if (restartBtn) {
+                restartBtn.classList.replace('fade-show', 'fade-hidden');
+            }
+            
+            startNewGame();
+        }
+        function calculateProblem() {
+            prob.d100 = Math.floor(prob.total / 100);
+            prob.d10 = Math.floor((prob.total % 100) / 10);
+            prob.d1 = prob.total % 10;
+            prob.q100 = Math.floor(prob.d100 / prob.divisor);
+            prob.rem100 = prob.d100 - (prob.q100 * prob.divisor);
+            let total10s = (prob.rem100 * 10) + prob.d10;
+            prob.q10 = Math.floor(total10s / prob.divisor);
+            prob.rem10 = total10s - (prob.q10 * prob.divisor);
+            let total1s = (prob.rem10 * 10) + prob.d1;
+            prob.q1 = Math.floor(total1s / prob.divisor);
+            prob.rem1 = total1s - (prob.q1 * prob.divisor);
+            state.current100s = prob.d100;
+            state.current10s = 0; 
+            state.current1s = 0;
+            state.shortcut100 = false;
+            state.shortcut10 = false;
+        }
+        function resetUI() {
+            OPTIONS.classList.replace('fade-show', 'fade-hidden');
+            document.getElementById('group-100s').style.display = 'contents';
+            document.getElementById('group-10s').style.display = 'contents';
+            document.getElementById('group-1s').style.display = 'contents';
+            document.querySelectorAll('.collapse-row').forEach(el => el.classList.remove('collapse-row'));
+            MONSTERS_BOX.innerHTML = '';
+            for(let i=0; i<prob.divisor; i++) {
+                const mBox = document.createElement('div');
+                mBox.className = "flex flex-col items-center flex-1 min-w-0";
+                mBox.innerHTML = `
+                    <div class="text-[clamp(1.5rem,6vw,3rem)] z-10 mb-[-1vmin]">${MONSTER_EMOJIS[i % MONSTER_EMOJIS.length]}</div>
+                    <div class="flex flex-row w-full h-full bg-green-200/60 rounded-lg md:rounded-xl p-0.5 md:p-1 border-2 border-dashed border-green-500 shadow-inner overflow-hidden gap-0.5 md:gap-1">
+                        <div id="monster-${i}-100" class="flex-1 flex flex-col items-center justify-start gap-0.5 md:gap-1 border-r border-green-400/50"></div>
+                        <div id="monster-${i}-10" class="flex-1 flex flex-col items-center justify-start gap-0.5 md:gap-1 border-r border-green-400/50"></div>
+                        <div id="monster-${i}-1" class="flex-1 flex flex-col items-center justify-start gap-0.5 md:gap-1"></div>
+                    </div>
+                `;
+                MONSTERS_BOX.appendChild(mBox);
+            }
+            let is3Digit = prob.total >= 100;
+            document.getElementById('m-total-note').classList.remove('fade-hidden');
+            document.getElementById('m-divisor').innerText = prob.divisor;
+            document.getElementById('m-dividend-100').innerText = is3Digit ? prob.d100 : '';
+            document.getElementById('m-dividend-10').innerText = prob.d10;
+            document.getElementById('m-dividend-1').innerText = prob.d1;
+            document.getElementById('m-divisor-container').style.gridColumn = '1';
+            document.getElementById('m-q-spacer').style.gridColumn = '1';
+            let q100Container = document.getElementById('m-q100-container');
+            if(q100Container) q100Container.classList.remove('hidden');
+            document.getElementById('m-dividend-100').classList.remove('hidden');
+            document.getElementById('group-100s').style.display = 'contents';
+            document.getElementById('m-dividend-100').className = 'cell div-bracket-start text-green-500 font-bold';
+            document.getElementById('m-dividend-10').className = 'cell div-bracket-mid text-red-500 font-bold';
+            document.getElementById('m-dividend-1').className = 'cell div-bracket-mid text-blue-500 font-bold';
+            document.getElementById('m-l2').style.gridColumn = '2 / 5';
+            document.getElementById('m-l3').style.gridColumn = '2 / 5';
+            const idsToClear = [
+                'm-q100', 'm-q10', 'm-q1', 'm-s100', 'm-rem100', 'm-b10', 'm-b1-row5',
+                'm-s10-100', 'm-s10-10', 'm-rem10-100', 'm-rem10', 'm-b1',
+                'm-s1-100', 'm-s1-10', 'm-s1-1', 'm-r0', 'm-r0-100', 'm-r0-10'
+            ];
+            idsToClear.forEach(id => {
+                let el = document.getElementById(id);
+                if(el) { el.innerText = ''; el.classList.replace('fade-show', 'fade-hidden'); el.classList.remove('active', 'drop-show'); }
+            });
+            const labelsToHide = [
+                'lbl-q100', 'lbl-q10', 'lbl-q1', 'm-n-s100', 'm-n-rem100', 'm-n-b10', 'm-n-s10', 'm-n-rem10', 'm-n-b1', 'm-n-s1', 'm-n-r0'
+            ];
+            labelsToHide.forEach(id => {
+                let el = document.getElementById(id);
+                if(el) { el.innerHTML = ''; el.classList.add('fade-hidden'); el.classList.remove('fade-show', 'drop-show'); }
+            });
+            ['m-l1', 'm-l2', 'm-l3'].forEach(id => {
+                let el = document.getElementById(id);
+                if(el) { el.classList.add('fade-hidden'); el.classList.remove('fade-show'); }
+            });
+            let nb10 = document.getElementById('m-n-b10');
+            if (nb10) { nb10.classList.remove('text-blue-600', 'text-slate-600'); nb10.classList.add('text-red-600'); }
+            let nb1 = document.getElementById('m-n-b1');
+            if (nb1) { nb1.classList.remove('text-slate-600'); nb1.classList.add('text-blue-600'); }
+            ['m-b10', 'm-b1', 'm-b1-row5'].forEach(id => {
+                let el = document.getElementById(id);
+                if(el) el.classList.add('drop-hidden');
+            });
+        }
+        function renderInitialBank() {
+            BANK.innerHTML = '';
+            for(let i=0; i<prob.d100; i++) BANK.appendChild(createCoin(100));
+            for(let i=0; i<prob.d10; i++) BANK.appendChild(createCoin(10, false, true));
+            for(let i=0; i<prob.d1; i++) BANK.appendChild(createCoin(1, false, true));
+        }
+        function createCoin(value, isFake = false, isInactiveOriginal = false) {
+            const item = document.createElement('div');
+            let classes = `coin coin-${value} `;
+            if (isFake) classes += 'opacity-40 grayscale border-dashed border-red-500 bg-red-100';
+            else if (isInactiveOriginal) classes += `opacity-40 original-${value}`;
+            item.className = classes;
+            item.innerText = value;
+            return item;
+        }
+        function moveItemToTarget(item, targetId) {
+            item.classList.remove('interactive');
+            const target = document.getElementById(targetId);
+            const firstRect = item.getBoundingClientRect();
+            target.appendChild(item);
+            const lastRect = item.getBoundingClientRect();
+            const invertX = firstRect.left - lastRect.left;
+            const invertY = firstRect.top - lastRect.top;
+            item.style.transform = `translate(${invertX}px, ${invertY}px)`;
+            item.style.transition = 'none';
+            requestAnimationFrame(() => {
+                item.style.transform = 'translate(0, 0) scale(1)';
+                item.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            });
+        }
+        async function animateDeal(type, guessAmount) {
+            let delay = 0;
+            let promises = [];
+            let coinsInBank = Array.from(BANK.querySelectorAll(`.coin-${type}:not(.opacity-40)`));
+            for (let i = 0; i < guessAmount; i++) {
+                for (let m = 0; m < prob.divisor; m++) {
+                    let coin = coinsInBank.pop();
+                    if (!coin) { coin = createCoin(type, true); BANK.appendChild(coin); }
+                    promises.push(new Promise(res => {
+                        setTimeout(() => { moveItemToTarget(coin, `monster-${m}-${type}`); res(); }, delay);
+                    }));
+                    delay += 100; 
+                }
+            }
+            await Promise.all(promises);
+            await new Promise(res => setTimeout(res, 500)); 
+        }
+        function setDialog(html) { DIALOG.innerHTML = html; }
+        function hideOptions() { OPTIONS.classList.replace('fade-show', 'fade-hidden'); OPTIONS.innerHTML = ''; }
+        function showKeypad(targetElementId, confirmCallback) {
+            state.userGuess = null;
+            document.getElementById(targetElementId).innerText = '';
+            let html = `<div class="flex flex-wrap justify-center gap-1 md:gap-2 w-full max-w-[280px] md:max-w-sm">`;
+            for(let i=0; i<=9; i++) { html += `<button id="kp-btn-${i}" onclick="selectNumber(${i}, '${targetElementId}')" class="w-8 h-8 md:w-12 md:h-12 bg-white border-2 border-slate-300 rounded-lg text-sm md:text-xl font-bold hover:bg-slate-100 transition-colors">${i}</button>`; }
+            html += `</div><div id="confirm-btn-container" class="hidden w-full text-center mt-2"><button onclick="${confirmCallback.name}()" class="bg-indigo-500 text-white px-4 md:px-6 py-1.5 md:py-2 rounded-full font-bold shadow-md hover:bg-indigo-600 active:scale-95 text-xs md:text-base">✅ 確認分分看</button></div>`;
+            OPTIONS.innerHTML = html; showFade('options-container');
+        }
+        window.selectNumber = function(num, targetId) {
+            state.userGuess = num;
+            document.getElementById(targetId).innerText = num;
+            for(let i=0; i<=9; i++) {
+                let btn = document.getElementById(`kp-btn-${i}`);
+                if(i === num) { btn.classList.replace('bg-white', 'bg-indigo-100'); btn.classList.replace('border-slate-300', 'border-indigo-500'); } 
+                else { btn.classList.replace('bg-indigo-100', 'bg-white'); btn.classList.replace('border-indigo-500', 'border-slate-300'); }
+            }
+            document.getElementById('confirm-btn-container').classList.remove('hidden');
+        };
+        function showActionOption(text, callbackName, isError = false) {
+            let color = isError ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600';
+            OPTIONS.innerHTML = `<button onclick="${callbackName}()" class="${color} text-white px-4 md:px-6 py-1.5 md:py-2 rounded-full font-bold shadow-md transition active:scale-95 text-sm md:text-lg animate-pulse">${text}</button>`;
+            showFade('options-container');
+        }
+        function startNewGame() {
+            calculateProblem();
+            resetUI();
+            renderInitialBank();
+            startPhase100();
+        }
+        /* ================= 階段 1: 百位數 ================= */
+        function startPhase100() {
+            state.phase = 'guess-100';
+            const qBox = document.getElementById('m-q100');
+            showFade('m-q100'); qBox.classList.add('active');
+            document.getElementById('lbl-q100').innerHTML = '每人得<br>幾個100';
+            showFade('lbl-q100');
+            if (state.current100s < prob.divisor) {
+                setDialog(`注意！百位只有 <span class="text-green-600 font-bold">${state.current100s} 個 100 元</span>，不夠平分給 ${prob.divisor} 隻怪獸。<br>不夠分時，商的百位要寫多少呢？`);
+            } else {
+                setDialog(`題目來了！我們有 <span class="text-green-600 font-bold">${state.current100s} 個 100 元</span>。<br>每隻怪獸可以分到幾個 100 呢？請點擊數字：`);
+            }
+            showKeypad('m-q100', evalGuess100);
+        }
+        async function evalGuess100() {
+            if(state.userGuess === null) return;
+            hideOptions(); document.getElementById('m-q100').classList.remove('active');
+            setDialog("✨ 看看分得怎麼樣...");
+            await animateDeal(100, state.userGuess);
+            if (state.userGuess < prob.q100) {
+                setDialog(`錢包裡還有剩下的 100 元，<span class="text-green-700 font-bold">其實每個人還可以再分更多喔！</span>`);
+                showActionOption("👉 重新估商", "retry100");
+            } else if (state.userGuess > prob.q100) {
+                const wrongTotal = state.userGuess * prob.divisor;
+                document.getElementById('m-s100').innerText = wrongTotal;
+                showFade('m-s100');
+                document.getElementById('m-n-s100').innerHTML = `👈 分出 ${wrongTotal} 個 100 (太多了)`;
+                document.getElementById('m-n-s100').className = 'cell math-note fade-show text-green-600';
+                setDialog(`⚠️ 錢包裡的錢不夠！你只有 ${state.current100s} 個 100，卻要分出 ${wrongTotal} 個 100，請重新思考！`);
+                showActionOption("🚨 把錢收回重來", "retry100", true);
+            } else {
+                if(state.userGuess === 0) {
+                    document.getElementById('m-q100').innerText = '0';
+                    state.shortcut100 = true;
+                    setDialog(`沒錯！${state.current100s} 個 100 不夠分給 ${prob.divisor} 個人，我們要換錢才能繼續分。<br>💡 <b>數學國不會寫 0 百，所以 0 不寫喔！</b>`);
+                    setTimeout(() => {
+                        document.getElementById('m-q100').innerText = ''; 
+                        hideFade('m-q100');
+                        hideFade('lbl-q100');
+                        document.getElementById('group-100s').style.display = 'none';
+                        checkExchange100();
+                    }, 4000);
+                } else {
+                    setDialog(`🎉 答對了！每人剛好分到 ${state.userGuess} 個 100 元。`);
+                    document.getElementById('m-s100').innerText = prob.q100 * prob.divisor;
+                    showFade('m-s100');
+                    document.getElementById('m-n-s100').innerHTML = `👈 分出 ${prob.q100 * prob.divisor} 個 100`;
+                    document.getElementById('m-n-s100').className = 'cell math-note fade-show text-green-600';
+                    setTimeout(() => {
+                        showFade('m-l1');
+                        showActionOption("👉 繼續結算", "checkExchange100");
+                    }, 800);
+                }
+            }
+        }
+        function retry100() {
+            for(let i=0; i<prob.divisor; i++) document.getElementById(`monster-${i}-100`).innerHTML = '';
+            hideFade('m-s100'); hideFade('m-n-s100');
+            const bank100s = BANK.querySelectorAll('.coin-100');
+            bank100s.forEach(c => c.remove()); 
+            for(let i=0; i<prob.d100; i++) BANK.insertBefore(createCoin(100), BANK.firstChild);
+            startPhase100();
+        }
+        function checkExchange100() {
+            hideOptions();
+            state.current10s = prob.d10; 
+            if (prob.rem100 > 0) {
+                state.phase = 'exchange-100';
+                if (!state.shortcut100) {
+                    document.getElementById('m-rem100').innerText = prob.rem100;
+                    document.getElementById('m-rem100').className = "cell text-green-500 fade-show font-bold";
+                    document.getElementById('m-n-rem100').innerHTML = `👈 剩下 ${prob.rem100} 個 100`;
+                    document.getElementById('m-n-rem100').className = "math-note fade-show text-green-600 absolute inset-y-0 flex items-center pr-2 w-full";
+                }
+                state.exchangeCount = prob.rem100;
+                if (state.shortcut100) {
+                    setDialog(`請點擊這 <span class="text-green-600 font-bold">${prob.rem100} 個 100 元</span>，把它們「<span class="text-purple-600 font-black">換錢成 10 元</span>」！`);
+                } else {
+                    setDialog(`百位分完囉！剩下 <span class="text-green-600 font-bold">${prob.rem100} 個 100 元</span> 不能平分。<br>請點擊剩下的 100 元，把它們「<span class="text-purple-600 font-black">換錢成 10 元</span>」！`);
+                }
+                let remCoins = BANK.querySelectorAll('.coin-100');
+                remCoins.forEach(c => {
+                    c.classList.add('interactive', 'animate-pulse');
+                    c.onclick = () => {
+                        c.remove(); state.exchangeCount--; state.current10s += 10;
+                        for(let i=0; i<10; i++) {
+                            const new10 = createCoin(10);
+                            const first1 = BANK.querySelector('.original-1');
+                            if(first1) BANK.insertBefore(new10, first1); else BANK.appendChild(new10);
+                        }
+                        if(state.exchangeCount === 0) {
+                            setTimeout(promptBringDown10, 800);
+                        }
+                    };
+                });
+            } else {
+                if (prob.q100 > 0) { 
+                    document.getElementById('m-rem100').innerText = '0';
+                    document.getElementById('m-rem100').className = "cell text-slate-400 fade-show font-bold";
+                    document.getElementById('m-n-rem100').innerHTML = `👈 剛好分完，這裡不用記錄 0`;
+                    document.getElementById('m-n-rem100').className = "math-note fade-show text-green-600 absolute inset-y-0 flex items-center pr-2 w-full";
+                    setDialog(`💡 剛好分完 ${prob.q100 * prob.divisor} 個 100！<br>但還有剩下的錢要繼續分，<span class="text-red-600 font-bold">直式上的 0 這裡可以省略不用記錄喔！</span>`);
+                    showActionOption("👉 隱藏 0 繼續分", "hideZero100");
+                } else {
+                    promptBringDown10();
+                }
+            }
+        }
+        window.hideZero100 = function() {
+            hideOptions();
+            document.getElementById('m-rem100').innerText = '';
+            document.getElementById('m-n-rem100').innerHTML = '';
+            hideFade('m-rem100'); hideFade('m-n-rem100');
+            promptBringDown10();
+        };
+        /* ================= 階段 2: 十位數 ================= */
+        function promptBringDown10() {
+            state.phase = 'bring-down-10';
+            if (state.shortcut100) {
+                doBringDown10(); 
+            } else {
+                setDialog(`現在把十位數的 <span class="text-red-600 font-bold">${prob.d10}</span> 放下來吧！`);
+                showActionOption(`⬇️ 把 ${prob.d10} 放下來`, "doBringDown10");
+            }
+        }
+        function doBringDown10() {
+            hideOptions();
+            document.querySelectorAll('.original-10').forEach(c => { c.classList.remove('opacity-40', 'original-10'); });
+            let oldNote100 = document.getElementById('m-n-rem100');
+            if (oldNote100) oldNote100.classList.add('fade-hidden');
+            if (state.shortcut100) {
+                setDialog(`換錢後加上原本的 ${prob.d10} 個，<br>現在總共有 <span class="text-red-600 font-bold">${state.current10s} 個 10 元</span>！`);
+            } else {
+                document.getElementById('m-b10').innerText = prob.d10;
+                showDrop('m-b10');
+                let noteEl = document.getElementById('m-n-b10');
+                if (state.current10s > prob.d10) {
+                    noteEl.innerHTML = `👈 有 ${state.current10s} 個 10`;
+                } else {
+                    noteEl.innerHTML = `👈 放下 ${prob.d10} 個 10`;
+                }
+                noteEl.className = "math-note drop-show text-red-600 absolute inset-y-0 flex items-center pr-2 w-full";
+                if (state.current10s > prob.d10) {
+                    setDialog(`把原本的 ${prob.d10} 個 10 元放下來，加上換好的錢，<br>總共有 <span class="text-red-600 font-bold">${state.current10s} 個 10 元</span>！`);
+                } else {
+                    setDialog(`把原本的 ${prob.d10} 個 10 元放下來，<br>總共有 <span class="text-red-600 font-bold">${state.current10s} 個 10 元</span>！`);
+                }
+            }
+            setTimeout(startPhase10, 2000);
+        }
+        function startPhase10() {
+            state.phase = 'guess-10';
+            const qBox = document.getElementById('m-q10');
+            showFade('m-q10'); qBox.classList.add('active');
+            document.getElementById('lbl-q10').innerHTML = '每人得<br>幾個10';
+            showFade('lbl-q10');
+            if (state.current10s < prob.divisor) {
+                setDialog(`只有 <span class="text-red-600 font-bold">${state.current10s} 個 10 元</span>，不夠分給 ${prob.divisor} 隻怪獸了！<br>商的十位要寫多少呢？`);
+            } else {
+                setDialog(`現在有 <span class="text-red-600 font-bold">${state.current10s} 個 10 元</span>。<br>每隻怪獸可以分到幾個 10 呢？`);
+            }
+            showKeypad('m-q10', evalGuess10);
+        }
+        async function evalGuess10() {
+            if(state.userGuess === null) return;
+            hideOptions(); document.getElementById('m-q10').classList.remove('active');
+            setDialog("✨ 看看分得怎麼樣...");
+            await animateDeal(10, state.userGuess);
+            if (state.userGuess < prob.q10) {
+                setDialog(`錢包裡還有剩下的 10 元，<br><span class="text-red-700 font-bold">其實還可以再分更多給怪獸喔！</span>`);
+                showActionOption("👉 重新估商", "retry10");
+            } else if (state.userGuess > prob.q10) {
+                const wrongS10 = state.userGuess * prob.divisor;
+                // 顯示錯誤的十位運算結果，拆分到直式格子
+                const h_digit = Math.floor(wrongS10 / 10);
+                const t_digit = wrongS10 % 10;
+                if (h_digit > 0 || prob.rem100 > 0) {
+                    document.getElementById('m-s10-100').innerText = h_digit > 0 ? h_digit : '';
+                    document.getElementById('m-s10-100').classList.replace('fade-hidden', 'fade-show');
+                }
+                document.getElementById('m-s10-10').innerText = t_digit;
+                document.getElementById('m-s10-10').classList.replace('fade-hidden', 'fade-show');
+                document.getElementById('m-n-s10').innerHTML = `👈 共分出 <span class="text-xl">${wrongS10}</span> 個 10 (太多了！)`;
+                document.getElementById('m-n-s10').classList.replace('fade-hidden', 'fade-show');
+                if (h_digit > 0 || prob.rem100 > 0) document.getElementById('m-s10-100').classList.add('animate-pulse');
+                document.getElementById('m-s10-10').classList.add('animate-pulse');
+                setDialog(`⚠️ 這樣錢包裡的錢不夠分給大家！<br><span class="text-sm text-red-600">你只有 ${state.current10s} 個 10，卻要分出 ${wrongS10} 個 10，請重新思考！</span>`);
+                showActionOption("🚨 把錢收回重來", "retry10", true);
+            } else {
+                setDialog(`🎉 太棒了！每人剛好分到 ${state.userGuess} 個 10 元。`);
+                const lbl10 = document.getElementById('lbl-q10');
+                lbl10.innerHTML = '每人得到<br>幾個10';
+                lbl10.className = 'absolute bottom-[100%] left-1/2 -translate-x-1/2 mb-0.5 w-max text-center text-[0.5rem] md:text-[0.65rem] font-bold text-red-600 fade-show leading-tight tracking-tighter';
+                document.getElementById('m-q10').classList.remove('border-dashed', 'bg-red-50');
+                const correctS10 = prob.q10 * prob.divisor;
+                const h_digit = Math.floor(correctS10 / 10);
+                const t_digit = correctS10 % 10;
+                if (h_digit > 0 || prob.rem100 > 0) {
+                    document.getElementById('m-s10-100').innerText = h_digit > 0 ? h_digit : '';
+                    document.getElementById('m-s10-100').classList.replace('fade-hidden', 'fade-show');
+                }
+                document.getElementById('m-s10-10').innerText = t_digit;
+                document.getElementById('m-s10-10').classList.replace('fade-hidden', 'fade-show');
+                document.getElementById('m-n-s10').innerText = `👈 共分出 ${correctS10} 個 10`;
+                document.getElementById('m-n-s10').classList.replace('fade-hidden', 'fade-show');
+                setTimeout(() => {
+                    showFade('m-l2');
+                    showActionOption("👉 繼續下一步", "checkExchange10");
+                }, 800);
+            }
+        }
+        function retry10() {
+            for(let i=0; i<prob.divisor; i++) {
+                document.getElementById(`monster-${i}-10`).innerHTML = '';
+            }
+            document.getElementById('m-s10-100').classList.replace('fade-show', 'fade-hidden');
+            document.getElementById('m-s10-10').classList.replace('fade-show', 'fade-hidden');
+            document.getElementById('m-n-s10').classList.replace('fade-show', 'fade-hidden');
+            document.getElementById('m-s10-100').classList.remove('animate-pulse');
+            document.getElementById('m-s10-10').classList.remove('animate-pulse');
+            BANK.querySelectorAll('.coin-10').forEach(c => c.remove());
+            const first1 = BANK.querySelector('.original-1');
+            for(let i=0; i<state.current10s; i++) {
+                const new10 = createCoin(10);
+                if (first1) BANK.insertBefore(new10, first1);
+                else BANK.appendChild(new10);
+            }
+            startPhase10();
+        }
+        function checkExchange10() {
+            hideOptions();
+            state.current1s = prob.d1;
+            let leftovers = prob.rem10;
+            if (leftovers > 0) {
+                state.phase = 'exchange-10';
+                document.getElementById('m-rem10').innerText = leftovers;
+                document.getElementById('m-rem10').className = "cell text-red-500 fade-show font-bold";
+                document.getElementById('m-n-rem10').innerHTML = `👈 剩下 ${leftovers} 個 10`;
+                document.getElementById('m-n-rem10').className = "math-note fade-show text-red-600 absolute inset-y-0 flex items-center pr-2 w-full";
+                state.exchangeCount = leftovers;
+                setDialog(`十位數分完囉！但是還有 ${leftovers} 個 10 元不能平分。<br>請點擊剩下的 10 元，把它們『換成 10 個 1 元』！`);
+                let remainingTens = BANK.querySelectorAll('.coin-10');
+                remainingTens.forEach(c => {
+                    c.classList.add('interactive', 'animate-pulse');
+                    c.onclick = () => {
+                        c.remove();
+                        state.exchangeCount--;
+                        state.current1s += 10;
+                        for(let i=0; i<10; i++) BANK.appendChild(createCoin(1));
+                        if(state.exchangeCount === 0) {
+                            setTimeout(promptBringDown1, 800);
+                        }
+                    };
+                });
+            } else {
+                document.getElementById('m-rem10').innerText = '0';
+                document.getElementById('m-rem10').className = "cell text-slate-400 fade-show font-bold";
+                document.getElementById('m-n-rem10').innerHTML = `👈 剛好分完，不用記錄 0`;
+                document.getElementById('m-n-rem10').className = "math-note fade-show text-red-600 absolute inset-y-0 flex items-center pr-2 w-full";
+                setDialog(`💡 剛好分完！十位數沒有剩下，我們接著把個位數放下來分分看！`);
+                showActionOption("👉 繼續分個位數", "hideZero10");
+            }
+        }
+        window.hideZero10 = function() {
+            hideOptions();
+            document.getElementById('m-rem10').innerText = '';
+            document.getElementById('m-n-rem10').innerHTML = '';
+            hideFade('m-rem10'); hideFade('m-n-rem10');
+            promptBringDown1();
+        };
+        function promptBringDown1() {
+            state.phase = 'bring-down-1';
+            setDialog(`現在把個位數的 <span class="text-blue-600 font-bold">${prob.d1}</span> 放下來吧！`);
+            showActionOption(`⬇️ 把 ${prob.d1} 放下來`, "doBringDown1");
+        }
+        function doBringDown1() {
+            hideOptions();
+            document.querySelectorAll('.original-1').forEach(c => {
+                c.classList.remove('opacity-40', 'original-1');
+            });
+            let oldNote10 = document.getElementById('m-n-rem10');
+            if (oldNote10) oldNote10.classList.add('fade-hidden');
+            document.getElementById('m-b1').innerText = prob.d1;
+            showDrop('m-b1');
+            let noteEl = document.getElementById('m-n-b1');
+            if (state.current1s > prob.d1) {
+                noteEl.innerHTML = `👈 有 ${state.current1s} 個 1`;
+            } else {
+                noteEl.innerHTML = `👈 放下 ${prob.d1} 個 1`;
+            }
+            noteEl.className = "math-note drop-show text-blue-600 absolute inset-y-0 flex items-center pr-2 w-full";
+            if (state.current1s > prob.d1) {
+                setDialog(`把原本的 ${prob.d1} 個 1 元放下來，加上換好的錢，<br>總共有 <span class="text-blue-600 font-bold">${state.current1s} 個 1 元</span>！`);
+            } else {
+                setDialog(`把原本的 ${prob.d1} 個 1 元放下來，<br>總共有 <span class="text-blue-600 font-bold">${state.current1s} 個 1 元</span>！`);
+            }
+            setTimeout(startPhase1, 2000);
+        }
+        function startPhase1() {
+            state.phase = 'guess-1';
+            const qBox = document.getElementById('m-q1');
+            showFade('m-q1'); qBox.classList.add('active');
+            document.getElementById('lbl-q1').innerHTML = '每人得<br>幾個1';
+            showFade('lbl-q1');
+            setDialog(`現在有 <span class="text-blue-600 font-bold">${state.current1s} 個 1 元</span>。<br>每隻怪獸可以分到幾個 1 呢？請點擊數字：`);
+            showKeypad('m-q1', evalGuess1);
+        }
+        async function evalGuess1() {
+            if(state.userGuess === null) return;
+            hideOptions(); document.getElementById('m-q1').classList.remove('active');
+            setDialog("✨ 看看分得怎麼樣...");
+            await animateDeal(1, state.userGuess);
+            if (state.userGuess < prob.q1) {
+                setDialog(`錢包裡還有剩下的 1 元，<br><span class="text-blue-700 font-bold">其實每個人還可以再分更多喔！</span>`);
+                showActionOption("👉 重新估商", "retry1");
+            } else if (state.userGuess > prob.q1) {
+                const wrongS1 = state.userGuess * prob.divisor;
+                const h_digit = Math.floor(wrongS1 / 100);
+                const t_digit = Math.floor((wrongS1 % 100) / 10);
+                const o_digit = wrongS1 % 10;
+                if (h_digit > 0) {
+                    document.getElementById('m-s1-100').innerText = h_digit;
+                    document.getElementById('m-s1-100').classList.replace('fade-hidden', 'fade-show');
+                }
+                if (h_digit > 0 || t_digit > 0) {
+                    document.getElementById('m-s1-10').innerText = t_digit;
+                    document.getElementById('m-s1-10').classList.replace('fade-hidden', 'fade-show');
+                }
+                document.getElementById('m-s1-1').innerText = o_digit;
+                document.getElementById('m-s1-1').classList.replace('fade-hidden', 'fade-show');
+                document.getElementById('m-n-s1').innerHTML = `👈 共分出 <span class="text-xl">${wrongS1}</span> 個 1 (太多了！)`;
+                document.getElementById('m-n-s1').classList.replace('fade-hidden', 'fade-show');
+                if (h_digit > 0) document.getElementById('m-s1-100').classList.add('animate-pulse');
+                if (h_digit > 0 || t_digit > 0) document.getElementById('m-s1-10').classList.add('animate-pulse');
+                document.getElementById('m-s1-1').classList.add('animate-pulse');
+                setDialog(`⚠️ 這樣錢包裡的錢不夠分給大家！<br><span class="text-sm text-red-600">你只有 ${state.current1s} 個 1，卻要分出 ${wrongS1} 個 1，請重新思考！</span>`);
+                showActionOption("🚨 把錢收回重來", "retry1", true);
+            } else {
+                setDialog(`🎉 太棒了！每人剛好分到 ${state.userGuess} 個 1 元。`);
+                const lbl1 = document.getElementById('lbl-q1');
+                lbl1.innerHTML = '每人得到<br>幾個1';
+                lbl1.className = 'absolute bottom-[100%] left-1/2 -translate-x-1/2 mb-0.5 w-max text-center text-[0.5rem] md:text-[0.65rem] font-bold text-blue-600 fade-show leading-tight tracking-tighter';
+                document.getElementById('m-q1').classList.remove('border-dashed', 'bg-blue-50');
+                const correctS1 = prob.q1 * prob.divisor;
+                const h_digit = Math.floor(correctS1 / 100);
+                const t_digit = Math.floor((correctS1 % 100) / 10);
+                const o_digit = correctS1 % 10;
+                if (h_digit > 0) {
+                    document.getElementById('m-s1-100').innerText = h_digit;
+                    document.getElementById('m-s1-100').classList.replace('fade-hidden', 'fade-show');
+                }
+                if (h_digit > 0 || t_digit > 0) {
+                    document.getElementById('m-s1-10').innerText = t_digit;
+                    document.getElementById('m-s1-10').classList.replace('fade-hidden', 'fade-show');
+                }
+                document.getElementById('m-s1-1').innerText = o_digit;
+                document.getElementById('m-s1-1').classList.replace('fade-hidden', 'fade-show');
+                document.getElementById('m-n-s1').innerText = `👈 共分出 ${correctS1} 個 1`;
+                document.getElementById('m-n-s1').classList.replace('fade-hidden', 'fade-show');
+                setTimeout(() => {
+                    showFade('m-l3');
+                    finishGame();
+                }, 800);
+            }
+        }
+        function retry1() {
+            for(let i=0; i<prob.divisor; i++) {
+                document.getElementById(`monster-${i}-1`).innerHTML = '';
+            }
+            document.getElementById('m-s1-100').classList.replace('fade-show', 'fade-hidden');
+            document.getElementById('m-s1-10').classList.replace('fade-show', 'fade-hidden');
+            document.getElementById('m-s1-1').classList.replace('fade-show', 'fade-hidden');
+            document.getElementById('m-n-s1').classList.replace('fade-show', 'fade-hidden');
+            document.getElementById('m-s1-100').classList.remove('animate-pulse');
+            document.getElementById('m-s1-10').classList.remove('animate-pulse');
+            document.getElementById('m-s1-1').classList.remove('animate-pulse');
+            BANK.querySelectorAll('.coin-1').forEach(c => c.remove());
+            for(let i=0; i<state.current1s; i++) {
+                BANK.appendChild(createCoin(1));
+            }
+            startPhase1();
+        }
+        function finishGame() {
+            state.phase = 'done';
+            const rem = prob.rem1;
+            document.getElementById('m-r0').innerText = rem;
+            document.getElementById('m-r0').className = "cell text-slate-700 fade-show font-bold";
+            if (rem > 0) {
+                document.getElementById('m-n-r0').innerText = `👈 還剩下 ${rem} 元，不能再平分了`;
+            } else {
+                document.getElementById('m-n-r0').innerText = `👈 全部都平分完了，沒有剩下`;
+            }
+            document.getElementById('m-n-r0').classList.replace('fade-hidden', 'fade-show');
+            const quotientStr = `${prob.q100 > 0 ? prob.q100 : ''}${prob.q10}${prob.q1}`;
+            if (rem > 0) {
+                setDialog(`🎊 挑戰成功！全部分完了！<br><span class="text-xl md:text-3xl text-green-700">${prob.total} ÷ ${prob.divisor} = ${quotientStr} ... ${rem}</span>`);
+            } else {
+                setDialog(`🎊 挑戰成功！全部分完了！<br><span class="text-xl md:text-3xl text-green-700">${prob.total} ÷ ${prob.divisor} = ${quotientStr}</span>`);
+            }
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+            document.getElementById('restart-btn').classList.replace('fade-hidden', 'fade-show');
+        }
+        // ====== AI ======
+        const apiKey = "";
+        const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
+        async function fetchWithBackoff(url, options, retries = 5) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(res => setTimeout(res, delays[i]));
+                }
+            }
+        }
+        async function generateHint() {
+            if (state.phase === 'done' || state.phase === 'setup') return;
+            let activeApiKey = apiKey;
+            if (!activeApiKey) {
+                activeApiKey = localStorage.getItem('gemini_api_key') || "";
+                if (!activeApiKey) {
+                    const userKey = prompt("💡 本機備份版提示：\n若要使用「AI老師求救」功能，請在下方輸入您的 Gemini API 金鑰（API Key）：");
+                    if (userKey) {
+                        const trimmed = userKey.trim();
+                        localStorage.setItem('gemini_api_key', trimmed);
+                        activeApiKey = trimmed;
+                    }
+                }
+            }
+            const hintDisplay = document.getElementById('ai-hint-display');
+            if (!activeApiKey) {
+                hintDisplay.classList.remove('hidden');
+                hintDisplay.innerHTML = `⚠️ 需要設定 Gemini API 金鑰才能使用 AI 老師求救功能喔！`;
+                return;
+            }
+            const hintBtn = document.getElementById('ai-hint-btn');
+            hintBtn.disabled = true;
+            hintBtn.innerHTML = '⏳ 思考中...';
+            hintDisplay.classList.remove('hidden');
+            hintDisplay.innerHTML = '✨ 老師正在觀察你的算式...';
+            const phaseMap = {
+                'guess-100': `學生正在估測商的百位數。被除數的百位是 ${prob.d100}，除數是 ${prob.divisor}。請提示他 ${prob.d100} 裡面最多可以平分給 ${prob.divisor} 個人每人多少。如果百位數不夠分，提示他商寫 0（或省略百位），並把百位換到十位。`,
+                'exchange-100': `學生正在將剩下的 100 元換成 10 元。請引導他點擊 100 元硬幣來換錢。`,
+                'bring-down-10': `學生已經完成百位換錢，現在要把十位數拉下來。`,
+                'guess-10': `學生正在估測商的十位數。目前有 ${state.current10s} 個十，除數是 ${prob.divisor}。請引導他思考 ${state.current10s} 裡面可以平分給 ${prob.divisor} 個人每人多少，提示背誦乘法表。`,
+                'exchange-10': `學生正在將十位的餘數換成 1 元。請提示他點擊十元硬幣來換錢。`,
+                'bring-down-1': `學生正在把個位數降下來。`,
+                'guess-1': `學生正在估測商的個位數。目前總共有 ${state.current1s} 個一，除數是 ${prob.divisor}。請提示他 ${state.current1s} 裡面可以平分給 ${prob.divisor} 個人每人多少，引導他背九九乘法。`
+            };
+            const promptText = `你是一位溫柔且有耐心的貓頭鷹數學老師。小學生正在學習三位數除以一位數的直式除法「${prob.total} ÷ ${prob.divisor}」。
+學生目前卡在這個步驟：【${phaseMap[state.phase] || '觀察中'}】。
+請用繁體中文給他一個簡短、充滿童趣與鼓勵的提示（最多 2 句話），引導他思考下一步要做什麼。
+重要規則：絕對不可以把正確的數字答案直接說出來！要用引導的方式。可以使用 Emoji。`;
+            const payload = {
+                contents: [{ parts: [{ text: promptText }] }],
+                systemInstruction: { parts: [{ text: "You are an encouraging and helpful math tutor for children." }] }
+            };
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${activeApiKey}`;
+                const result = await fetchWithBackoff(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "喵！魔法連線中斷了，請再點我一次！";
+                hintDisplay.innerHTML = `🦉 老師說：${text}`;
+            } catch (error) {
+                hintDisplay.innerHTML = `⚠️ 哎呀，AI 老師暫時不在家，請稍後再試！\n（若金鑰無效，您可以清除瀏覽器快取或使用 localStorage.removeItem('gemini_api_key') 重設）`;
+            } finally {
+                hintBtn.disabled = false;
+                hintBtn.innerHTML = '✨ AI 求救';
+            }
+        }
+        window.onload = generateRandomProblem;
+    </script>
+</body>
+</html>

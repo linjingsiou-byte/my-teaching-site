@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>感謝 Kitty Ting丁丁老師的分享 | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">感謝 Kitty Ting丁丁老師的分享</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #iPad種子教師 #南四組 #三月分享文 #小一數學課 #說數學 #生生用平板 #NumberFrames #課堂</h1>
+<p>感謝 Kitty Ting丁丁老師的分享<br />
+認識了numberframes這個很好用的數學app<br />
+(the math learning center的app都值得下載)<br />
+(也有網頁版可操作)<br />
+謝謝學校美女網管老師協助安裝app</p>
+<p>結合康軒版一下第二單元18以內的數<br />
+讓孩子操作numberframes<br />
+各組選取兩組十格的定位格<br />
+再透過合十計算18以內的加法</p>
+<p>孩子透過截具移動數位教具<br />
+加上錯誤或是重新來過時<br />
+能立即清空畫面<br />
+省下不少時間</p>
+<p>最重要的是<br />
+孩子秒懂為什麼要透過合十計算<br />
+也減少低成就孩子在拆解加數上的困難</p>
+<p>在加法交換律的學習上<br />
+透過選取移動兩組十格的定位格互調位置<br />
+學生更能發現加法交換律</p>
+<p>課堂是學生立即的動態操作顯示大助手<br />
+老師不一定要一組組確認<br />
+從畫面中立馬掌握各組學生的完成度<br />
+(持續建立孩子完成任務手放背後的規定中)</p>
+<p>最重要的是<br />
+透過說數學<br />
+請孩子歸納操作載具中的發現<br />
+說出加法交換律的規律</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>謝謝丁丁老師的無私分享。</p>
+<p>那次研習，讓我重新檢視自己的說數學：<br />
+我有沒有真的在「聽」孩子說？<br />
+還是只是在「等」孩子說出我想要的答案？</p>
+<p>兩者，差很多。</p>
+<p>真正的聆聽，是帶著好奇；<br />
+等待答案，是帶著評分表。</p>
+<p><strong>我想成為一個帶著好奇聆聽的老師。<br />
+因為當老師真心在聽，孩子才會真心在說。</strong></p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

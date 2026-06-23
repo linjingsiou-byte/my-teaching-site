@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>※教學目標： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">※教學目標：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #屏科實中國小部 #三年級說數學 #生生用平板</h1>
+<p>※教學目標：</p>
+<p>1.能認識一位小數及十分位。</p>
+<p>2.能進行小數的大小比較。</p>
+<p>※教學流程：</p>
+<p>1.教師介紹分數國及小數國的故事。<br />
+協助學生對一位小數的印象深刻。<br />
+(故事內容係共備時扶堂主任分享)</p>
+<p>2.介紹分數國及小數國後，也同步以數字往返分數國及小數國，<br />
+熟悉一位小數與分數的轉換。</p>
+<p>3.教師導學十分位。</p>
+<p>4.學生利用數位教具進行做數及比較一位小數的大小。<br />
+學生說明自己的比較方法：以幾個0.1來比大小，或是以各就各位依位值進行比較大小。</p>
+<p>※教學心得<br />
+學生在拿出2.7和3的過程，<br />
+有學生會先做出2.7，再利用複製功能快速做出第二個2.7，接著再多拿3個0.1；<br />
+還有一位學生是同時拿出二個「3」，<br />
+其中一個「3」再拿走3個0.1來做數，<br />
+也能順利說明自己的思考方式，<br />
+讓其他同學了解是30個0.1拿走3個0.1後，<br />
+就是2.7。<br />
+另一個沒有拿走任何的0.1，所以3比2.7大。</p>
+<p>也因這位同學的分享，<br />
+當學生再次比較10.3及10.7時，<br />
+有學生也直接拿出一個百格，做出10來後，<br />
+再分別累加到指定的數。<br />
+透過相互分享，<br />
+引發學生在一位小數的做數思考，<br />
+也是這堂課的意外收穫。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

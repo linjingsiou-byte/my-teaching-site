@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數學單元進入到很重要的「比多少」， | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">數學單元進入到很重要的「比多少」，</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #說數學 #比多少</h1>
+<p>數學單元進入到很重要的「比多少」，<br />
+依照帶上屆的做法，<br />
+先讓孩子操作花片，<br />
+有什麼顏色的花片？<br />
+接續問哪種花片比較多？<br />
+可以告訴數學國國王理由嗎？</p>
+<p>孩子說<br />
+藍色花片有5個，<br />
+紅色花片有4個，<br />
+所以就是藍色花片多啊！</p>
+<p>當我問，是這樣嗎？<br />
+還有沒有其他的想法呢？</p>
+<p>有一位孩子講出：<br />
+藍色(排得)比較長啊！當然就比較多！</p>
+<p>針對孩子的這句話，<br />
+我排出白色花片少但長度長，<br />
+紅色花片多但長度短的情況，<br />
+問孩子這樣子是白色花片多？</p>
+<p>全班孩子又說不對，<br />
+沒有對齊啊！<br />
+我回說：有啊！有對齊啊！<br />
+孩子說不對不對！<br />
+我請講這個答案的孩子上來試著說<br />
+一個不夠，<br />
+再一個再一個補充。<br />
+讓孩子練習思考，<br />
+練習表達。<br />
+總之，<br />
+就是要「不只答案對，還要說清楚」，<br />
+大家有共識「對齊」，<br />
+老師幫它們用另一個童言童語「一個對一個手牽手」來達成共識。</p>
+<p>說清楚了，<br />
+再進入到半具體的畫圈圈，<br />
+從小數字再練習比多少。<br />
+教學進度不快，<br />
+但能看到孩子真的在思考，<br />
+也練習表達力！</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>「比多少」這個單元，孩子最常犯的錯，<br />
+不是算錯，而是說不清楚<strong>為什麼</strong>多或少。</p>
+<p>「就是多啊！」<br />
+「就是少啊！」</p>
+<p>我忍住笑，繼續追問：「為什麼你覺得多？」</p>
+<p>等他終於說出：「因為……這邊有剩下沒有配對到的……」<br />
+我知道他懂了。</p>
+<p><strong>說數學，是讓「直覺」變成「理解」的翻譯過程。</strong><br />
+每一個孩子都有直覺，但說出來，才算真正擁有知識。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

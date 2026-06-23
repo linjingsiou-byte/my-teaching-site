@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好的…上次看實習老師教授二年級乘法的比較倍數問題時 | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">好的…上次看實習老師教授二年級乘法的比較倍數問題時</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #說數學 #被觀課</h1>
+<p>好的…上次看實習老師教授二年級乘法的比較倍數問題時<br />
+發現實習老師對於比較型乘法的細節不是很有把握<br />
+剛好今天教到比較型的減法問題<br />
+直接邀請實習老師過來觀課<br />
+一來也呈現如何帶說數學</p>
+<p>學生誤以為的簡單<br />
+其實真的回歸算式的數字意義時<br />
+連答案對都會說到懷疑自己在說什麼<br />
+連大人教的那一套只要大的數字減小的數字就好<br />
+也是會懷疑自己的算式<br />
+上次一節課只教一題的比較型減法<br />
+這次稍稍加快速度<br />
+但該確認題意再慢慢讓孩子上台練習說的重點不能少</p>
+<p>上次就理解比較型問題的孩子<br />
+也一直不懂為何同學就是不懂或是亂說算式數字的意義<br />
+這就是自己真的做數、說數學後的真懂啊</p>
+<p>家長是教育孩子的合夥人<br />
+至少也要讓家長認同老師的說數學<br />
+丟了一題比較型問題請家長思考<br />
+得到的是…孩子在家做數說數的影片<br />
+真的是挖到寶~~</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>看著實習老師上課，我想起自己剛踏入教室的樣子。</p>
+<p>那時候我也不太會等孩子說。<br />
+總是急著把答案說出來，怕孩子卡住、怕時間來不及。</p>
+<p>後來我才明白：<strong>那段孩子在想、在說的時間，才是真正的學習。</strong></p>
+<p>說數學教會我「等」——<br />
+等孩子找到語言，等孩子說完整，等孩子聽懂彼此。</p>
+<p>這個「等」字，是說數學送給我最重要的教學禮物。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

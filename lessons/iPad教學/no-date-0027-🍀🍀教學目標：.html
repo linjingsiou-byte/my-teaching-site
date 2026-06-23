@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍀🍀教學目標： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">🍀🍀教學目標：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: iPad教學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>iPadSeeding2526 #MojoNine第九組 #1月分享文 #教學日誌 #屏科實中國小部 #四年級藝術 #生生用平板</h1>
+<p>🍀🍀教學目標：</p>
+<p>1.能配合跨年節慶並利用GarageBand的「即時循環樂段」製作施放煙火的配樂。</p>
+<p>2.能在Keynote中加入照片(移除背景)、物件(調整不透明度)、文字、音樂，插入動畫效果並安排動畫順序，輸出成影片並上傳。</p>
+<p>🎆 誰說跨年煙火只能用看的？四年級孩子用 iPad 自己「炸」給你看！<br />
+跨年剛過，大家有沒有去哪裡看煙火呢？🧨 我們用 iPad <strong>「導」</strong>出一場專屬的「日本」跨年煙火秀！</p>
+<p>✨ 孩子解鎖的新技能（不只是玩平板，是玩創作！）： 這堂課結合了 GarageBand 與 Keynote 兩大神級好用的 App，讓孩子化身為：</p>
+<p>🎧 電音配樂師：利用 GarageBand 的「即時循環樂段」，即使沒有學過樂理，也能混出超有氣勢的煙火配樂。</p>
+<p>🎬 視覺導演：運用 Keynote 的密技（去背、調整不透明度），練習安排動畫出場的順序與時間，讓煙火隨著音樂節奏「綻放」！</p>
+<p>🏫 課堂小現場： 先是操作 GarageBand，此時，孩子們根本玩瘋了（笑），大家都對製作音樂展現了驚人的熱情，原本安靜的教室瞬間變成了小小混音室！🎵這次最特別的是，剛好有 日本交流學生 入班一起上課！為了歡迎日本新朋友，我們讓孩子選擇日本著名景點當作背景。看著孩子們專注地在 Keynote 上「去背」照片，</p>
+<p>💭 老師的感動時刻： 這其實是我們第二次製作煙火秀了(去年三年級是以台北101大樓為背景❤️❤️❤️謝謝Robin的點子分享❤️❤️❤️)。看著孩子們從第一次的生疏，到現在能熟練地為照片去背或是直接挑選合適的照片、加入並調整物件，甚至開始講究動畫出現的「時間點」要對在拍子上，真的看見了他們數位能力的成長。透過科技，四年級的孩子不只學會操作軟體，更在台日交流的氛圍中，用創意跨越了語言的隔閡。看到最後大家在 Padlet 上互相欣賞作品，那種成就感，比真的煙火還耀眼！✨</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

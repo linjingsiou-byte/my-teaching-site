@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開學第二天 | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">開學第二天</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: iPad教學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <blockquote>
+<p>📌 <strong>原始教學紀錄（來自臉書）</strong></p>
+<h1>教學日誌</h1>
+<p>#iPad種子教師<br />
+ #南四組<br />
+ #二月分享文<br />
+ #小一數學課<br />
+ #生生用平板<br />
+ #numbers<br />
+ #課堂</p>
+<p>開學第二天<br />
+ 配合五十以內的數該活動<br />
+ 直接送上numbers的學習單<br />
+ 透過兩兩共學<br />
+ 完成學習任務</p>
+<p>使用平板取代傳統附件的操作<br />
+ 學生練習拖拉物件做數<br />
+ 過程中如果不小心誤讓物件變形<br />
+ 也能知道按左轉箭頭回上一步驟<br />
+ 最重要的是搭配<br />
+ 條件式反白<br />
+ 學生練習自己檢核答案的正確性</p>
+<p>故意這次題目不加上注音符號<br />
+ 改教導選取題目後點選朗讀<br />
+ 第一次接觸<br />
+ 需要再多練習後<br />
+ 孩子們就能自行聽題目了</p>
+<p>課程的最後<br />
+ 利用課堂app<br />
+ 顯示各組的答題情形<br />
+ 共同檢核做數及表格是否正確<br />
+</p>
+</blockquote>
+<h2>課程脈絡</h2>
+<p>開學第二天<br />
+配合五十以內的數該活動<br />
+直接送上numbers的學習單<br />
+透過兩兩共學<br />
+完成學習任務</p>
+<p>使用平板取代傳統附件的操作<br />
+學生練習拖拉物件做數<br />
+過程中如果不小心誤讓物件變形<br />
+也能知道按左轉箭頭回上一步驟<br />
+最重要的是搭配<br />
+條件式反白<br />
+學生練習自己檢核答案的正確性</p>
+<p>故意這次題目不加上注音符號<br />
+改教導選取題目後點選朗讀<br />
+第一次接觸<br />
+需要再多練習後<br />
+孩子們就能自行聽題目了</p>
+<p>課程的最後<br />
+利用課堂app<br />
+顯示各組的答題情形<br />
+共同檢核做數及表格是否正確</p>
+<hr />
+<h2>🎯 數位融入目標</h2>
+<ul>
+<li>善用平板工具輔助學習，提升學習效率</li>
+<li>培養學生的數位素養與資訊倫理</li>
+<li>讓科技成為溝通與表達的工具</li>
+</ul>
+<hr />
+<h2>📱 使用工具與平台</h2>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iPad / 平板</td>
+<td>主要操作載具</td>
+</tr>
+<tr>
+<td>Padlet / 共學平台</td>
+<td>成果分享與展示</td>
+</tr>
+</tbody>
+</table>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

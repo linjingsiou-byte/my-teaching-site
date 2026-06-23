@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小二的班級怎麼精進說數學呢？ | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">小二的班級怎麼精進說數學呢？</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #說數學</h1>
+<p>小二的班級怎麼精進說數學呢？<br />
+班上的孩子已習慣課堂的發表，<br />
+除了三不五時帶著孩子複習四條班規，<br />
+老師也不忘身教示範。</p>
+<p>基本條件做到下，老師更想透過現有的平台讓學生的說數學不單單是在課堂上，<br />
+而是藉由平台與網路、載具，讓每個孩子都有機會表現說數學。<br />
+於是乎，結合學校現有的ipad，<br />
+除了在校本課程中，結合教學目標教導孩子如何使用ipad拍照、編輯、錄影外，<br />
+也帶著孩子熟悉padlet、seesaw平台，<br />
+孩子已會上傳個人的解說校本課程的影片，<br />
+並且進行同儕觀摩。</p>
+<p>有了這些成功的經驗，<br />
+想當然爾，<br />
+老師打算將說數學也納入在評量之中。<br />
+準備結合乘法(一)(二)單元，<br />
+讓孩子先完成書面的擬題活動，<br />
+規定要有完整的題目、解題的圖示、標示單位量對應的句子、算式外(平時上乘法的例行活動)，<br />
+還要將書面的資料拍照上傳，<br />
+然後準備在期末課堂時上傳到指定的平台，<br />
+上傳後，再請同儕進行互評，達到共學的目標。</p>
+<p>謝謝這學期二年級共備教師對於我的一些天馬行空想法給予肯定，<br />
+也謝謝前輩們給予教學上的寶貴經驗分享，感恩！<br />
+一群人走，真的，走得遠，也不孤單！</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>小二的說數學，要從班級文化開始建立。</p>
+<p>當孩子習慣了「說」，習慣了被聽，習慣了聽別人說，<br />
+數學課就不再只是對答案的地方，<br />
+而是一個<strong>思想流動的空間</strong>。</p>
+<p>我看著班上的孩子，從一開始的怯生生，<br />
+到後來的自信舉手、主動補充，</p>
+<p>這個轉變，是說數學最真實的成果。<br />
+不在分數，在神情。</p>
+<p><strong>推動說數學，是在投資孩子的勇氣。</strong></p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

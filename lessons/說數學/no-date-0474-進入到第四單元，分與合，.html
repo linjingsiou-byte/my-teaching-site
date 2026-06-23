@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>進入到第四單元，分與合， | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">進入到第四單元，分與合，</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #說數學</h1>
+<p>進入到第四單元，分與合，<br />
+算是學生第一個會嚴重卡關的單元。<br />
+從活動一到活動二，<br />
+我一直讓孩子上台操作實物教具，<br />
+(紅、藍點點是我的好友)<br />
+直到昨天，才開始問孩子，<br />
+我覺得每次都拿紅點點或藍點點出來有點麻煩？<br />
+有沒有人可以想想數學國的人會不會有更好的方法將8分成二堆？<br />
+有學生上台發表，說比手指頭，<br />
+我也順勢請他示範，<br />
+他就比給同學看，我確認左、右手比的手指頭代表的意思。<br />
+問學生會了嗎？學生說會！<br />
+我問還有沒有其他方法？<br />
+有學生回答畫數字，<br />
+我問是畫數字8嗎？<br />
+學生說是畫圈圈，<br />
+邀請學生上台進行示範教學，<br />
+學生上台畫了8個圈，<br />
+再刪掉要分去左邊的圈圈數，<br />
+同樣確認孩子8有那裡？為什麼刪掉2個圈，<br />
+最後，丟出問題，能不能以一筆畫的方式來分堆？<br />
+學生想到的是一筆畫(刪)掉圈圈，<br />
+我問還有沒有其他的一筆畫？<br />
+時間有限下，老師公布答案，直接畫直線將圈圈分成二堆。</p>
+<p>老師說的教的都不懂，同學上台說的就都懂。<br />
+這也是說數學神奇的地方吧！</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>「有沒有人可以想想，有沒有更好的方法？」</p>
+<p>這個問題，打開了一個孩子的嘴巴——<br />
+他上台，比出手指，說：「可以這樣！」</p>
+<p>那是他第一次在課堂上主動說。</p>
+<p>我心裡知道，這不只是一個數學方法的發現，<br />
+而是他發現了自己在這個課堂上是被歡迎的。</p>
+<p><strong>說數學，在給每個孩子一次被看見的機會。</strong><br />
+那個機會，可能就是他愛上數學的起點。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>孩子們在充分練習三位數除以一位數，商是三位數的題目後， | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">孩子們在充分練習三位數除以一位數，商是三位數的題目後，</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>屏科實中國小部 #說數學 #小三直式除法 #三層的直式計算一點都不慢這才是好方法</h1>
+<p>孩子們在充分練習三位數除以一位數，商是三位數的題目後，<br />
+詢問孩子們能否掌握分錢的順序及不能分怎麼記錄、不夠分了就換錢再合併的方法？<br />
+孩子們有把握的說有！<br />
+於是…立馬拿課本的空白計算題驗收尚未教過的題目，<br />
+扣除已經先在安親班學過的孩子，<br />
+不少孩子喊著怎麼算啊？不會算！cpu燒掉了！(這回答好笑~)</p>
+<p>但看到有孩子這麼記錄，<br />
+我好感動…真的…<br />
+這個孩子掌握基本原理後，<br />
+一步一步推出老師還沒有教過的三位數除以一位，商是二位數的題目。<br />
+他真的懂了…尤其是聽他說著方法就跟先前的一樣時…<br />
+(根本沒有像其他同學說的有另一種做法，大人只是被訓練過要將直式美化過…)</p>
+<p>感謝扶堂主任帶著大家共備以及共備夥伴的分享，<br />
+要求孩子一層一層記錄自己在算什麼，<br />
+這是相當重要的~(誰被分？怎麼分？分的結果？剩什麼？也是很重要的)<br />
+嗯…下週繼續練習說數學！</p>
+<p>當然，卡在九九乘法表的孩子還是要小小鼓勵(碎念)</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>孩子在充分練習後，我最喜歡做的一件事，<br />
+就是請他們「說給同學聽」。</p>
+<p>不是說答案，是說過程。</p>
+<p>「我先把 756 分成 700 和 56……」<br />
+「我是這樣想的，因為……」</p>
+<p>每次聽到孩子用自己的語言重新組織解題過程，<br />
+我都覺得：<strong>這才是真正的理解。</strong></p>
+<p>說，讓理解從腦袋裡走出來，變得看得見、聽得到。<br />
+這就是說數學最迷人的地方。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

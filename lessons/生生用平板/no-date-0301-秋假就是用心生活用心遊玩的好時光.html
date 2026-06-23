@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秋假就是用心生活用心遊玩的好時光 | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">秋假就是用心生活用心遊玩的好時光</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <blockquote>
+<p>📌 <strong>原始教學紀錄（來自臉書）</strong></p>
+<h1>教學日誌</h1>
+<h1>錄影</h1>
+<h1>padlet</h1>
+<h1>生生用平板</h1>
+<p>秋假就是用心生活用心遊玩的好時光<br />
+導師就是最好的示範<br />
+(快閃八天日本行<br />
+當然有值得分享的事)<br />
+透過錄影<br />
+示範分享秋假生活的重點<br />
+上傳到padlet<br />
+強迫推銷給孩子及家長<br />
+讓孩子及家長有案例可以依循</p>
+<p>請孩子錄下想分享的秋假生活<br />
+同時當作接下來的課文朗讀錄影作業的暖身</p>
+<p>我的天啊<br />
+上課時我只是簡單的示範美聲朗讀第二課課文<br />
+今天上網看秋假生活影片給孩子及家人回饋<br />
+意外發現已經有小美女錄好課文朗讀並上傳<br />
+小美女光是拿課本的架勢就有模有樣</p>
+<p>希望有機會<br />
+能直接在教室當場訓練<br />
+當場錄影好<br />
+gogogo~<br />
+</p>
+</blockquote>
+<h2>課程脈絡</h2>
+<p>秋假就是用心生活用心遊玩的好時光<br />
+導師就是最好的示範<br />
+(快閃八天日本行<br />
+當然有值得分享的事)<br />
+透過錄影<br />
+示範分享秋假生活的重點<br />
+上傳到padlet<br />
+強迫推銷給孩子及家長<br />
+讓孩子及家長有案例可以依循</p>
+<p>請孩子錄下想分享的秋假生活<br />
+同時當作接下來的課文朗讀錄影作業的暖身</p>
+<p>我的天啊<br />
+上課時我只是簡單的示範美聲朗讀第二課課文<br />
+今天上網看秋假生活影片給孩子及家人回饋<br />
+意外發現已經有小美女錄好課文朗讀並上傳<br />
+小美女光是拿課本的架勢就有模有樣</p>
+<p>希望有機會<br />
+能直接在教室當場訓練<br />
+當場錄影好<br />
+gogogo~</p>
+<hr />
+<h2>🎯 數位融入目標</h2>
+<ul>
+<li>善用平板工具輔助學習，提升學習效率</li>
+<li>培養學生的數位素養與資訊倫理</li>
+<li>讓科技成為溝通與表達的工具</li>
+</ul>
+<hr />
+<h2>📱 使用工具與平台</h2>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iPad / 平板</td>
+<td>主要操作載具</td>
+</tr>
+<tr>
+<td>Padlet / 共學平台</td>
+<td>成果分享與展示</td>
+</tr>
+</tbody>
+</table>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

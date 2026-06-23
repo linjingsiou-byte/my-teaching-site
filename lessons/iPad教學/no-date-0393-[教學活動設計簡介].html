@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>['教學活動設計簡介'] | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">['教學活動設計簡介']</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: iPad教學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>ipad種子教師 #南區第七組 #二年級國語 #N版國語第九課角與腳 #12月作業 #拍照編輯 #padlet</h1>
+<p>[教學活動設計簡介]<br />
+小二N版國語第九課是一則故事，<br />
+描述花鹿不喜歡自己又瘦又長的腳，<br />
+卻喜歡頭上漂亮的角。<br />
+一天，花鹿在獅子的追逃過程，<br />
+因頭上角卡在樹枝上差點害了自己喪命，<br />
+反而是瘦長的腳最後救了自己。</p>
+<p>課程進行時剛好由集中實習老師授課，<br />
+鄭聿昕聿昕老師設計的綜合活動是讓孩子畫自畫像，<br />
+練習從自畫像中肯定自己，並接納自己的不完美。<br />
+因預留的活動時間為20分鐘，相當有限，<br />
+經給予回饋及修改後，<br />
+將原先設計的自畫像改成ipad進行自拍或互拍全身照，<br />
+並且編輯照片後再上傳到padlet。<br />
+(照片編輯功能則是我在早自修時先行示範教學，課堂中，讓鄭師、我協助孩子操作)</p>
+<p>[SAMR的模式運用]<br />
+S(Substitution)替代：ipad取代原先的畫紙、畫筆功能。</p>
+<p>A(Augmentation)增強：利用照片編輯功能，圈選出自己滿意、不滿意之處並敘明原因，<br />
+之後上傳到Padlet平台，同儕間上平台觀看大家的自拍照，教師邀請學生上台分享。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

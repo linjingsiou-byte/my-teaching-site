@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>先前線上和主任夥伴備課討論到數量規律時， | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">先前線上和主任夥伴備課討論到數量規律時，</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <blockquote>
+<p>📌 <strong>原始教學紀錄（來自臉書）</strong></p>
+<h1>教學日誌</h1>
+<h1>屏科實中國小部</h1>
+<h1>說數學</h1>
+<h1>四下數量規律</h1>
+<h1>沒感覺就製造感覺</h1>
+<p>先前線上和主任夥伴備課討論到數量規律時，<br />
+總覺得從座位找規律(數字規律)對學生來說應該不難(都有搭過遊覽車啊)，<br />
+但昨天一上課，<br />
+發現…<br />
+沒感覺…或正確說學生沒有認真觀察過遊覽車座位號碼的安排規律，<br />
+真的很難立馬理解。</p>
+<p>索性利用今早下雨沒外出打掃的空檔，<br />
+立馬開啟班級列車模式，<br />
+讓學生按火車座位排排位置，<br />
+自己當乘客，<br />
+實際玩(按座位安排規律找座位)一次，<br />
+(主任名言：沒有感覺就製造感覺)<br />
+看到學生一起討論弄懂並找到座位，<br />
+真好！<br />
+</p>
+</blockquote>
+<hr />
+<h2>💡 教學心得</h2>
+<p>和主任線上共備時，我們都認同同一件事：<br />
+規律這個概念，說得出來才算真的懂。</p>
+<p>那堂課後，我請孩子們說說自己發現的規律。<br />
+一個孩子舉手：「老師，我覺得是 △○□ 一直重複，我看到規律是三個一組的。」<br />
+另一個孩子馬上補充：「我也是三個一組，可是我從○開始數！」</p>
+<p>他們不只在說答案，他們在<strong>聽彼此、補充彼此</strong>。<br />
+那一刻，我覺得說數學真正的魔法不是在說，而是在「聽」。<br />
+因為聽，所以有了對話；因為對話，思考才真的發生了。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

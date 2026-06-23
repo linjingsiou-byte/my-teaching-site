@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>※課程設計緣起： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">※課程設計緣起：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #20232024iPad種子教師 #pages #小二戶外教育 #生生用平板</h1>
+<p>※課程設計緣起：<br />
+補課日，尚在農曆新年，<br />
+安排師生步行前往屏東縣縣民公園賞花燈。<br />
+利用pages的模板，簡單設計五個任務，<br />
+藉此和生肖排行第五的龍年相呼應。</p>
+<p>學生練習利用影相暫存區拍照及錄音功能、文字輸入完成任務，<br />
+為避免學生可能無法自行完全了解任務，<br />
+老師錄製音訊放在任務說明旁。</p>
+<p>※教學目標：</p>
+<p>1.複習上學期國語學習過的句型「什麼當什麼」，讓孩子發揮觀察力。</p>
+<p>2.說出吉祥話</p>
+<p>3.練習文字輸入、拍照及錄音。</p>
+<p>※授課省思心得：</p>
+<p>1.在教室內先透過課堂app，老師傳送Pages檔案，<br />
+確認各組皆收到檔案後才請小組將ipad放進背包後才整隊出發，<br />
+避免可能會漏接檔案的情形。<br />
+(是的，到戶外老師更忙了…能少一事是一事)</p>
+<p>2.學生有任務在身，眼睛都發亮，四處找花燈，不用老師介紹，<br />
+學生自己來問老師這個字怎麼拼音，忙著記錄及完成任務。<br />
+不知不覺，四十分鐘一下子就過去~</p>
+<p>3.小二學生已數次透過iwork進行小組自學，</p>
+<p>11組中僅有一組無法在一節課內完成五個任務，<br />
+有二組小組是在三十分鐘內完成，<br />
+但明顯看出句子是出自課本中。<br />
+(補假日…就放過了孩子也放過自己）<br />
+無法完成的小組是慢郎中，<br />
+打字、輸入文字皆不是很快速所致。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

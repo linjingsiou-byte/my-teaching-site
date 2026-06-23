@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>※教學目標： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">※教學目標：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #屏科實中國小部 #四年級一億以內的數 #說數學</h1>
+<p>※教學目標：</p>
+<p>1.認識一億以內的位名和位值，並能寫出其記法。</p>
+<p>2.能做一億以內數的化聚。</p>
+<p>※教學流程)</p>
+<p>1.先介紹存款單的寫法及注意事項(數字小寫)<br />
+並額外補充提款單的寫法(要寫上數字大小寫)</p>
+<p>2.複習一億以內數的化聚。</p>
+<p>3.airdrop學習單給學生，<br />
+學生練習回答。</p>
+<p>4.討論答案並請同學說明自己的想法。<br />
+(已有同學掌握以千位為準，寫出存款單)</p>
+<p>※教學心得<br />
+在共備時，主任及夥伴皆提及存款單的教學，<br />
+故在備課後利用時間下載郵局的存款單的範例並後製。<br />
+存款單是學生和家長在日常生活中會接觸到的真實文件，而不是課本上抽象的數字。<br />
+這讓學生了解學習大數字的實用價值（例如：看懂存款餘額），<br />
+進而提升學習興趣。<br />
+存款單上的金額欄位通常會印有「仟、佰、拾、萬、仟、佰、拾、元」等單位，學生在填寫數字時，必須將數字對應到正確的位值上，這對於「一億以內」的位值概念（特別是「萬位」到「千萬位」）是絕佳的視覺化練習。<br />
+透過填寫存款單，學生能具體理解多一個「0」或少一個「0」會造成多大的差異，例如 10,000 元和 1,000 元在存款單上的寫法和意義完全不同，有助於培養嚴謹的數字感。</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>每一次和夥伴共備，最讓我期待的環節，<br />
+是討論「說數學要怎麼問」。</p>
+<p>問題設計得好，孩子的說才能真的打開。<br />
+問題太直，孩子只會回答對或不對；<br />
+問題留有空間，孩子才能說出自己的理由。</p>
+<p>我喜歡聽孩子說「因為……所以……」的那種感覺。<br />
+每一次他們願意開口，我都覺得：<strong>說數學，正在讓他們學會思考的語言。</strong></p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在這節課堂上， | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">在這節課堂上，</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #屏科實中國小部 #三年級除法 #說數學 #keynote #課堂 #生生用平板</h1>
+<p>在這節課堂上，<br />
+孩子們利用老師事先設計好的Keynote學習單(包含除法和等分除的問題)，<br />
+透過讓孩子們動手操作解題，<br />
+並寫出對應的除法算式，<br />
+達到教學目標。</p>
+<p>※教學目標：</p>
+<p>1.能用算式紀錄包含除、等分除的解題過程</p>
+<p>2.能使用除法算式，紀錄除法問題和結果</p>
+<p>3.能說出除法算式中各數字和符號的意義</p>
+<p>4.認識除法算式中的被除數、除數、商及餘數</p>
+<p>※教學流程</p>
+<p>1.確認題意：利用「分什麼？怎麼分？分的結果？剩什麼？」提示語來讀懂除法問題。<br />
+(提示語改編自謝千慧老師分享的除法教學文)</p>
+<p>2.確認題意後操作：<br />
+孩子們根據題意進行實際操作，<br />
+將問題轉換為具體的數學操作。</p>
+<p>3.寫出算式：<br />
+孩子們將操作過程轉換為數學算式，<br />
+寫出對應的減法算式及除法算式。<br />
+發表在減法算式中如何找出商。</p>
+<p>4.學生發表並解釋除法算式中各個數字和符號的意義。</p>
+<p>5.老師總結並強調除號的意義，幫助學生鞏固所學知識。</p>
+<p>※教學心得<br />
+這班的孩子相對前間服務學校的孩子文靜許多，<br />
+需要多多鼓勵孩子們練習「說數學」，<br />
+發表個人的想法，<br />
+期盼孩子們能增強了他們的數學表達能力，<br />
+讓他們更深入地理解說數學的好處。</p>
+<p>課堂App怎能不好好使用？<br />
+有了它，<br />
+更能掌握孩子們的課堂參與情形，<br />
+確保每個孩子都能跟上教學進度。</p>
+<p>這次的教學活動不僅讓孩子們更能掌握了除法的基本概念，<br />
+也讓他們在互動中增強了學習的樂趣和信心。</p>
+<p>期待他們在未來的數學學習中能夠更加有自信和習慣發表！</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>這節課，我故意放慢節奏。</p>
+<p>讓孩子多說幾分鐘，雖然進度會慢，<br />
+但我看到每個說話的孩子，眼睛裡都有一種光。</p>
+<p>那是「我的想法被聽到了」的光。</p>
+<p>身為老師，能給孩子最好的禮物，<br />
+或許就是：<strong>認真把他的話聽完，然後讓全班也聽見。</strong></p>
+<p>說數學不是讓最快的孩子說，是讓每個孩子都有說的機會。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天和小二生在討論分裝的題型 | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">今天和小二生在討論分裝的題型</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #說數學</h1>
+<p>今天和小二生在討論分裝的題型<br />
+我：我們看完題目後，題目有告訴我們的是什麼？(已知單位量及總量)，不知道的是什麼？(未知的單位數)<br />
+生：可是我們都知道答案是多少啊？很簡單啊！</p>
+<p>我：但如果數字一大，你們可以立刻知道答案(未知的單位數)是多少嗎？<br />
+某生：可以啊！<br />
+我：如果題目是198片餅乾，每2片餅乾裝一盤，全部裝完，可以裝幾盤？<br />
+生：……(烏鴉飛過…)<br />
+某生：(認真思考)有99盤。<br />
+我：(不信)如果有998片餅乾，每2片餅乾裝一盤，全部裝完，可以裝幾盤？<br />
+生：……<br />
+某生：(認真思考)有499盤！因為有1000片餅乾的時候，可以裝500盤，少2片餅乾，就少裝一盤，所以998片餅乾就能裝499盤。<br />
+我：好的…你可以說答案你都知道了(全班大笑)~</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>分裝的題目，孩子最容易卡住的地方，<br />
+不是算不出來，而是說不清楚「為什麼要這樣算」。</p>
+<p>那天，一個孩子說了一句讓我印象很深的話：<br />
+「因為……每一份都要一樣多，所以要分開來算，不能加在一起。」</p>
+<p>這句話，不是我教他的。<br />
+是他在試著說的過程中，自己組裝起來的理解。</p>
+<p><strong>說數學，是一種從混亂走向清晰的過程，<br />
+而那個清晰，是孩子自己說出來的。</strong></p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

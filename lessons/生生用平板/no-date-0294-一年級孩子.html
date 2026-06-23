@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年級孩子 | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">一年級孩子</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #生生用平板</h1>
+<p>一年級孩子<br />
+正式進入第三課的國字學習<br />
+一筆一劃空書學習國字不能少<br />
+課堂的尾聲<br />
+再來練習輔助網站-雄筆順</p>
+<p>傳統教學沒有不好<br />
+只要能達到教學目標就是好的教學法</p>
+<p>雄筆順是讓孩子練習自學國字的好網站<br />
+但教會孩子上網就是考驗</p>
+<p>拆解教學步驟<br />
+第一次上網<br />
+（有課堂app的確減少一次大災難的發生）<br />
+先習慣操作頁面<br />
+只練習兩個字（嗯。切換輸入法，輸入注音符號，找到要練習的國字，都是關卡）</p>
+<p>兩人一組<br />
+輪流<br />
+練習等待<br />
+練習欣賞（監督）<br />
+教室的學習風景慢慢改變</p>
+<p>如果可以越教越輕鬆（我的北極星）<br />
+我很樂意帶著孩子練習</p>
+<p>在低年級推生生用平板<br />
+無法快速<br />
+只能不斷多次練習的累積</p>
+<p>期待孩子們二年級時<br />
+自動拿平板<br />
+完成學習任務<br />
+而不需要老師耳提面命<br />
+加鎖機的監控（幫孩子們唉唉叫一下）</p>
+<p>教室終於來了黑色推車<br />
+老師可以少練體力了😂😂😂</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

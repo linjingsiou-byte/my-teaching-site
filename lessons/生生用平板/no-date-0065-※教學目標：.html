@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>※教學目標： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">※教學目標：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #屏科實中國小部 #三年級國語表演藝術 #生生用平板 #20242025ipad種子教師 #第三組ipad創意gogogo #5月分享文 #相機 #可立拍 #Keynote</h1>
+<p>※教學目標：</p>
+<p>1.能練習表演相聲</p>
+<p>2.在可立拍中製作片頭、片尾</p>
+<p>※教學流程：</p>
+<p>1.學生先兩兩一組，分配角色，利用空檔時間背熟國語相聲相關的課文內容。</p>
+<p>2.在藝術課上，兩兩上台表演，老師利用相機錄影。<br />
+(相聲表演的注意事項及練習在藝術課中給予指導)</p>
+<p>3.老師將各組表演的相聲影片airdrop給每位學生。</p>
+<p>4.利用可立拍的海報，更改文字、加入表情符號、音樂，製作成約各5秒的片頭、片尾。</p>
+<p>5.在Keynote中新增三張空白頁，插入片頭、正本、片尾，選擇過場效果，輸出影片。</p>
+<p>6.上傳影片到Padlet，相互觀摩作品。</p>
+<p>※教學心得<br />
+透過表演國語課文中的相聲內容，<br />
+節省了師生創作或尋找合適相聲文本的時間。<br />
+由於課本的內容已經解說過，學生在表演時更加得心應手。</p>
+<p>在使用可立拍的過程中，學生能夠迅速上手，因為它直觀且易於學習。<br />
+學生會嘗試加入不同的表情符號，但需要提醒他們，過多的表情符號可能會讓觀眾分心。</p>
+<p>最後，看到Sango分享了如何利用Keynote插入影片再輸出的技巧，<br />
+帶著學生進行嘗試，這不僅節省了不少時間，還能創造出簡單的過場效果，<br />
+讓學生對影片製作有了更完整的概念。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>※教學目標： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">※教學目標：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #屏科實中國小部 #三年級國語 #生生用平板 #20242025ipad種子教師 #第三組ipad創意gogogo #4月分享文 #Safari #padlet</h1>
+<p>※教學目標：<br />
+能認識尋物啟事的格式並撰寫一則尋物啟事。</p>
+<p>※教學流程：</p>
+<p>1.教師除講解課文自學篇章中的啟事格式，<br />
+也呈現教師預先製作的樣板。</p>
+<p>2.介紹padlet沙盒的功能。<br />
+(1)如何插入文字，更換字型大小、顏色<br />
+(2)如何拍照或是利用搜尋網頁功能找到要撰寫的物品</p>
+<p>3.孩子完成尋物啟事並相互觀賞其他同學的作品。</p>
+<p>※教學心得<br />
+孩子在二年級時即有接觸「啟事」的格式，<br />
+此次透過國語課本自學篇章的文章再次複習，<br />
+因此，教學重點放在讓孩子能練習撰寫尋物啟事。</p>
+<p>選用padlet的沙盒除想讓學生多認識不同數位工具，<br />
+孩子也能在padlet內一次完成拍照物品或是padlet內建的搜尋功能，<br />
+無須分割頁面操作且能快速看到同學的作品。<br />
+(當然pages也很合適操作)</p>
+<p>孩子因是看著手邊的實物或先上網搜尋欲寫尋物啟事的物品，<br />
+皆能順利寫出老師要求的至少三個該物品的外形特徵，<br />
+但字彙上可再豐富些。</p>
+<p>第一次使用沙盒的困擾在於，<br />
+孩子會不慎點入其他同學的版面，<br />
+需老師提醒外，<br />
+孩子們在操作上無太大的問題，<br />
+皆能在預期的時間內完成，<br />
+並達成觀看同學作品相互學習的目的。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

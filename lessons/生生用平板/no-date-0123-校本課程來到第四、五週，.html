@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校本課程來到第四、五週， | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">校本課程來到第四、五週，</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #生生用平板 #三年級校本彈性課程小馬蓋先 #屏科實中國小部 #朗讀所選內容 #googlelens以圖搜圖 #螢幕分割顯示 #久按浮起來拖拉照片文字</h1>
+<p>校本課程來到第四、五週，<br />
+練習使用safari輸入關鍵字查找校園植物的資料，<br />
+也透過以圖搜圖的方式練習搜集資料。</p>
+<p>對於識字能力尚有限的孩子而言，<br />
+朗讀所選內容的功能開啟就相當重要。<br />
+帶著孩子們一起完成設定好朗讀所選範圍，<br />
+孩子們成功後，<br />
+不改本色，<br />
+忍不住在網頁上試了試語速的調整，<br />
+聆聽平板發出植物的介紹內容，<br />
+語音中夾雜著此起彼落的笑聲。<br />
+(最後還是規定語速要調整到適中位置)</p>
+<p>將事先準備好的pages植物小書模板，<br />
+利用課堂airdrop給孩子，<br />
+讓孩子練習上網找照片，<br />
+透過螢幕分割顯示，<br />
+將網頁上自己想要放的照片，<br />
+先左手拉第一張到暫存區，右手再點選其他張欲選取的照片，<br />
+利用久按、浮起來再拖拉到暫存區，<br />
+完成一口氣拖拉數張照片到預留的照片暫存區。<br />
+(我還是有教一張一張拖拉照片)</p>
+<p>再練習從網頁中找到自己要貼上的文字，<br />
+依舊利用久按、浮起來再拖拉，<br />
+完成文字的貼上動作。<br />
+嗯…謝謝孩子們的哇哇哇…<br />
+有感受到他們驚訝又佩服的眼神…</p>
+<p>期待下次孩子們正式完成植物小書~</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

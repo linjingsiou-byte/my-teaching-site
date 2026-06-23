@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一、備課： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">一、備課：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #iPad種子教師 #南四組 #五月分享文 #小一發表練習 #生生用平板 #keynote #airdrop</h1>
+<p>一、備課：<br />
+孩子第一次面對學校的校本課程發表，<br />
+需要多次的練習，<br />
+除了孩子原先已經會的錄影並上傳到padlet外，<br />
+還可以再怎麼多練習？<br />
+又能當作教學檔案留存？<br />
+這次就讓孩子在錄影前，<br />
+改先練習在keynote裡加入錄音吧！</p>
+<p>二、教學流程：</p>
+<p>1.老師先在keynote插入每個孩子的照片。</p>
+<p>2.老師airdrop給各組孩子（兩人共用一台ipad），<br />
+學生練習接收檔案。</p>
+<p>3.老師指導孩子錄音時要對著鏡頭後收音處講話，收音效果會比較好。<br />
+小組輪流完成錄音再airdrop檔案給老師。</p>
+<p>4.老師彙整後輸出成影片，全班一起欣賞該影片，聆聽同學的發表內容。</p>
+<p>三、省思：<br />
+如果教學目標是要孩子能在上台前<br />
+能流暢發表內容，<br />
+除了對自己錄影練習發表內容，<br />
+再上傳到padlet，<br />
+請孩子相互觀摩同學的心得外，<br />
+這次加入新的練習方式。</p>
+<p>老師事前利用keynote插入學生個人照片，<br />
+讓孩子練習在keynote加入錄音功能，<br />
+孩子完成後練習airdrop給老師，<br />
+老師彙整後全班孩子的檔案後輸出成影片，<br />
+該影片也能當作電子書，<br />
+孩子也能透過影片觀摩同學學習心得，<br />
+此外也讓家長了解孩子的學習心得，<br />
+還能留存當教學檔案。<br />
+一舉數得！</p>
+<p>https://youtu.be/KFHgzab9FVU</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

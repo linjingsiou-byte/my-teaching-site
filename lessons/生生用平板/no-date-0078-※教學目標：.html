@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>※教學目標： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">※教學目標：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #屏科實中國小部 #三年級綜合活動 #生生用平板 #20242025ipad種子教師 #第三組ipad創意gogogo #3月分享文 #Safari #padlet #課堂</h1>
+<p>※教學目標：<br />
+經由自己喜愛與家人一起的休閒活動探索自己喜愛的人事物。</p>
+<p>※教學流程：</p>
+<p>1.教師提問<br />
+除了家庭事務以外，你喜歡與家人進行哪些休閒活動？</p>
+<p>2.引導思考及分享（學生在padlet上作答）<br />
+(1)家人會帶你進行哪些休閒活動？你最喜歡做什麼？<br />
+(2)喜愛戶外還是室內活動？為什麼？<br />
+(3)喜歡與誰一起完成？為什麼？<br />
+(4)進行這些活動時，你會主動幫忙做什麼事情？<br />
+(5)進行這項休閒活動時，需要注意什麼事？</p>
+<p>3.教師歸納總結，提醒學生感受與覺察：<br />
+(1) 哪件事情你最喜愛最投入？進行之後仍念念不忘？<br />
+(2) 喜愛的這些人、事、物可能是你的專長或興趣。</p>
+<p>※教學心得<br />
+這是學生第二次使用Padlet（上次是上傳照片並使用“我不會畫圖”的功能）。<br />
+由於本節課設計了五個討論題項，原本擔心問題會不會過多，<br />
+但幸好學生平日已熟悉語音輸入方式，<br />
+因此都能在預計的作答時間內完成回答並進行課堂討論。</p>
+<p>此外，先前在藝術課時曾讓學生將個人的畫作再以AI方式生成圖像，<br />
+有了上次下提示詞的經驗，<br />
+此次第一題也刻意設計讓學生以生成圖像的方式回答最喜歡的休閒活動。<br />
+從學生的生成圖像結果來看，學生下提示詞的表現也比第一次進步。</p>
+<p>在課堂討論環節，透過Padlet，學生能先閱讀同學分享的內容，<br />
+了解彼此對同一問題的不同想法，<br />
+這樣也減少了學生在上台講話時可能會因緊張而說不出答案的情況。<br />
+整體而言，<br />
+Padlet的使用不僅提高了學生的參與度，<br />
+也促進了課堂討論的深度和廣度。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

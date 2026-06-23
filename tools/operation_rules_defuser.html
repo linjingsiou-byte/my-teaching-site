@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>運算規則拆彈專家</title>
+    <!-- 引入 Tailwind CSS (負責簡潔大方的排版與多巴胺配色) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* 簡單的淡入動畫 */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        /* 確保點擊時有回饋感 */
+        .active-scale:active { transform: scale(0.95); }
+    </style>
+</head>
+<body id="app-body" class="bg-slate-50 min-h-screen transition-colors duration-300 flex flex-col items-center justify-start pt-10 p-4 font-sans text-gray-800">
+
+    <!-- 應用程式的主要容器 -->
+    <div id="app" class="w-full max-w-md relative flex flex-col items-center">
+        <!-- 內容將由 JavaScript 動態生成 -->
+    </div>
+
+    <script>
+        // --- 關卡與題目資料 ---
+        const levels = [
+            {
+                id: 1,
+                title: "第一關：左左右右指令",
+                description: "同級運算（只有加減，或只有乘除）時，必須由左往右算！",
+                color: "bg-orange-100 border-orange-400 text-orange-800",
+                btnColor: "bg-orange-500 hover:bg-orange-600",
+                progressBar: "bg-orange-500",
+                questions: [
+                    {
+                        question: "109 - 50 + 10 = ?",
+                        concept: "同級運算（由左往右）",
+                        options: [
+                            { text: "109 - 60 = 49", correct: false, feedback: "⚠️ <b>陷阱預警：</b>你先算後面的 50 + 10 嗎？這是最常見的失誤！只有加減法（同級）時，沒有誰比較大，必須按照順序「由左往右」排隊計算，先算 109 - 50 才是正確的喔！" },
+                            { text: "59 + 10 = 69", correct: true, feedback: "🎉 <b>答對了！</b>沒有錯！加減法是同級運算，要乖乖由左往右先算 109 - 50 = 59，再把 59 + 10 = 69。觀念百分百正確！" }
+                        ]
+                    },
+                    {
+                        question: "45 ÷ 5 × 3 = ?",
+                        concept: "同級運算（由左往右）",
+                        options: [
+                            { text: "45 ÷ 15 = 3", correct: false, feedback: "⚠️ <b>陷阱預警：</b>你先算了後面的 5 × 3 = 15 對吧？乘法和除法是「平級」的平手老大，在同一個算式裡地位一樣，誰在左邊誰就先算！要先算左邊的 45 ÷ 5 喔！" },
+                            { text: "9 × 3 = 27", correct: true, feedback: "🎉 <b>答對了！</b>你成功抵擋了先算乘法的誘惑！先算左邊的除法 45 ÷ 5 = 9，再乘以 3 得到 27。非常完美的「左左右右」規則應用！" }
+                        ]
+                    },
+                    {
+                        question: "72 ÷ 8 × 9 = ?",
+                        concept: "同級運算（由左往右）",
+                        options: [
+                            { text: "72 ÷ 72 = 1", correct: false, feedback: "⚠️ <b>陷阱預警：</b>是不是看到 8 × 9 就直覺聯想到九九乘法表，超想先把它們合體？這就是出題老師設下的「乘法表甜美陷阱」！乘除同級，要堅持由左往右算 72 ÷ 8 喔！" },
+                            { text: "9 × 9 = 81", correct: true, feedback: "🎉 <b>太強了！</b>能避開 8 × 9 = 72 的乘法表直覺，堅持由左往右先算 72 ÷ 8 = 9，再乘以 9 得到 81。你已經有拆彈專家的直覺了！" }
+                        ]
+                    },
+                    {
+                        question: "120 - 40 - 20 = ?",
+                        concept: "連減運算（由左往右）",
+                        options: [
+                            { text: "120 - 20 = 100", correct: false, feedback: "⚠️ <b>陷阱預警：</b>你先算了後面的 40 - 20 = 20 嗎？如果是這樣，等於你原本要扣兩次錢，結果反而少扣了！連減也是由左往右，要先拿 120 減去 40 喔！" },
+                            { text: "80 - 20 = 60", correct: true, feedback: "🎉 <b>答對了！</b>非常穩健！連減法也是一步一腳印地由左往右算，先算 120 - 40 = 80，再用 80 - 20 = 60。踏實的步伐最安全！" }
+                        ]
+                    },
+                    {
+                        question: "80 ÷ 4 ÷ 2 = ?",
+                        concept: "連除運算（由左往右）",
+                        options: [
+                            { text: "80 ÷ 2 = 40", correct: false, feedback: "⚠️ <b>陷阱預警：</b>你先算了後面的 4 ÷ 2 = 2。這是除法中常見的陷阱！如果先除後面，答案會被放大好多倍。記得除法也要從左往右，先算 80 ÷ 4 = 20 喔！" },
+                            { text: "20 ÷ 2 = 10", correct: true, feedback: "🎉 <b>正確！</b>連續除法也難不倒你！由左往右先算 80 ÷ 4 = 20，再將 20 ÷ 2 = 10。恭喜你順利通過了所有由左往右的挑戰！" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "第二關：老大先走指令",
+                description: "混合運算時，乘除是老大，要先算！",
+                color: "bg-purple-100 border-purple-400 text-purple-800",
+                btnColor: "bg-purple-500 hover:bg-purple-600",
+                progressBar: "bg-purple-500",
+                questions: [
+                    {
+                        question: "4 + 6 × 13 = ?",
+                        concept: "先乘除後加減",
+                        options: [
+                            { text: "10 × 13 = 130", correct: false, feedback: "⚠️ <b>陷阱預警：</b>你順手先算了最左邊的 4 + 6 = 10。雖然左往右是基本規則，但在混合運算中，乘法和除法是「老大」，地位高於加減法，要最先計算喔！" },
+                            { text: "4 + 78 = 82", correct: true, feedback: "🎉 <b>正確觀念！</b>加號是擋不住乘號老大的！先算後面的 6 × 13 = 78，再與前面的 4 相加得到 82。完美拆彈！" }
+                        ]
+                    },
+                    {
+                        question: "50 + 28 ÷ 2 = ?",
+                        concept: "先乘除後加減",
+                        options: [
+                            { text: "78 ÷ 2 = 39", correct: false, feedback: "⚠️ <b>陷阱預警：</b>不能因為加法寫在左邊就先算 50 + 28 喔！在數學的世界裡，除法老大的權限比加法高，必須最優先處理！" },
+                            { text: "50 + 14 = 64", correct: true, feedback: "🎉 <b>答對了！</b>除法老大優先出動，先算 28 ÷ 2 = 14，最後再與 50 相加得到 64。非常冷靜的判斷！" }
+                        ]
+                    },
+                    {
+                        question: "50 - 10 × 3 = ?",
+                        concept: "先乘除後加減",
+                        options: [
+                            { text: "40 × 3 = 120", correct: false, feedback: "⚠️ <b>陷阱預警：</b>不可以順手就先減下去（50 - 10 = 40）喔！減號要先等後面的乘法老大算完才能動手！" },
+                            { text: "50 - 30 = 20", correct: true, feedback: "🎉 <b>完全正確！</b>減號禮讓乘法，先算 10 × 3 = 30，最後才用 50 減 30 = 20。你對老大的規則瞭若指掌！" }
+                        ]
+                    },
+                    {
+                        question: "8 + 16 ÷ 4 = ?",
+                        concept: "先乘除後加減",
+                        options: [
+                            { text: "24 ÷ 4 = 6", correct: false, feedback: "⚠️ <b>陷阱預警：</b>你被前面的 8 + 16 吸引了！不論加減在多前面，只要後方有除法，就必須強迫除法老大先算喔！" },
+                            { text: "8 + 4 = 12", correct: true, feedback: "🎉 <b>答對了！</b>除法優先，先計算 16 ÷ 4 = 4，再與 8 相加得到 12。四則計算肌肉越來越結實了！" }
+                        ]
+                    },
+                    {
+                        question: "12 + 8 × 5 - 3 = ?",
+                        concept: "多步混合運算",
+                        options: [
+                            { text: "20 × 2 = 40", correct: false, feedback: "⚠️ <b>陷阱預警：</b>這題是多步驟大陷阱！你先算了前面的 12 + 8 且先算了後面的 5 - 3。這是嚴重的越權行為！乘法是老大，必須最先動手！" },
+                            { text: "12 + 40 - 3 = 49", correct: true, feedback: "🎉 <b>大師級計算！</b>這題超難！你先算乘法老大 8 × 5 = 40，算式化簡為 12 + 40 - 3。接下來只剩加減（平級），由左往右算 12 + 40 = 52，最後 52 - 3 = 49。太精彩了！" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "第三關：盾牌拆解指令",
+                description: "括號是無敵盾牌，裡面要最先算！注意拆盾牌時的陷阱。",
+                color: "bg-emerald-100 border-emerald-400 text-emerald-800",
+                btnColor: "bg-emerald-500 hover:bg-emerald-600",
+                progressBar: "bg-emerald-500",
+                questions: [
+                    {
+                        question: "60 × (20 - 5) = ?",
+                        concept: "括號優先",
+                        options: [
+                            { text: "1200 - 5 = 1195", correct: false, feedback: "⚠️ <b>陷阱預警：</b>雖然乘法是老大，但「括號」是比乘法還要更強大的無敵盾牌！只要被括號保護，裡面的算式就必須最先算，不能直接乘進去喔！" },
+                            { text: "60 × 15 = 900", correct: true, feedback: "🎉 <b>答對了！</b>沒錯！括號盾牌保護的 20 - 5 = 15 必須最先算，然後才算 60 × 15 = 900。你成功打破了盾牌！" }
+                        ]
+                    },
+                    {
+                        question: "504 - (322 + 142) = ?",
+                        concept: "去括號變號規則",
+                        options: [
+                            { text: "504 - 322 + 142", correct: false, feedback: "⚠️ <b>陷阱預警：</b>這是超多高年級學生都會錯的「去括號陷阱」！減去一整包東西 (322 + 142) 時，代表要連續減去這兩個數。如果你直接把括號拿掉，會變成扣了 322 卻加回 142。要變號喔！" },
+                            { text: "504 - 322 - 142", correct: true, feedback: "🎉 <b>太神了！</b>你居然懂去括號的變號法則！減去 (A+B) 等於連續減去 A 和 B，所以拆掉括號後，加號要變成減號。你絕對是數學學霸！" }
+                        ]
+                    },
+                    {
+                        question: "400 ÷ (25 × 4) = ?",
+                        concept: "括號優先",
+                        options: [
+                            { text: "16 × 4 = 64", correct: false, feedback: "⚠️ <b>陷阱預警：</b>如果沒有括號，確實應該由左往右算 400 ÷ 25 = 16，再乘以 4。但有括號這個強大的無敵盾牌，要把 25 × 4 當成一組最先算！" },
+                            { text: "400 ÷ 100 = 4", correct: true, feedback: "🎉 <b>太聰明了！</b>先算括號裡的 25 × 4 = 100，再做 400 ÷ 100 = 4。有時候括號先算，會讓計算變得出奇簡單對吧！" }
+                        ]
+                    },
+                    {
+                        question: "90 - (50 - 20) = ?",
+                        concept: "去括號變號規則",
+                        options: [
+                            { text: "90 - 50 - 20 = 20", correct: false, feedback: "⚠️ <b>陷阱預警：</b>如果要拆括號，因為括號前面是「減號」，代表你要扣掉「50與20的差」。如果你寫成 - 50 - 20，等於你多扣了 20！拆開括號後，裡面的減號必須變成加號（90 - 50 + 20）才對喔！" },
+                            { text: "90 - 30 = 60", correct: true, feedback: "🎉 <b>答對了！</b>括號裡面先算，50 - 20 = 30，最後 90 - 30 = 60。另外提醒：如果非要拆括號，記得變號成 90 - 50 + 20 答案也是 60 喔！" }
+                        ]
+                    },
+                    {
+                        question: "120 ÷ (6 ÷ 2) = ?",
+                        concept: "括號優先",
+                        options: [
+                            { text: "20 ÷ 2 = 10", correct: false, feedback: "⚠️ <b>陷阱預警：</b>你忽略了括號盾牌的存在。若沒有括號，照順序算確實是 10，但有括號時，必須強制把裡面的 6 ÷ 2 = 3 當作第一步！" },
+                            { text: "120 ÷ 3 = 40", correct: true, feedback: "🎉 <b>正確！</b>括號盾牌先算，得到 6 ÷ 2 = 3，接著用 120 ÷ 3 = 40。你對括號規則非常熟悉，盾牌關卡全部擊破！" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "第四關：真相只有一個",
+                description: "綜合判斷！請找出正確的解題說法。",
+                color: "bg-rose-100 border-rose-400 text-rose-800",
+                btnColor: "bg-rose-500 hover:bg-rose-600",
+                progressBar: "bg-rose-500",
+                questions: [
+                    {
+                        question: "關於 240 ÷ 6 × 4，誰說得對？",
+                        concept: "乘除交換律",
+                        options: [
+                            { text: "小華：可以變成 240 ÷ (6 × 4)", correct: false, feedback: "⚠️ <b>陷阱預警：</b>小華犯了大錯！原本是「先除以 6，再乘以 4」，如果擅自加括號變成先算 6 × 4，除數會放大 24 倍，答案完全變調囉！" },
+                            { text: "小明：可以變成 240 × 4 ÷ 6", correct: true, feedback: "🎉 <b>答對了！</b>在只有乘除的式子中，如果要調換順序，必須「連同數字前面的符號一起帶走」。所以原本乘以 4 移到前面，除以 6 移到後面，算式變成 240 × 4 ÷ 6，這完全正確！" }
+                        ]
+                    },
+                    {
+                        question: "關於 204 ÷ 2 × 3，正確的運算順序是？",
+                        concept: "同級乘除順序",
+                        options: [
+                            { text: "先算 2 × 3 = 6，再用 204 ÷ 6", correct: false, feedback: "⚠️ <b>陷阱預警：</b>這是考試的經典殺手題！很多小朋友直覺想先算後面簡單的 2 × 3 = 6。但乘除是同級運算，沒有括號時一定要乖乖「由左往右」算，先除再乘！" },
+                            { text: "先算 204 ÷ 2 = 102，再用 102 × 3", correct: true, feedback: "🎉 <b>完全正確！</b>遵守了由左往右算的核心法則，先算 204 ÷ 2 = 102，再乘以 3。你對規則的掌握非常穩健！" }
+                        ]
+                    },
+                    {
+                        question: "關於 320 - (120 - 45)，哪一個去括號算式是對的？",
+                        concept: "去括號變號規則",
+                        options: [
+                            { text: "320 - 120 - 45", correct: false, feedback: "⚠️ <b>陷阱預警：</b>括號前是減號時，減去一包差 (A - B)，等同於減去 A 再加回 B。如果不變號直接拆開，就會多扣了 45 喔！記住口訣：減號接括號，拆開要變號！" },
+                            { text: "320 - 120 + 45", correct: true, feedback: "🎉 <b>高手！</b>你對減法去括號的本質理解非常深刻。減去 (A-B) 等同於減去 A 之後，把少扣的 B 加回來，所以減號要變加號。超讚的啦！" }
+                        ]
+                    },
+                    {
+                        question: "關於 150 ÷ (5 × 3)，拆開括號後應該是？",
+                        concept: "去括號變號規則",
+                        options: [
+                            { text: "150 ÷ 5 × 3", correct: false, feedback: "⚠️ <b>陷阱預警：</b>這會算出截然不同的答案！原本是 150 ÷ 15 = 10。如果直接拆成 150 ÷ 5 × 3，依由左往右會變成先算 150 ÷ 5 = 30，再乘以 3 得到 90，差了 9 倍！除法接括號，拆開也要變號喔！" },
+                            { text: "150 ÷ 5 ÷ 3", correct: true, feedback: "🎉 <b>觀念完全正確！</b>除以一個積 (A × B)，代表要連續除以 A 與除以 B。就像把東西分成 5 大箱，每箱再平分給 3 個人，等同於直接平分給 15 個人。觀念滿分！" }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // --- 遊戲狀態管理 ---
+        let gameState = 'start'; // 'start', 'playing', 'feedback', 'end'
+        let currentLevel = 0;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let wrongAnswers = [];
+        let selectedOptionIndex = null;
+        let isCurrentCorrect = false;
+
+        const appDiv = document.getElementById('app');
+        const bodyDiv = document.getElementById('app-body');
+
+        // --- 渲染畫面核心邏輯 ---
+        function render() {
+            if (gameState === 'start') {
+                bodyDiv.className = "bg-slate-50 min-h-screen transition-colors duration-300 flex flex-col items-center justify-start pt-10 p-4 font-sans text-gray-800";
+                appDiv.innerHTML = `
+                    <div class="w-full bg-white rounded-3xl shadow-xl overflow-hidden border-b-8 border-blue-500 fade-in">
+                        <div class="bg-blue-500 p-8 text-center">
+                            <i data-lucide="shield-alert" class="w-20 h-20 text-yellow-300 mx-auto mb-4 animate-pulse"></i>
+                            <h1 class="text-3xl font-bold text-white mb-2 tracking-wider">運算規則<br/>拆彈專家</h1>
+                            <p class="text-blue-100">林老師的數學挑戰 (優化版)</p>
+                        </div>
+                        <div class="p-8 space-y-6">
+                            <div class="bg-blue-50 p-4 rounded-2xl">
+                                <h3 class="font-bold text-blue-800 mb-2 flex items-center">
+                                    <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> 任務說明
+                                </h3>
+                                <p class="text-gray-600 text-sm leading-relaxed">
+                                    四則運算也是有規律的！本挑戰共包含 4 大關卡，您需要找出正確的計算順序與拆解法，避開出題老師最愛考的「甜美陷阱」，成為真正的拆彈專家！
+                                </p>
+                            </div>
+                            <button onclick="startGame()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-4 rounded-xl text-xl shadow-lg active-scale flex items-center justify-center transition">
+                                <i data-lucide="play" class="w-6 h-6 mr-2 fill-current"></i> 開始挑戰
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (gameState === 'end') {
+                bodyDiv.className = "bg-slate-50 min-h-screen transition-colors duration-300 flex flex-col items-center justify-start pt-10 p-4 font-sans text-gray-800";
+                
+                let feedbackHTML = '';
+                if (wrongAnswers.length === 0) {
+                    feedbackHTML = `
+                        <div class="text-center p-6 bg-green-50 rounded-2xl border-2 border-green-200 mb-6">
+                            <i data-lucide="award" class="w-16 h-16 text-green-500 mx-auto mb-2 animate-bounce"></i>
+                            <p class="text-green-800 font-bold text-xl">太震撼了！無懈可擊！</p>
+                            <p class="text-green-600 text-sm mt-1">您成功避開了所有陷阱，獲得了「傳奇拆彈大師」的稱號！</p>
+                        </div>
+                    `;
+                } else {
+                    let errorsList = wrongAnswers.map(item => `
+                        <div class="bg-red-50 p-4 rounded-xl border-l-4 border-red-400 text-sm mb-3">
+                            <div class="font-mono text-gray-600 font-bold mb-1 text-base">${item.q}</div>
+                            <div class="font-bold text-red-700 mb-1">【${item.concept}】</div>
+                            <div class="text-gray-600 leading-relaxed">${item.feedback}</div>
+                        </div>
+                    `).join('');
+
+                    feedbackHTML = `
+                        <div class="mb-6">
+                            <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500 mr-2"></i>
+                                本次拆彈筆記（需要加強的觀念）：
+                            </h3>
+                            <div class="space-y-3 max-h-60 overflow-y-auto pr-1">
+                                ${errorsList}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // 拆彈心法總複習 (Cheat Sheet)
+                const cheatSheetHTML = `
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 mb-6">
+                        <h3 class="font-bold text-slate-800 mb-3 flex items-center text-base">
+                            <i data-lucide="book-open" class="w-5 h-5 text-blue-500 mr-2"></i>
+                            💡 拆彈心法大統整
+                        </h3>
+                        <ul class="space-y-3 text-sm text-gray-600">
+                            <li class="flex items-start">
+                                <span class="bg-orange-100 text-orange-800 rounded px-1.5 py-0.5 font-bold mr-2 shrink-0">1</span>
+                                <div><b>左左右右律：</b>只有加減或只有乘除時，一定要<b>由左往右</b>計算。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-purple-100 text-purple-800 rounded px-1.5 py-0.5 font-bold mr-2 shrink-0">2</span>
+                                <div><b>老大優先律：</b>加減乘除混合時，<b>乘除是老大</b>，要比加減先計算。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-emerald-100 text-emerald-800 rounded px-1.5 py-0.5 font-bold mr-2 shrink-0">3</span>
+                                <div><b>無敵盾牌律：</b><b>括號</b>保護的部分，不論加減乘除都必須<b>最先計算</b>。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-rose-100 text-rose-800 rounded px-1.5 py-0.5 font-bold mr-2 shrink-0">4</span>
+                                <div><b>去括號變號律：</b>括號前面是「減法」或「除法」時，拆括號裡面要<b>變號</b>！
+                                    <div class="font-mono text-xs text-blue-600 mt-1">A - (B + C) = A - B - C</div>
+                                    <div class="font-mono text-xs text-blue-600">A ÷ (B × C) = A ÷ B ÷ C</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                `;
+
+                appDiv.innerHTML = `
+                    <div class="w-full bg-white rounded-3xl shadow-xl overflow-hidden fade-in">
+                        <div class="bg-slate-800 p-8 text-center">
+                            <div class="relative inline-block">
+                                <div class="absolute inset-0 bg-yellow-400 rounded-full blur opacity-75 animate-pulse"></div>
+                                <div class="relative bg-white rounded-full p-4 mb-4 inline-block">
+                                    <span class="text-4xl font-black text-slate-800">${score}</span>
+                                    <span class="text-xs text-gray-500 block">分</span>
+                                </div>
+                            </div>
+                            <h2 class="text-2xl font-bold text-white">挑戰完成！</h2>
+                        </div>
+                        <div class="p-6">
+                            ${feedbackHTML}
+                            ${cheatSheetHTML}
+                            <button onclick="startGame()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center transition active-scale">
+                                <i data-lucide="refresh-cw" class="w-5 h-5 mr-2"></i> 再挑戰一次
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            else {
+                // playing 或 feedback 狀態，共用相同的卡片結構
+                if (gameState === 'feedback') {
+                    bodyDiv.className = "bg-gray-200 min-h-screen transition-colors duration-300 flex flex-col items-center justify-start pt-10 p-4 font-sans text-gray-800";
+                } else {
+                    bodyDiv.className = "bg-slate-50 min-h-screen transition-colors duration-300 flex flex-col items-center justify-start pt-10 p-4 font-sans text-gray-800";
+                }
+
+                const levelData = levels[currentLevel];
+                const questionData = levelData.questions[currentQuestionIndex];
+                const progressPercentage = ((currentQuestionIndex + 1) / levelData.questions.length) * 100;
+
+                // 建立選項按鈕的 HTML
+                let optionsHTML = questionData.options.map((option, idx) => {
+                    let btnClass = "bg-white border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:scale-105 active:scale-95 text-gray-700 shadow-sm";
+                    
+                    if (gameState === 'feedback') {
+                        if (idx === selectedOptionIndex) {
+                            btnClass = option.correct ? "bg-green-100 border-green-500 text-green-800 scale-100 font-black" : "bg-red-100 border-red-500 text-red-800 scale-100 font-black";
+                        } else {
+                            btnClass = "bg-gray-50 border-gray-100 text-gray-300 scale-95 opacity-50 cursor-not-allowed";
+                        }
+                    }
+
+                    return `
+                        <button 
+                            ${gameState === 'feedback' ? 'disabled' : `onclick="handleOptionSelect(${idx})"`}
+                            class="w-full p-4 rounded-xl border-2 text-base md:text-lg font-bold transition-all duration-200 transform ${btnClass}"
+                        >
+                            ${option.text}
+                        </button>
+                    `;
+                }).join('');
+
+                // 建立 Feedback 覆蓋層的 HTML
+                let feedbackOverlayHTML = '';
+                if (gameState === 'feedback') {
+                    const iconHTML = isCurrentCorrect 
+                        ? `<div class="mb-4 p-4 rounded-full bg-green-100"><i data-lucide="check-circle" class="w-12 h-12 text-green-500"></i></div>`
+                        : `<div class="mb-4 p-4 rounded-full bg-red-100"><i data-lucide="x-circle" class="w-12 h-12 text-red-500"></i></div>`;
+                    
+                    const titleHTML = isCurrentCorrect 
+                        ? `<h3 class="text-2xl font-black mb-2 text-green-600">答對了！</h3>`
+                        : `<h3 class="text-2xl font-black mb-2 text-red-600">哎呀，踩到炸彈了！</h3>`;
+
+                    feedbackOverlayHTML = `
+                        <div class="absolute inset-0 bg-white/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-6 fade-in rounded-3xl">
+                            ${iconHTML}
+                            ${titleHTML}
+                            <p class="text-gray-600 text-center font-medium text-base mb-8 leading-relaxed max-w-xs">
+                                ${questionData.options[selectedOptionIndex].feedback}
+                            </p>
+                            <button onclick="nextQuestion()" class="px-8 py-3 rounded-full text-white font-bold text-lg shadow-lg flex items-center transform transition hover:scale-105 active-scale ${levelData.btnColor}">
+                                下一題 <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+
+                // 組合主畫面
+                appDiv.innerHTML = `
+                    <!-- Level Header (放大置中版) -->
+                    <div class="w-full mb-6 flex flex-col items-center">
+                        <div class="w-full flex justify-between items-center mb-2">
+                            <div class="text-xs font-bold text-gray-400 bg-gray-200 px-3 py-1 rounded-full">
+                                關卡 ${currentLevel + 1} / ${levels.length}
+                            </div>
+                            <div class="bg-white px-4 py-1 rounded-full text-sm font-bold shadow-sm text-gray-600 border border-gray-200 flex items-center">
+                                <i data-lucide="trophy" class="w-4 h-4 mr-1 text-yellow-500"></i> 分數: ${score}
+                            </div>
+                        </div>
+                        <div class="w-full py-4 rounded-2xl text-xl md:text-2xl font-black text-center shadow-md border-b-4 transform transition-all ${levelData.color}">
+                            ${levelData.title}
+                        </div>
+                    </div>
+
+                    <!-- Main Card -->
+                    <div class="w-full bg-white rounded-3xl shadow-xl overflow-hidden min-h-[420px] flex flex-col relative fade-in">
+                        <!-- Progress Bar -->
+                        <div class="w-full h-2 bg-gray-100">
+                            <div class="h-full transition-all duration-500 ${levelData.progressBar}" style="width: ${progressPercentage}%"></div>
+                        </div>
+
+                        <!-- Question Area -->
+                        <div class="p-8 flex-grow flex flex-col items-center justify-center text-center">
+                            <p class="text-gray-400 text-xs font-bold mb-2 uppercase tracking-widest">
+                                題目 ${currentQuestionIndex + 1} / ${levelData.questions.length}
+                            </p>
+                            <h2 class="text-3xl font-black text-gray-800 mb-8 font-mono tracking-tight leading-snug">
+                                ${questionData.question}
+                            </h2>
+                            <!-- Options -->
+                            <div class="w-full space-y-4">
+                                ${optionsHTML}
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="p-4 text-center text-xs font-medium ${levelData.color} leading-relaxed">
+                            💡 提示：${levelData.description}
+                        </div>
+
+                        <!-- Feedback Overlay -->
+                        ${feedbackOverlayHTML}
+                    </div>
+                `;
+            }
+
+            // 初始化 Lucide 圖示
+            lucide.createIcons();
+        }
+
+        // --- 互動邏輯 ---
+        function startGame() {
+            gameState = 'playing';
+            currentLevel = 0;
+            currentQuestionIndex = 0;
+            score = 0;
+            wrongAnswers = [];
+            selectedOptionIndex = null;
+            render();
+        }
+
+        function handleOptionSelect(index) {
+            const levelData = levels[currentLevel];
+            const questionData = levelData.questions[currentQuestionIndex];
+            const selectedOption = questionData.options[index];
+
+            selectedOptionIndex = index;
+            isCurrentCorrect = selectedOption.correct;
+
+            if (isCurrentCorrect) {
+                score += 10;
+            } else {
+                wrongAnswers.push({
+                    q: questionData.question,
+                    concept: questionData.concept,
+                    feedback: selectedOption.feedback
+                });
+            }
+
+            gameState = 'feedback';
+            render();
+        }
+
+        function nextQuestion() {
+            const levelData = levels[currentLevel];
+            
+            if (currentQuestionIndex < levelData.questions.length - 1) {
+                // 同關卡的下一題
+                currentQuestionIndex++;
+                gameState = 'playing';
+                selectedOptionIndex = null;
+            } else {
+                // 進入下一關，或是結束遊戲
+                if (currentLevel < levels.length - 1) {
+                    currentLevel++;
+                    currentQuestionIndex = 0;
+                    gameState = 'playing';
+                    selectedOptionIndex = null;
+                } else {
+                    gameState = 'end';
+                }
+            }
+            render();
+        }
+
+        // 初始渲染
+        render();
+
+    </script>
+</body>
+</html>

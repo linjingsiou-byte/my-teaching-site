@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥳 臺大「Ipad種子教師趴」：這不是逛校園，這是來充電！💡 | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">🥳 臺大「Ipad種子教師趴」：這不是逛校園，這是來充電！💡</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: iPad教學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>iPadSeeding2526 #11月分享文 #MojoNine第九組</h1>
+<p>🥳 臺大「Ipad種子教師趴」：這不是逛校園，這是來充電！💡</p>
+<p>再次踏入臺大校園，這回可不是當觀光客，而是以2025-2026 iPad種子教師的身份來充電、交朋友的！說真的，比起在椰林大道散步，我更愛這種知識交流的聚會(吃吃喝喝也愛啦)！🥂</p>
+<p>每年都很期得的課例分享時間，簡直就是一場教學點子的自助餐！🥗 聽著來自各路英雄好漢（不同教學領域的種子老師）的精采分享(家政課也能邊觀看老師事先製作好的影片自學，太強大了)，我有點年紀腦袋裡的小宇宙就不停地爆炸：「這個招式好酷！我要怎麼把它『翻譯』成我班上學生能懂的版本？」 這才是聽課例分享最燒腦也最有趣的地方啊！🧠</p>
+<p>🚀 「迷幻動畫」與「音樂快閃」太犯規！<br />
+下午場，英斌老師帶來的「魔幻動畫」搭配上午場運用Garageband自己製做出場音樂的活動，兩者的結合簡直是「手速」和「創意」+「腦力」的終極大考驗！(謝謝方方老師幫忙喊停啊~)👏 雖然燒腦到不行，但過程超級有趣，讓人記憶點滿分！💯(老人也就只能記得住這麼多了，其他聚會活動細節請參閱其他夥伴的分享文)</p>
+<p>邊完成任務時，我的腦袋閃過：「如果把這個動畫的技巧，應用到語文複習上，效果會不會炸裂？！」💥 想像一下：</p>
+<p>緊湊的節奏感音樂&lt;---&gt;學生的注意力瞬間拉滿！<br />
+閃示的詞卡 &lt;---&gt;呆萌學生眼睛瞪大、拚命想抓住到底閃了哪些重點語詞！影片結束，再書寫出現過語詞。</p>
+<p>這樣一來，原本枯燥的考前「複習語詞」環節，不就變成一場好玩的視覺記憶大挑戰了嗎？📖 這招「吸睛快閃複習法」，應該能成功「綁架」學生的目光！👁️ 超級期待把這些新技能帶回教室實戰！</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

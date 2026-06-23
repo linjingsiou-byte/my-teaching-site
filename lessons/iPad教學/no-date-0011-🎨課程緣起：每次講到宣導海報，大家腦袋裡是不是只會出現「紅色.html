@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨課程緣起：每次講到宣導海報，大家腦袋裡是不是只會出現「紅色圓圈加一條斜槓」？😅… | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">🎨課程緣起：每次講到宣導海報，大家腦袋裡是不是只會出現「紅色圓圈加一條斜槓」？😅…</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: iPad教學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #屏科實中國小部 #四年級藝術 #iPadSeeding2526 #MojoNine第九組 #4月分享文</h1>
+<p>🎨課程緣起：每次講到宣導海報，大家腦袋裡是不是只會出現「紅色圓圈加一條斜槓」？😅其實，只要用對工具，學生也能變身 斜槓設計大師！</p>
+<p>這次帶學生挑戰用 Keynote 玩創意，把嚴肅的菸害防治宣導，變成一場「設計美學課」！</p>
+<p>🎨 三步驟打造吸睛標誌：</p>
+<p>1️⃣ 觀察中聚焦要素： 我們先上網搜集一般常見的拒菸標誌，一起討論為什麼有些一眼就能看懂？原來「顏色對比」和「簡單圖像」就是關鍵！🧐</p>
+<p>2️⃣ 解鎖 Keynote 隱藏功能： 不只是做簡報！老師手把手教大家如何 調整投影片尺寸，把畫布變成正方形或長方形。接著活用標示工具與 樣式調整，不管是漸層色還是陰影效果，通通一鍵搞定！</p>
+<p>3️⃣ 雲端策展大會： 完成後直接截圖上傳到 Padlet 。這時候最精彩了！大家互相「按讚、給回饋」，看誰的設計最有創意、最有說服力！</p>
+<p>🎨教學心得：<br />
+看著學生們從「不知道怎麼畫」到做出「這可以直接印刷吧」的作品，那種成就感真的會發光！</p>
+<p>✨從觀察到創造： 與其直接給指令，不如先讓學生在 Safari 上觀察真實案例。當他們歸納出「紅圈、斜線、菸」這三大元素後，動手設計時就更有方向感。</p>
+<p>✨數位工具的降門檻： 以前畫海報最怕畫錯，現在學生在 Keynote 裡能自由調整尺寸、玩轉樣式。看到他們發現「標示工具」能做出專業漸層感時，眼神裡閃爍的驚喜是騙不了人的！</p>
+<p>✨同儕回饋的力量： 最後利用 Padlet 牆展示作品，比起老師評分，孩子們更在意同學給的讚。這種「線上策展」的過程，讓每份作品都多了一份被看見的價值。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

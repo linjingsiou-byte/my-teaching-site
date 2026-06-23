@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>※教學目標： | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">※教學目標：</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 生生用平板</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #屏科實中國小部 #公開授課給日本教授觀課 #三年級校本課程 #主題探究 #生生用平板</h1>
+<p>※教學目標：</p>
+<p>1.練習以關鍵字搜尋資料。</p>
+<p>2.摘要搜尋到的資料。</p>
+<p>※教學流程：</p>
+<p>1.先複習蜜源植物減少的原因。</p>
+<p>2.想想可以搜尋哪些關鍵字來找到蜜源植物可能減少的原因。</p>
+<p>3.以felo、google搜尋關鍵字。</p>
+<p>4.閱讀資料並摘要整理。</p>
+<p>5.評估解方的可行性。</p>
+<p>※教學心得：<br />
+整個授課流程就是以平時的校本課程授課模式進行。<br />
+利用ipad帶著孩子們試圖找出蜜源植物減少的解方，<br />
+搭配在padlet上已設計好的流程說明，<br />
+師生按表操課，<br />
+讓學生有充分的時間想關鍵字、搜尋資料、整理摘要，<br />
+討論資料的整理方式是否可行及再修改。<br />
+(嗯…下次再重點提示，讓孩子們重新修改摘要內容)<br />
+也因為孩子小三個個操作起ipad沒有什麼大問題，<br />
+讓教授有些驚訝！<br />
+(教授好像是看到孩子們善用分割顯示就覺得斯勾以吧…)</p>
+<p>本日觀課的四辻伸吾教授來自日本大阪教育大學，<br />
+學生聽到觀課是日本人，搞得自己很緊張，<br />
+孩子們緊張到老師上課講冷笑話，<br />
+學生不敢笑出來，<br />
+這畫面實在是精典！</p>
+<p>內心話：<br />
+這堂課再多了腳勤，<br />
+不然，<br />
+平常有「課堂」，<br />
+我都是直接坐下好好盯著螢幕看孩子們操作。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

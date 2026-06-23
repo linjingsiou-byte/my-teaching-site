@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>繼續感謝 Kitty Ting 丁丁老師的分享， | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">繼續感謝 Kitty Ting 丁丁老師的分享，</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 未知日期</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>教學日誌 #iPad種子教師 #小一數學 #說數學 #生生用平板 #numberpieces #課堂</h1>
+<p>繼續感謝 Kitty Ting 丁丁老師的分享，<br />
+認識了numberpiece這個很好用的數學app，<br />
+也繼續謝謝學校美女網管老師協助安裝app。</p>
+<p>結合康軒版一下第六單元100以內的數，<br />
+讓孩子操作numberpieces<br />
+各組利用拖拉物件(1、10)，<br />
+呈現出老師指定的數量，<br />
+再利用拖拉物件(1、10)，<br />
+可以練習以某數為出發點的多1、多10數詞序列。</p>
+<p>點選某物件(1、10)，<br />
+再按垃圾桶，<br />
+立即少1或少10，<br />
+練習100以內的往下數數。</p>
+<p>該app還能圈選物件進行合成，<br />
+也就是讓學生發現十個1(小白)是一個十(小橘)，<br />
+十個十(小橘)可以合成一個百(小藍)。<br />
+反之則是利用分解的功能。</p>
+<p>課堂是學生立即的動態操作顯示大助手，<br />
+老師不一定要一組組確認，<br />
+從畫面中立馬掌握各組學生的完成度。<br />
+(持續建立孩子完成任務手放背後的規定中)</p>
+<p>最重要的是，<br />
+透過好用app的操作及說數學，<br />
+呈現出孩子建立數詞序列的過程。</p>
+<p>好用的數學app，<br />
+大推！<br />
+附上線上操作網頁版。</p>
+<p>https://apps.mathlearningcenter.org/number-pieces/</p>
+<hr />
+<h2>💡 教學心得</h2>
+<p>從丁丁老師的分享，我學到說數學的另一個面向：<br />
+題目設計，決定孩子能說多深。</p>
+<p>如果題目只問「對或錯」，孩子只能說「對」或「錯」。<br />
+如果題目問「你怎麼想」，孩子才能說出真正的思考。</p>
+<p>我開始在備課時，把問題從「答案型」改成「思考型」。</p>
+<p>效果驚人。</p>
+<p><strong>孩子的嘴巴打開了，腦袋也跟著打開了。</strong><br />
+說數學，從問對問題開始。</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>
