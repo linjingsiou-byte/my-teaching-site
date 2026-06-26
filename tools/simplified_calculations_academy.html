@@ -4,12 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>林老師的簡化計算魔法學院</title>
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (負責簡潔大方的排版與多巴胺配色) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for cute icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -63,596 +58,564 @@
             50% { transform: translateY(-10px); }
         }
         .bounce-animation { animation: bounce-sm 0.5s ease-in-out; }
+
+        /* 簡單的淡入動畫 */
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="min-h-screen pb-20">
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10 px-4 py-3 mb-6">
+        <div class="max-w-2xl mx-auto flex items-center justify-between">
+            <h1 class="text-2xl font-black text-slate-800 flex items-center gap-2">
+                <span class="bg-yellow-400 text-yellow-900 w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm shadow-yellow-200">林</span>
+                單元8 簡化計算
+            </h1>
+            <div class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-sm font-bold">
+                國小四年級數學
+            </div>
+        </div>
+    </header>
 
-        // --- 元件：互動式填空題 (下拉選單，新增浮動引導解析) ---
-        const InteractiveBlank = ({ options, correctAnswer, onCorrect, isResolved, placeholder="請選擇", colorClass="text-blue-600 bg-blue-50 border-blue-300", hints }) => {
-            const [selected, setSelected] = useState("");
-            const [status, setStatus] = useState("idle"); // idle, error, success
-            const [hint, setHint] = useState("");
+    <!-- Main Content Container -->
+    <main class="max-w-2xl mx-auto px-4">
+        
+        <!-- ==================== 頁面 0: 加減的魔法 ==================== -->
+        <div id="page-0" class="page-container space-y-6 fade-in">
+            <div class="bg-gradient-to-r from-pink-400 to-rose-400 text-white p-4 rounded-2xl shadow-md flex items-center gap-3">
+                <div class="bg-white/30 p-3 rounded-full"><i class="fa-solid fa-wand-magic-sparkles text-2xl"></i></div>
+                <div>
+                    <h2 class="text-2xl font-black tracking-wide">活動 1：加與減的魔法</h2>
+                    <p class="text-pink-50">找出好朋友，湊成整十、整百，計算變超快！</p>
+                </div>
+            </div>
 
-            const handleChange = (e) => {
-                const val = e.target.value;
-                setSelected(val);
-                if (val === correctAnswer) {
-                    setStatus("success");
-                    setHint("");
-                    if(onCorrect) onCorrect();
-                } else if (val !== "") {
-                    setStatus("error");
-                    if (hints && hints[val]) {
-                        setHint(hints[val]);
-                    } else {
-                        setHint("再想想看喔，這個選項不夠簡便。");
-                    }
-                    // 幾秒後自動隱藏提示並還原狀態
-                    setTimeout(() => {
-                        setStatus("idle");
-                    }, 800);
-                } else {
-                    setStatus("idle");
-                    setHint("");
-                }
-            };
+            <!-- 秘訣 1 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-pink-400">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-pink-100 text-pink-600 font-black px-3 py-1 rounded-lg">秘訣 1</span>
+                    <h3 class="text-xl font-bold text-slate-800">連加：誰跟誰是好朋友？</h3>
+                </div>
+                <div class="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
+                    <b>林老師教學：</b>先找尾數加起來是 <span class="font-bold text-pink-500">10</span> 的數字！這利用了「加法結合律」，先把好朋友綁在一起算，後面就輕鬆多囉！
+                </div>
+                <div class="text-2xl font-bold text-center bg-pink-50/50 py-6 rounded-xl border border-pink-100">
+                    <span class="text-slate-700">73 + 49 + </span>
+                    <span class="interactive-blank-container" 
+                          data-options="49,27,100" 
+                          data-correct="27" 
+                          data-color="pink" 
+                          data-hints='{"49":"選 49 的話，個位數 3 + 9 = 12，無法湊成整十。看誰的個位數能跟 73 的 3 湊成 10？","100":"算式中沒有 100 喔！我們要找原題目中的數字 27，和 73 湊成 100。"}'
+                          data-placeholder="請選擇"></span>
+                    <div class="my-3 text-slate-400 text-lg">
+                        <i class="fa-solid fa-arrow-down"></i> 把好朋友用括號圈在一起先算
+                    </div>
+                    <span class="text-slate-700">= ( 73 + 27 ) + 49</span><br/>
+                    <span class="text-slate-700">= <span class="text-pink-500">100</span> + 49</span><br/>
+                    <span class="text-slate-700">= 149</span>
+                </div>
+            </div>
 
-            // 點選空白處關閉提示
-            useEffect(() => {
-                if (hint) {
-                    const timer = setTimeout(() => setHint(""), 4000);
-                    return () => clearTimeout(timer);
-                }
-            }, [hint]);
+            <!-- 秘訣 2 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-blue-400">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-blue-100 text-blue-600 font-black px-3 py-1 rounded-lg">秘訣 2</span>
+                    <h3 class="text-xl font-bold text-slate-800">連減 / 先加再減：換個位置更輕鬆</h3>
+                </div>
+                <div class="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
+                    <b>林老師教學：</b>看見能湊成 <span class="font-bold text-blue-500">整數</span> 的，可以帶著數字前面的加減符號「大搬家」！
+                    <span class="text-red-500 font-bold block mt-1">⚠️ 警報：搬家時記得要把減號「-」當成行李一起帶走喔！不要寫成 + 23。</span>
+                </div>
+                <div class="text-2xl font-bold text-center bg-blue-50/50 py-6 rounded-xl border border-blue-100 space-y-2">
+                    <div class="text-slate-700">73 - 49 - 23</div>
+                    <div class="text-slate-400 text-lg"><i class="fa-solid fa-arrow-down"></i> 讓 73 先減 23，個位數都是 3 最好減！</div>
+                    <div class="text-slate-700">
+                        = ( 73 - 
+                        <span class="interactive-blank-container" 
+                              data-options="49,23,50" 
+                              data-correct="23" 
+                              data-color="blue" 
+                              data-hints='{"49":"如果填 49，73 - 49 = 24，心算不夠直覺。如果先扣除個位數同為 3 的 23，計算變超簡單！","50":"算式中原本沒有 50 喔！50 是 73 - 23 算完的結果，搬家時要搬題目裡的 23。"}'
+                              data-placeholder="請選擇"></span> ) - 49
+                    </div>
+                    <div class="text-slate-700">= <span class="text-blue-500">50</span> - 49 = 1</div>
+                </div>
+            </div>
 
-            if (isResolved || status === "success") {
-                return (
-                    <span className={`inline-block px-3 py-1 font-bold rounded-lg border-2 border-transparent ${colorClass.replace('bg-', 'bg-').replace('border-', '')} text-xl mx-1 bounce-animation shadow-sm`}>
-                        {correctAnswer} <i className="fa-solid fa-check text-green-500 ml-1 text-sm"></i>
-                    </span>
-                );
+            <!-- 秘訣 3 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-purple-400">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-purple-100 text-purple-600 font-black px-3 py-1 rounded-lg">秘訣 3</span>
+                    <h3 class="text-xl font-bold text-slate-800">連續減去兩數 = 減去兩數之「和」</h3>
+                </div>
+                <div class="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
+                    <b>林老師教學：</b>連續扣掉兩個東西，就等於「先把兩件物品的價格加起來，再用總錢數一次扣掉」！這在生活中就像合併結帳。
+                </div>
+                <div class="text-2xl font-bold text-center bg-purple-50/50 py-6 rounded-xl border border-purple-100 space-y-2">
+                    <div class="text-slate-700">200 - 73 - 27</div>
+                    <div class="text-slate-400 text-lg"><i class="fa-solid fa-arrow-down"></i> 把要扣的數包在括號裡「加」起來一起減</div>
+                    <div class="text-slate-700">
+                        = 200 - ( 73 <span class="text-purple-500 font-black">+</span> 
+                        <span class="interactive-blank-container" 
+                              data-options="73,27,200" 
+                              data-correct="27" 
+                              data-color="purple" 
+                              data-hints='{"73":"括號裡已經有第一個扣除項 73 了，我們要放的是另一個原本要被減去的數字 27。","200":"不能填 200 喔！200 是被減的總金額，括號裡要加的是買的物品價格總和 (73+27)。"}'
+                              data-placeholder="請選擇"></span> )
+                    </div>
+                    <div class="text-slate-700">= 200 - <span class="text-purple-500">100</span></div>
+                    <div class="text-slate-700">= 100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 頁面 1: 乘除的魔法 ==================== -->
+        <div id="page-1" class="page-container space-y-6 hidden fade-in">
+            <div class="bg-gradient-to-r from-emerald-400 to-teal-400 text-white p-4 rounded-2xl shadow-md flex items-center gap-3">
+                <div class="bg-white/30 p-3 rounded-full"><i class="fa-solid fa-bolt text-2xl"></i></div>
+                <div>
+                    <h2 class="text-2xl font-black tracking-wide">活動 2：乘與除的魔法</h2>
+                    <p class="text-emerald-50">湊出 10、100、1000，大數字也不怕！</p>
+                </div>
+            </div>
+
+            <!-- 魔法配對卡 -->
+            <div class="magic-card bg-amber-50 p-5 rounded-2xl shadow-sm border border-amber-200">
+                <h3 class="text-xl font-bold text-amber-800 text-center mb-4"><i class="fa-solid fa-star text-amber-500 mr-2"></i>必背！乘法好朋友卡牌</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm text-center border-b-4 border-amber-300">
+                        <div class="text-3xl font-black text-amber-600 mb-1">5 × 2</div>
+                        <div class="text-xl font-bold text-slate-500">= 10</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm text-center border-b-4 border-orange-400">
+                        <div class="text-3xl font-black text-orange-500 mb-1">25 × 4</div>
+                        <div class="text-xl font-bold text-slate-500">= 100</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm text-center border-b-4 border-red-400">
+                        <div class="text-3xl font-black text-red-500 mb-1">125 × 8</div>
+                        <div class="text-xl font-bold text-slate-500">= 1000</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 秘訣 4 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-emerald-400">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-emerald-100 text-emerald-700 font-black px-3 py-1 rounded-lg">秘訣 4</span>
+                    <h3 class="text-xl font-bold text-slate-800">連乘：呼叫好朋友</h3>
+                </div>
+                <div class="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
+                    <b>林老師教學：</b>利用「乘法結合律」，看到 25 或是 125 時，立刻在題目裡尋找它們的乘法超級好朋友（4 或 8），先算成 100 或 1000！
+                </div>
+                <div class="text-2xl font-bold text-center bg-emerald-50/50 py-6 rounded-xl border border-emerald-100 space-y-2">
+                    <div class="text-slate-700">25 × 999 × 4</div>
+                    <div class="text-slate-400 text-lg"><i class="fa-solid fa-arrow-down"></i> 25 的乘法好朋友是誰？</div>
+                    <div class="text-slate-700">
+                        = ( 25 × 
+                        <span class="interactive-blank-container" 
+                              data-options="999,4,8" 
+                              data-correct="4" 
+                              data-color="emerald" 
+                              data-hints='{"999":"如果先乘 999 數字太大了！看看好朋友卡牌，25 乘以誰能湊成 100？是 4 喔！","8":"算式裡沒有 8 喔！8 是 125 的好朋友，而 25 的好朋友是 4。"}'
+                              data-placeholder="請選擇"></span> ) × 999
+                    </div>
+                    <div class="text-slate-700">= <span class="text-emerald-600 font-bold">100</span> × 999</div>
+                    <div class="text-slate-700">= 99900</div>
+                </div>
+            </div>
+
+            <!-- 秘訣 5 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-cyan-400">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-cyan-100 text-cyan-700 font-black px-3 py-1 rounded-lg">秘訣 5</span>
+                    <h3 class="text-xl font-bold text-slate-800">先乘再除 ＝ 先除再乘</h3>
+                </div>
+                <p class="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
+                    <b>林老師教學：</b>如果先相乘數字會變得太大（如 <code>33 × 7 = 231</code> 再除以 3），我們可以搬動除號「÷」，先找能夠整除的數字進行「先除以除數」，把數字變小後乘起來更輕鬆！
+                </p>
+                <div class="text-2xl font-bold text-center bg-cyan-50/50 py-6 rounded-xl border border-cyan-100 space-y-2">
+                    <div class="text-slate-700">33 × 7 ÷ 3</div>
+                    <div class="text-slate-400 text-lg"><i class="fa-solid fa-arrow-down"></i> 33 能被 3 整除，帶著除號「÷ 3」搬到前面先算！</div>
+                    <div class="text-slate-700">
+                        = ( 33 ÷ 
+                        <span class="interactive-blank-container" 
+                              data-options="7,3,11" 
+                              data-correct="3" 
+                              data-color="cyan" 
+                              data-hints='{"7":"33 沒有辦法被 7 整除喔！如果先算 33 ÷ 7 就會出現分數，變得更難算了！","11":"算式裡沒有 11 喔！11 是 33 ÷ 3 算出來的結果，還沒除之前要選題目裡的除數 3。"}'
+                              data-placeholder="請選擇"></span> ) × 7
+                    </div>
+                    <div class="text-slate-700">= <span class="text-cyan-600 font-bold">11</span> × 7</div>
+                    <div class="text-slate-700">= 77</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 頁面 2: 總結秘笈 ==================== -->
+        <div id="page-2" class="page-container space-y-6 hidden fade-in">
+            <div class="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white p-4 rounded-2xl shadow-md flex items-center gap-3">
+                <div class="bg-white/30 p-3 rounded-full"><i class="fa-solid fa-book-open text-2xl"></i></div>
+                <div>
+                    <h2 class="text-2xl font-black tracking-wide">林老師的簡化計算秘笈</h2>
+                    <p class="text-violet-100">靈活應用交換律與結合律，大數變小數！</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                                <th class="p-4 font-black w-1/4">活動</th>
+                                <th class="p-4 font-black w-1/3">計算口訣 / 規則</th>
+                                <th class="p-4 font-black">範例對照</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-base md:text-lg">
+                            <tr class="border-b border-slate-100 hover:bg-pink-50 transition-colors">
+                                <td class="p-4 font-bold text-pink-600"><i class="fa-solid fa-plus mr-2"></i>連加</td>
+                                <td class="p-4 text-slate-600 text-sm md:text-base">找尾數湊十，改順序先加（結合律）</td>
+                                <td class="p-4 font-mono font-bold text-slate-700"><span class="text-pink-500">73</span> + 49 <span class="text-pink-500">+ 27</span><br/>= <span class="text-pink-500">(73 + 27)</span> + 49 = 149</td>
+                            </tr>
+                            <tr class="border-b border-slate-100 hover:bg-blue-50 transition-colors">
+                                <td class="p-4 font-bold text-blue-600"><i class="fa-solid fa-minus mr-2"></i>連減</td>
+                                <td class="p-4 text-slate-600 text-sm md:text-base">搬移位置先減（連符號一起搬移）</td>
+                                <td class="p-4 font-mono font-bold text-slate-700"><span class="text-blue-500">73</span> - 49 <span class="text-blue-500">- 23</span><br/>= <span class="text-blue-500">(73 - 23)</span> - 49 = 1</td>
+                            </tr>
+                            <tr class="border-b border-slate-100 hover:bg-purple-50 transition-colors">
+                                <td class="p-4 font-bold text-purple-600"><i class="fa-solid fa-object-group mr-2"></i>連減兩數</td>
+                                <td class="p-4 text-slate-600 text-sm md:text-base">等於直接減去兩數的「和」</td>
+                                <td class="p-4 font-mono font-bold text-slate-700">200 <span class="text-purple-500">- 73 - 27</span><br/>= 200 - <span class="text-purple-500">(73 + 27)</span> = 100</td>
+                            </tr>
+                            <tr class="border-b border-slate-100 hover:bg-emerald-50 transition-colors">
+                                <td class="p-4 font-bold text-emerald-600"><i class="fa-solid fa-xmark mr-2"></i>連乘</td>
+                                <td class="p-4 text-slate-600 text-sm md:text-base">找好朋友配對：5×2, 25×4, 125×8</td>
+                                <td class="p-4 font-mono font-bold text-slate-700"><span class="text-emerald-500">25</span> × 999 <span class="text-emerald-500">× 4</span><br/>= <span class="text-emerald-500">(25 × 4)</span> × 999 = 99900</td>
+                            </tr>
+                            <tr class="hover:bg-cyan-50 transition-colors">
+                                <td class="p-4 font-bold text-cyan-600"><i class="fa-solid fa-divide mr-2"></i>乘與除</td>
+                                <td class="p-4 text-slate-600 text-sm md:text-base">調整除法順序，先除以能整除的數</td>
+                                <td class="p-4 font-mono font-bold text-slate-700"><span class="text-cyan-500">33</span> × 7 <span class="text-cyan-500">÷ 3</span><br/>= <span class="text-cyan-500">(33 ÷ 3)</span> × 7 = 77</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="text-center py-6">
+                <p class="text-2xl font-black text-slate-700 mb-2">🎉 恭喜你完成單元 8 的自學挑戰！ 🎉</p>
+                <p class="text-slate-500">準備好挑戰底部的「實戰演練」來檢測實力了嗎？</p>
+            </div>
+        </div>
+
+        <!-- ==================== 頁面 3: 實戰演練 ==================== -->
+        <div id="page-3" class="page-container space-y-6 hidden fade-in">
+            <div class="bg-gradient-to-r from-orange-400 to-amber-500 text-white p-4 rounded-2xl shadow-md flex items-center gap-3">
+                <div class="bg-white/30 p-3 rounded-full"><i class="fa-solid fa-gamepad text-2xl"></i></div>
+                <div>
+                    <h2 class="text-2xl font-black tracking-wide">實戰演練：牛刀小試</h2>
+                    <p class="text-orange-50">混合挑戰！看看你能否活用簡化計算魔法！</p>
+                </div>
+            </div>
+
+            <!-- Q1 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xl font-bold text-slate-800">第 1 題：尋找加法好朋友</h3>
+                    <span class="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">連加</span>
+                </div>
+                <div class="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
+                    <div class="text-slate-700">35 + 88 + 65</div>
+                    <div class="text-slate-700">
+                        = ( 35 + 
+                        <span class="interactive-blank-container" 
+                              data-options="88,65,100" 
+                              data-correct="65" 
+                              data-color="orange" 
+                              data-hints='{"88":"選 88 的話，尾數 5 + 8 = 13，無法湊整。找尾數能與 35 的 5 湊成 10 的好朋友吧！","100":"題目裡原本沒有 100 喔！要選題目中的 65 來與 35 湊成 100。"}'
+                              data-placeholder="請選擇"></span> 
+                        ) + 88
+                    </div>
+                    <div class="text-slate-700">
+                        = <span class="interactive-blank-container" 
+                                data-options="188,100,153" 
+                                data-correct="188" 
+                                data-color="orange" 
+                                data-hints='{"100":"算完括號裡的 35 + 65 = 100 之後，不要忘記外面還有一位老朋友 88 喔！100 + 88 得到什麼？","153":"計算有誤喔，(35 + 65) + 88 = 100 + 88 = 188。"}'
+                                data-placeholder="請選擇"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xl font-bold text-slate-800">第 2 題：帶著符號大搬家</h3>
+                    <span class="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">連減</span>
+                </div>
+                <div class="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
+                    <div class="text-slate-700">150 - 47 - 50</div>
+                    <div class="text-slate-700">
+                        = ( 150 - 
+                        <span class="interactive-blank-container" 
+                              data-options="47,50,100" 
+                              data-correct="50" 
+                              data-color="orange" 
+                              data-hints='{"47":"如果先扣 47 得到 103，沒有整十不好算。不如先扣掉有漂亮整十尾數的 50！","100":"題目裡原本沒有 100 喔！要選題目中的 50，先算 150 - 50 = 100。"}'
+                              data-placeholder="請選擇"></span> 
+                        ) - 47
+                    </div>
+                    <div class="text-slate-700">
+                        = <span class="interactive-blank-container" 
+                                data-options="53,103,197" 
+                                data-correct="53" 
+                                data-color="orange" 
+                                data-hints='{"103":"記得要把剛剛 150 - 50 = 100 的結果，再減去後面的 47 喔！","197":"注意，這是減法算式，不是加法喔，數字不會變大！"}'
+                                data-placeholder="請選擇"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xl font-bold text-slate-800">第 3 題：包起來一起減</h3>
+                    <span class="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">連減兩數</span>
+                </div>
+                <div class="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
+                    <div class="text-slate-700">300 - 128 - 72</div>
+                    <div class="text-slate-700">
+                        = 300 - ( 128 
+                        <span class="interactive-blank-container" 
+                              data-options="+,-,×" 
+                              data-correct="+" 
+                              data-color="orange" 
+                              data-hints='{"-":"如果是減號，括號內算出來是 56，300 - 56 = 244，與原算式值不同！連續減去兩個數，等於減去兩數的『和』，要用加號！","×":"連減不能改寫成乘法喔！要把這兩個要扣除的數相加，再一次扣掉。"}'
+                              data-placeholder="請選擇"></span> 
+                        72 )
+                    </div>
+                    <div class="text-slate-700">
+                        = <span class="interactive-blank-container" 
+                                data-options="100,200,500" 
+                                data-correct="100" 
+                                data-color="orange" 
+                                data-hints='{"200":"200 是括號裡 128 + 72 的結果。別忘了用前面的 300 減去這個 200 喔！","500":"減法算式算出來的值不會變大，請重新心算一遍：300 - 200。"}'
+                                data-placeholder="請選擇"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xl font-bold text-slate-800">第 4 題：乘法好朋友卡牌</h3>
+                    <span class="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">連乘</span>
+                </div>
+                <div class="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
+                    <div class="text-slate-700">8 × 17 × 125</div>
+                    <div class="text-slate-700">
+                        = ( 
+                        <span class="interactive-blank-container" 
+                              data-options="8,17,1000" 
+                              data-correct="8" 
+                              data-color="orange" 
+                              data-hints='{"17":"如果先算 17 × 125 數字會非常龐大！快找 125 的乘法好朋友是誰？是 8 喔！","1000":"題目裡原本沒有 1000 喔！1000 是 8 × 125 算出來的結果。"}'
+                              data-placeholder="請選擇"></span> 
+                        × 125 ) × 17
+                    </div>
+                    <div class="text-slate-700">
+                        = <span class="interactive-blank-container" 
+                                data-options="1700,17000,170000" 
+                                data-correct="17000" 
+                                data-color="orange" 
+                                data-hints='{"1700":"少算了一個 0！`1000 × 17`，1000 有三個 0，所以要在 17 後面加上三個 0 喔！","170000":"多算了一個 0！`1000 × 17 = 17000`。"}'
+                                data-placeholder="請選擇"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xl font-bold text-slate-800">第 5 題：先變小再變大</h3>
+                    <span class="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">乘與除</span>
+                </div>
+                <div class="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
+                    <div class="text-slate-700">45 × 8 ÷ 9</div>
+                    <div class="text-slate-700">
+                        = ( 45 ÷ 
+                        <span class="interactive-blank-container" 
+                              data-options="8,9,5" 
+                              data-correct="9" 
+                              data-color="orange" 
+                              data-hints='{"8":"45 沒有辦法被 8 整除喔，如果先算 45 ÷ 8 會得到小數。找找看題目裡誰可以把 45 整除？是 9！","5":"算式裡原本沒有 5 喔！5 是 45 ÷ 9 算出來的結果。"}'
+                              data-placeholder="請選擇"></span> 
+                        ) × 8
+                    </div>
+                    <div class="text-slate-700">
+                        = <span class="interactive-blank-container" 
+                                data-options="32,40,360" 
+                                data-correct="40" 
+                                data-color="orange" 
+                                data-hints='{"32":"計算有誤。先算 45 ÷ 9 = 5，接著 5 × 8 等於多少？","360":"360 是先算 45 × 8 算出來的結果，雖然正確，但這樣就沒有享受到「先除以 9 變小」的簡化魔法囉！"}'
+                                data-placeholder="請選擇"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 設計者標籤 -->
+        <footer class="mt-12 mb-28 text-center text-xs text-slate-400">
+            設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+        </footer>
+
+    </main>
+
+    <!-- Bottom Navigation for iPad/Mobile friendly -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe z-50">
+        <div class="max-w-2xl mx-auto flex justify-between p-2">
+            <button onclick="switchTab(0)" id="tab-btn-0" class="flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all bg-pink-100 text-pink-600 transform scale-105 font-black">
+                <i class="fa-solid fa-plus-minus text-xl mb-1"></i>
+                <span class="text-sm">1. 加減</span>
+            </button>
+            <button onclick="switchTab(1)" id="tab-btn-1" class="flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-50 font-bold">
+                <i class="fa-solid fa-xmark text-xl mb-1"></i>
+                <span class="text-sm">2. 乘除</span>
+            </button>
+            <button onclick="switchTab(2)" id="tab-btn-2" class="flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-50 font-bold">
+                <i class="fa-solid fa-map text-xl mb-1"></i>
+                <span class="text-sm">3. 總結</span>
+            </button>
+            <button onclick="switchTab(3)" id="tab-btn-3" class="flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-50 font-bold">
+                <i class="fa-solid fa-gamepad text-xl mb-1"></i>
+                <span class="text-sm">4. 演練</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Safe area padding for iOS devices -->
+    <style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+
+    <script>
+        // --- 頁面切換邏輯 ---
+        const tabConfigs = [
+            { id: 0, activeBg: "bg-pink-100", activeText: "text-pink-600" },
+            { id: 1, activeBg: "bg-emerald-100", activeText: "text-emerald-600" },
+            { id: 2, activeBg: "bg-violet-100", activeText: "text-violet-600" },
+            { id: 3, activeBg: "bg-orange-100", activeText: "text-orange-600" }
+        ];
+
+        function switchTab(tabId) {
+            // 隱藏所有頁面並重設按鈕樣式
+            for (let i = 0; i < 4; i++) {
+                const page = document.getElementById(`page-${i}`);
+                if (page) page.classList.add('hidden');
+                
+                const btn = document.getElementById(`tab-btn-${i}`);
+                if (btn) btn.className = "flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-50 font-bold";
             }
 
-            return (
-                <span className="relative inline-block">
-                    <select 
-                        value={selected} 
-                        onChange={handleChange}
-                        className={`inline-block text-center text-lg font-bold px-3 py-1 rounded-lg border-2 cursor-pointer outline-none transition-all mx-1 shadow-sm
-                            ${status === "error" ? "border-red-400 bg-red-50 text-red-500 shake-animation" : colorClass}
-                            ${status === "idle" ? "hover:brightness-95" : ""}
-                        `}
-                    >
-                        <option value="" disabled>{placeholder}</option>
-                        {options.map((opt, i) => (
-                            <option key={i} value={opt}>{opt}</option>
-                        ))}
+            // 顯示目前頁面
+            const activePage = document.getElementById(`page-${tabId}`);
+            if (activePage) activePage.classList.remove('hidden');
+
+            // 啟用目前按鈕樣式
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            const config = tabConfigs[tabId];
+            if (activeBtn && config) {
+                activeBtn.className = `flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all ${config.activeBg} ${config.activeText} transform scale-105 font-black`;
+            }
+
+            // 平滑滾動回頂端，包裝在 try-catch 以免特定瀏覽器不支援拋錯
+            try {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (e) {
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // --- 互動下拉框元件初始化與邏輯 ---
+        function initInteractiveBlanks() {
+            document.querySelectorAll('.interactive-blank-container').forEach(container => {
+                const options = container.getAttribute('data-options').split(',');
+                const correctAnswer = container.getAttribute('data-correct');
+                const color = container.getAttribute('data-color') || 'blue'; // pink, blue, purple, emerald, cyan, orange
+                const placeholder = container.getAttribute('data-placeholder') || '請選擇';
+                const hints = JSON.parse(container.getAttribute('data-hints') || '{}');
+
+                const colorClasses = {
+                    pink: "text-pink-600 bg-pink-50 border-pink-300",
+                    blue: "text-blue-600 bg-blue-50 border-blue-300",
+                    purple: "text-purple-600 bg-purple-50 border-purple-300",
+                    emerald: "text-emerald-600 bg-emerald-50 border-emerald-300",
+                    cyan: "text-cyan-600 bg-cyan-50 border-cyan-300",
+                    orange: "text-orange-600 bg-orange-50 border-orange-300"
+                };
+
+                const activeColorClass = colorClasses[color] || colorClasses.blue;
+
+                // 生成 Select 與 Hint HTML
+                container.innerHTML = `
+                    <select class="inline-block text-center text-lg font-bold px-3 py-1 rounded-lg border-2 cursor-pointer outline-none transition-all mx-1 shadow-sm ${activeColorClass} hover:brightness-95">
+                        <option value="" disabled selected>${placeholder}</option>
+                        ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                     </select>
-                    {hint && (
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 bg-slate-800 text-white text-xs rounded-xl py-2.5 px-3 w-56 shadow-xl z-20 text-center leading-relaxed font-bold animate-[fadeIn_0.2s_ease-in-out]">
-                            {hint}
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-800"></div>
-                        </div>
-                    )}
-                </span>
-            );
-        };
-
-        // --- 頁面 1：加與減的魔法 ---
-        const AddSubPage = () => {
-            return (
-                <div className="space-y-6 animate-[fadeIn_0.5s_ease-in-out]">
-                    <div className="bg-gradient-to-r from-pink-400 to-rose-400 text-white p-4 rounded-2xl shadow-md flex items-center gap-3">
-                        <div className="bg-white/30 p-3 rounded-full"><i className="fa-solid fa-wand-magic-sparkles text-2xl"></i></div>
-                        <div>
-                            <h2 className="text-2xl font-black tracking-wide">活動 1：加與減的魔法</h2>
-                            <p className="text-pink-50">找出好朋友，湊成整十、整百，計算變超快！</p>
-                        </div>
+                    <div class="hint-popup absolute left-1/2 -translate-x-1/2 bottom-full mb-3 bg-slate-800 text-white text-xs rounded-xl py-2.5 px-3 w-56 shadow-xl z-20 text-center leading-relaxed font-bold hidden">
+                        <span class="hint-text"></span>
+                        <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-800"></div>
                     </div>
+                `;
 
-                    {/* 觀念 1 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-pink-400">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="bg-pink-100 text-pink-600 font-black px-3 py-1 rounded-lg">秘訣 1</span>
-                            <h3 className="text-xl font-bold text-slate-800">連加：誰跟誰是好朋友？</h3>
-                        </div>
-                        <div className="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
-                            <b>林老師教學：</b>先找尾數加起來是 <span className="font-bold text-pink-500">10</span> 的數字！這利用了「加法結合律」，先把好朋友綁在一起算，後面就輕鬆多囉！
-                        </div>
-                        <div className="text-2xl font-bold text-center bg-pink-50/50 py-6 rounded-xl border border-pink-100">
-                            <span className="text-slate-700">73 + 49 + </span>
-                            <InteractiveBlank 
-                                options={["49", "27", "100"]} 
-                                correctAnswer="27" 
-                                colorClass="text-pink-600 bg-pink-50 border-pink-300"
-                                hints={{
-                                    "49": "選 49 的話，個位數 3 + 9 = 12，無法湊成整十。看誰的個位數能跟 73 的 3 湊成 10？",
-                                    "100": "算式中沒有 100 喔！我們要找原題目中的數字 27，和 73 湊成 100。"
-                                }}
-                            />
-                            <div className="my-3 text-slate-400 text-lg">
-                                <i className="fa-solid fa-arrow-down"></i> 把好朋友用括號圈在一起先算
-                            </div>
-                            <span className="text-slate-700">= ( 73 + 27 ) + 49</span><br/>
-                            <span className="text-slate-700">= <span className="text-pink-500">100</span> + 49</span><br/>
-                            <span className="text-slate-700">= 149</span>
-                        </div>
-                    </div>
+                const select = container.querySelector('select');
+                const hintPopup = container.querySelector('.hint-popup');
+                const hintText = container.querySelector('.hint-text');
 
-                    {/* 觀念 2 & 4 結合 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-blue-400">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="bg-blue-100 text-blue-600 font-black px-3 py-1 rounded-lg">秘訣 2</span>
-                            <h3 className="text-xl font-bold text-slate-800">連減 / 先加再減：換個位置更輕鬆</h3>
-                        </div>
-                        <div className="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
-                            <b>林老師教學：</b>看見能湊成 <span className="font-bold text-blue-500">整數</span> 的，可以帶著數字前面的加減符號「大搬家」！
-                            <span className="text-red-500 font-bold block mt-1">⚠️ 警報：搬家時記得要把減號「-」當成行李一起帶走喔！不要寫成 + 23。</span>
-                        </div>
-                        <div className="text-2xl font-bold text-center bg-blue-50/50 py-6 rounded-xl border border-blue-100 space-y-2">
-                            <div className="text-slate-700">73 - 49 - 23</div>
-                            <div className="text-slate-400 text-lg"><i className="fa-solid fa-arrow-down"></i> 讓 73 先減 23，個位數都是 3 最好減！</div>
-                            <div className="text-slate-700">
-                                = ( 73 - 
-                                <InteractiveBlank 
-                                    options={["49", "23", "50"]} 
-                                    correctAnswer="23" 
-                                    colorClass="text-blue-600 bg-blue-50 border-blue-300"
-                                    hints={{
-                                        "49": "如果填 49，73 - 49 = 24，心算不夠直覺。如果先扣除個位數同為 3 的 23，計算變超簡單！",
-                                        "50": "算式中原本沒有 50 喔！50 是 73 - 23 算完的結果，搬家時要搬題目裡的 23。"
-                                    }}
-                                /> ) - 49
-                            </div>
-                            <div className="text-slate-700">= <span className="text-blue-500">50</span> - 49 = 1</div>
-                        </div>
-                    </div>
+                let hintTimeout = null;
 
-                    {/* 觀念 3 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-purple-400">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="bg-purple-100 text-purple-600 font-black px-3 py-1 rounded-lg">秘訣 3</span>
-                            <h3 className="text-xl font-bold text-slate-800">連續減去兩數 = 減去兩數之「和」</h3>
-                        </div>
-                        <div className="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
-                            <b>林老師教學：</b>連續扣掉兩個東西，就等於「先把兩件物品的價格加起來，再用總錢數一次扣掉」！這在生活中就像合併結帳。
-                        </div>
-                        <div className="text-2xl font-bold text-center bg-purple-50/50 py-6 rounded-xl border border-purple-100 space-y-2">
-                            <div className="text-slate-700">200 - 73 - 27</div>
-                            <div className="text-slate-400 text-lg"><i className="fa-solid fa-arrow-down"></i> 把要扣的數包在括號裡「加」起來一起減</div>
-                            <div className="text-slate-700">
-                                = 200 - ( 73 <span className="text-purple-500 font-black">+</span> 
-                                <InteractiveBlank 
-                                    options={["73", "27", "200"]} 
-                                    correctAnswer="27" 
-                                    colorClass="text-purple-600 bg-purple-50 border-purple-300"
-                                    hints={{
-                                        "73": "括號裡已經有第一個扣除項 73 了，我們要放的是另一個原本要被減去的數字 27。",
-                                        "200": "不能填 200 喔！200 是被減的總金額，括號裡要加的是買的物品價格總和 (73+27)。"
-                                    }}
-                                /> )
-                            </div>
-                            <div className="text-slate-700">= 200 - <span className="text-purple-500">100</span></div>
-                            <div className="text-slate-700">= 100</div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
+                select.addEventListener('change', (e) => {
+                    const val = e.target.value;
+                    if (val === correctAnswer) {
+                        // 答對了
+                        container.innerHTML = `
+                            <span class="inline-block px-3 py-1 font-bold rounded-lg border-2 border-transparent bg-${color}-100 text-${color}-600 text-xl mx-1 bounce-animation shadow-sm">
+                                ${correctAnswer} <i class="fa-solid fa-check text-green-500 ml-1 text-sm"></i>
+                            </span>
+                        `;
+                    } else if (val !== "") {
+                        // 答錯了，震動提示並顯示解析引導
+                        select.className = `inline-block text-center text-lg font-bold px-3 py-1 rounded-lg border-2 cursor-pointer outline-none transition-all mx-1 shadow-sm border-red-400 bg-red-50 text-red-500 shake-animation`;
+                        
+                        const hint = hints[val] || "再想想看喔，這個選項不夠簡便。";
+                        hintText.textContent = hint;
+                        hintPopup.classList.remove('hidden');
 
-        // --- 頁面 2：乘與除的魔法 ---
-        const MulDivPage = () => {
-            return (
-                <div className="space-y-6 animate-[fadeIn_0.5s_ease-in-out]">
-                    <div className="bg-gradient-to-r from-emerald-400 to-teal-400 text-white p-4 rounded-2xl shadow-md flex items-center gap-3">
-                        <div className="bg-white/30 p-3 rounded-full"><i className="fa-solid fa-bolt text-2xl"></i></div>
-                        <div>
-                            <h2 className="text-2xl font-black tracking-wide">活動 2：乘與除的魔法</h2>
-                            <p className="text-emerald-50">湊出 10、100、1000，大數字也不怕！</p>
-                        </div>
-                    </div>
+                        if (hintTimeout) clearTimeout(hintTimeout);
+                        hintTimeout = setTimeout(() => {
+                            hintPopup.classList.add('hidden');
+                        }, 4000);
 
-                    {/* 魔法配對卡 */}
-                    <div className="magic-card bg-amber-50 p-5 rounded-2xl shadow-sm border border-amber-200">
-                        <h3 className="text-xl font-bold text-amber-800 text-center mb-4"><i className="fa-solid fa-star text-amber-500 mr-2"></i>必背！乘法好朋友卡牌</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div className="bg-white p-4 rounded-xl shadow-sm text-center border-b-4 border-amber-300">
-                                <div className="text-3xl font-black text-amber-600 mb-1">5 × 2</div>
-                                <div className="text-xl font-bold text-slate-500">= 10</div>
-                            </div>
-                            <div className="bg-white p-4 rounded-xl shadow-sm text-center border-b-4 border-orange-400">
-                                <div className="text-3xl font-black text-orange-500 mb-1">25 × 4</div>
-                                <div className="text-xl font-bold text-slate-500">= 100</div>
-                            </div>
-                            <div className="bg-white p-4 rounded-xl shadow-sm text-center border-b-4 border-red-400">
-                                <div className="text-3xl font-black text-red-500 mb-1">125 × 8</div>
-                                <div className="text-xl font-bold text-slate-500">= 1000</div>
-                            </div>
-                        </div>
-                    </div>
+                        // 震動動畫結束後復原 select 樣式（但保留選項，讓使用者可以再次嘗試）
+                        setTimeout(() => {
+                            select.className = `inline-block text-center text-lg font-bold px-3 py-1 rounded-lg border-2 cursor-pointer outline-none transition-all mx-1 shadow-sm ${activeColorClass} hover:brightness-95`;
+                        }, 800);
+                    }
+                });
 
-                    {/* 觀念 1 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-emerald-400">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="bg-emerald-100 text-emerald-700 font-black px-3 py-1 rounded-lg">秘訣 4</span>
-                            <h3 className="text-xl font-bold text-slate-800">連乘：呼叫好朋友</h3>
-                        </div>
-                        <div className="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
-                            <b>林老師教學：</b>利用「乘法結合律」，看到 25 或是 125 時，立刻在題目裡尋找它們的乘法超級好朋友（4 或 8），先算成 100 或 1000！
-                        </div>
-                        <div className="text-2xl font-bold text-center bg-emerald-50/50 py-6 rounded-xl border border-emerald-100 space-y-2">
-                            <div className="text-slate-700">25 × 999 × 4</div>
-                            <div className="text-slate-400 text-lg"><i className="fa-solid fa-arrow-down"></i> 25 的乘法好朋友是誰？</div>
-                            <div className="text-slate-700">
-                                = ( 25 × 
-                                <InteractiveBlank 
-                                    options={["999", "4", "8"]} 
-                                    correctAnswer="4" 
-                                    colorClass="text-emerald-600 bg-emerald-50 border-emerald-300"
-                                    hints={{
-                                        "999": "如果先乘 999 數字太大了！看看好朋友卡牌，25 乘以誰能湊成 100？是 4 喔！",
-                                        "8": "算式裡沒有 8 喔！8 是 125 的好朋友，而 25 的好朋友是 4。"
-                                    }}
-                                /> ) × 999
-                            </div>
-                            <div className="text-slate-700">= <span className="text-emerald-600 font-bold">100</span> × 999</div>
-                            <div className="text-slate-700">= 99900</div>
-                        </div>
-                    </div>
+                // 點選其他地方時關閉提示氣泡
+                document.addEventListener('click', (e) => {
+                    if (!container.contains(e.target)) {
+                        hintPopup.classList.add('hidden');
+                    }
+                });
+            });
+        }
 
-                    {/* 觀念 2 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-cyan-400">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="bg-cyan-100 text-cyan-700 font-black px-3 py-1 rounded-lg">秘訣 5</span>
-                            <h3 className="text-xl font-bold text-slate-800">先乘再除 ＝ 先除再乘</h3>
-                        </div>
-                        <p className="text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed text-sm">
-                            <b>林老師教學：</b>如果先相乘數字會變得太大（如 `33 × 7 = 231` 再除以 3），我們可以搬動除號「÷」，先找能夠整除的數字進行「先除以除數」，把數字變小後乘起來更輕鬆！
-                        </p>
-                        <div className="text-2xl font-bold text-center bg-cyan-50/50 py-6 rounded-xl border border-cyan-100 space-y-2">
-                            <div className="text-slate-700">33 × 7 ÷ 3</div>
-                            <div className="text-slate-400 text-lg"><i className="fa-solid fa-arrow-down"></i> 33 能被 3 整除，帶著除號「÷ 3」搬到前面先算！</div>
-                            <div className="text-slate-700">
-                                = ( 33 ÷ 
-                                <InteractiveBlank 
-                                    options={["7", "3", "11"]} 
-                                    correctAnswer="3" 
-                                    colorClass="text-cyan-600 bg-cyan-50 border-cyan-300"
-                                    hints={{
-                                        "7": "33 沒有辦法被 7 整除喔！如果先算 33 ÷ 7 就會出現分數，變得更難算了！",
-                                        "11": "算式裡沒有 11 喔！11 是 33 ÷ 3 算出來的結果，還沒除之前要選題目裡的除數 3。"
-                                    }}
-                                /> ) × 7
-                            </div>
-                            <div className="text-slate-700">= <span className="text-cyan-600 font-bold">11</span> × 7</div>
-                            <div className="text-slate-700">= 77</div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- 頁面 3：總結圖表 ---
-        const SummaryPage = () => {
-            return (
-                <div className="space-y-6 animate-[fadeIn_0.5s_ease-in-out]">
-                    <div className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white p-4 rounded-2xl shadow-md flex items-center gap-3">
-                        <div className="bg-white/30 p-3 rounded-full"><i className="fa-solid fa-book-open text-2xl"></i></div>
-                        <div>
-                            <h2 className="text-2xl font-black tracking-wide">林老師的簡化計算秘笈</h2>
-                            <p className="text-violet-100">靈活應用交換律與結合律，大數變小數！</p>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-slate-100 text-slate-700 border-b border-slate-200">
-                                        <th className="p-4 font-black w-1/4">活動</th>
-                                        <th className="p-4 font-black w-1/3">計算口訣 / 規則</th>
-                                        <th className="p-4 font-black">範例對照</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="text-base md:text-lg">
-                                    <tr className="border-b border-slate-100 hover:bg-pink-50 transition-colors">
-                                        <td className="p-4 font-bold text-pink-600"><i className="fa-solid fa-plus mr-2"></i>連加</td>
-                                        <td className="p-4 text-slate-600 text-sm md:text-base">找尾數湊十，改順序先加（結合律）</td>
-                                        <td className="p-4 font-mono font-bold text-slate-700"><span className="text-pink-500">73</span> + 49 <span className="text-pink-500">+ 27</span><br/>= <span className="text-pink-500">(73 + 27)</span> + 49 = 149</td>
-                                    </tr>
-                                    <tr className="border-b border-slate-100 hover:bg-blue-50 transition-colors">
-                                        <td className="p-4 font-bold text-blue-600"><i className="fa-solid fa-minus mr-2"></i>連減</td>
-                                        <td className="p-4 text-slate-600 text-sm md:text-base">搬移位置先減（連符號一起搬移）</td>
-                                        <td className="p-4 font-mono font-bold text-slate-700"><span className="text-blue-500">73</span> - 49 <span className="text-blue-500">- 23</span><br/>= <span className="text-blue-500">(73 - 23)</span> - 49 = 1</td>
-                                    </tr>
-                                    <tr className="border-b border-slate-100 hover:bg-purple-50 transition-colors">
-                                        <td className="p-4 font-bold text-purple-600"><i className="fa-solid fa-object-group mr-2"></i>連減兩數</td>
-                                        <td className="p-4 text-slate-600 text-sm md:text-base">等於直接減去兩數的「和」</td>
-                                        <td className="p-4 font-mono font-bold text-slate-700">200 <span className="text-purple-500">- 73 - 27</span><br/>= 200 - <span className="text-purple-500">(73 + 27)</span> = 100</td>
-                                    </tr>
-                                    <tr className="border-b border-slate-100 hover:bg-emerald-50 transition-colors">
-                                        <td className="p-4 font-bold text-emerald-600"><i className="fa-solid fa-xmark mr-2"></i>連乘</td>
-                                        <td className="p-4 text-slate-600 text-sm md:text-base">找好朋友配對：5×2, 25×4, 125×8</td>
-                                        <td className="p-4 font-mono font-bold text-slate-700"><span className="text-emerald-500">25</span> × 999 <span className="text-emerald-500">× 4</span><br/>= <span className="text-emerald-500">(25 × 4)</span> × 999 = 99900</td>
-                                    </tr>
-                                    <tr className="hover:bg-cyan-50 transition-colors">
-                                        <td className="p-4 font-bold text-cyan-600"><i className="fa-solid fa-divide mr-2"></i>乘與除</td>
-                                        <td className="p-4 text-slate-600 text-sm md:text-base">調整除法順序，先除以能整除的數</td>
-                                        <td className="p-4 font-mono font-bold text-slate-700"><span className="text-cyan-500">33</span> × 7 <span className="text-cyan-500">÷ 3</span><br/>= <span className="text-cyan-500">(33 ÷ 3)</span> × 7 = 77</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div className="text-center py-6">
-                        <p className="text-2xl font-black text-slate-700 mb-2">🎉 恭喜你完成單元 8 的自學挑戰！ 🎉</p>
-                        <p className="text-slate-500">準備好挑戰底部的「實戰演練」來檢測實力了嗎？</p>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- 頁面 4：實戰演練 (五題混合) ---
-        const PracticePage = () => {
-            return (
-                <div className="space-y-6 animate-[fadeIn_0.5s_ease-in-out] pb-10">
-                    <div className="bg-gradient-to-r from-orange-400 to-amber-500 text-white p-4 rounded-2xl shadow-md flex items-center gap-3">
-                        <div className="bg-white/30 p-3 rounded-full"><i className="fa-solid fa-gamepad text-2xl"></i></div>
-                        <div>
-                            <h2 className="text-2xl font-black tracking-wide">實戰演練：牛刀小試</h2>
-                            <p className="text-orange-50">混合挑戰！看看你能否活用簡化計算魔法！</p>
-                        </div>
-                    </div>
-
-                    {/* Q1 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-xl font-bold text-slate-800">第 1 題：尋找加法好朋友</h3>
-                            <span className="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">連加</span>
-                        </div>
-                        <div className="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
-                            <div className="text-slate-700">35 + 88 + 65</div>
-                            <div className="text-slate-700">
-                                = ( 35 + 
-                                <InteractiveBlank 
-                                    options={["88", "65", "100"]} 
-                                    correctAnswer="65" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "88": "選 88 的話，尾數 5 + 8 = 13，無法湊整。找尾數能與 35 的 5 湊成 10 的好朋友吧！",
-                                        "100": "題目裡原本沒有 100 喔！要選題目中的 65 來與 35 湊成 100。"
-                                    }}
-                                /> 
-                                ) + 88
-                            </div>
-                            <div className="text-slate-700">
-                                = <InteractiveBlank 
-                                    options={["188", "100", "153"]} 
-                                    correctAnswer="188" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "100": "算完括號裡的 35 + 65 = 100 之後，不要忘記外面還有一位老朋友 88 喔！100 + 88 得到什麼？",
-                                        "153": "計算有誤喔，(35 + 65) + 88 = 100 + 88 = 188。"
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Q2 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-xl font-bold text-slate-800">第 2 題：帶著符號大搬家</h3>
-                            <span className="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">連減</span>
-                        </div>
-                        <div className="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
-                            <div className="text-slate-700">150 - 47 - 50</div>
-                            <div className="text-slate-700">
-                                = ( 150 - 
-                                <InteractiveBlank 
-                                    options={["47", "50", "100"]} 
-                                    correctAnswer="50" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "47": "如果先扣 47 得到 103，沒有整十不好算。不如先扣掉有漂亮整十尾數的 50！",
-                                        "100": "題目裡原本沒有 100 喔！要選題目中的 50，先算 150 - 50 = 100。"
-                                    }}
-                                /> 
-                                ) - 47
-                            </div>
-                            <div className="text-slate-700">
-                                = <InteractiveBlank 
-                                    options={["53", "103", "197"]} 
-                                    correctAnswer="53" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "103": "記得要把剛剛 150 - 50 = 100 的結果，再減去後面的 47 喔！",
-                                        "197": "注意，這是減法算式，不是加法喔，數字不會變大！"
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Q3 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-xl font-bold text-slate-800">第 3 題：包起來一起減</h3>
-                            <span className="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">連減兩數</span>
-                        </div>
-                        <div className="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
-                            <div className="text-slate-700">300 - 128 - 72</div>
-                            <div className="text-slate-700">
-                                = 300 - ( 128 
-                                <InteractiveBlank 
-                                    options={["+", "-", "×"]} 
-                                    correctAnswer="+" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "-": "如果是減號，括號內算出來是 56，300 - 56 = 244，與原算式值不同！連續減去兩個數，等於減去兩數的『和』，要用加號！",
-                                        "×": "連減不能改寫成乘法喔！要把這兩個要扣除的數相加，再一次扣掉。"
-                                    }}
-                                /> 
-                                72 )
-                            </div>
-                            <div className="text-slate-700">
-                                = <InteractiveBlank 
-                                    options={["100", "200", "500"]} 
-                                    correctAnswer="100" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "200": "200 是括號裡 128 + 72 的結果。別忘了用前面的 300 減去這個 200 喔！",
-                                        "500": "減法算式算出來的值不會變大，請重新心算一遍：300 - 200。"
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Q4 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-xl font-bold text-slate-800">第 4 題：乘法好朋友卡牌</h3>
-                            <span className="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">連乘</span>
-                        </div>
-                        <div className="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
-                            <div className="text-slate-700">8 × 17 × 125</div>
-                            <div className="text-slate-700">
-                                = ( 
-                                <InteractiveBlank 
-                                    options={["8", "17", "1000"]} 
-                                    correctAnswer="8" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "17": "如果先算 17 × 125 數字會非常龐大！快找 125 的乘法好朋友是誰？是 8 喔！",
-                                        "1000": "題目裡原本沒有 1000 喔！1000 是 8 × 125 算出來的結果。"
-                                    }}
-                                /> 
-                                × 125 ) × 17
-                            </div>
-                            <div className="text-slate-700">
-                                = <InteractiveBlank 
-                                    options={["1700", "17000", "170000"]} 
-                                    correctAnswer="17000" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "1700": "少算了一個 0！`1000 × 17`，1000 有三個 0，所以要在 17 後面加上三個 0 喔！",
-                                        "170000": "多算了一個 0！`1000 × 17 = 17000`。"
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Q5 */}
-                    <div className="magic-card bg-white p-5 rounded-2xl shadow-sm border-t-4 border-orange-400">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-xl font-bold text-slate-800">第 5 題：先變小再變大</h3>
-                            <span className="bg-orange-100 text-orange-600 font-black px-3 py-1 rounded-lg text-sm">乘與除</span>
-                        </div>
-                        <div className="text-2xl font-bold text-center bg-slate-50 py-4 rounded-xl border border-slate-100 space-y-2">
-                            <div className="text-slate-700">45 × 8 ÷ 9</div>
-                            <div className="text-slate-700">
-                                = ( 45 ÷ 
-                                <InteractiveBlank 
-                                    options={["8", "9", "5"]} 
-                                    correctAnswer="9" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "8": "45 沒有辦法被 8 整除喔，如果先算 45 ÷ 8 會得到小數。找找看題目裡誰可以把 45 整除？是 9！",
-                                        "5": "算式裡原本沒有 5 喔！5 是 45 ÷ 9 算出來的結果。"
-                                    }}
-                                /> 
-                                ) × 8
-                            </div>
-                            <div className="text-slate-700">
-                                = <InteractiveBlank 
-                                    options={["32", "40", "360"]} 
-                                    correctAnswer="40" 
-                                    colorClass="text-orange-600 bg-orange-50 border-orange-300"
-                                    hints={{
-                                        "32": "計算有誤。先算 45 ÷ 9 = 5，接著 5 × 8 等於多少？",
-                                        "360": "360 是先算 45 × 8 算出來的結果，雖然正確，但這樣就沒有享受到「先除以 9 變小」的簡化魔法囉！"
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- 主應用程式 ---
-        const App = () => {
-            const [currentTab, setCurrentTab] = useState(0); // 0: 加減, 1: 乘除, 2: 總結, 3: 演練
-            
-            const tabs = [
-                { id: 0, title: "1. 加減", icon: "fa-plus-minus", activeBg: "bg-pink-100", activeText: "text-pink-600" },
-                { id: 1, title: "2. 乘除", icon: "fa-xmark", activeBg: "bg-emerald-100", activeText: "text-emerald-600" },
-                { id: 2, title: "3. 總結", icon: "fa-map", activeBg: "bg-violet-100", activeText: "text-violet-600" },
-                { id: 3, title: "4. 演練", icon: "fa-gamepad", activeBg: "bg-orange-100", activeText: "text-orange-600" }
-            ];
-
-            return (
-                <div className="min-h-screen pb-20">
-                    {/* Header */}
-                    <header className="bg-white shadow-sm sticky top-0 z-10 px-4 py-3 mb-6">
-                        <div className="max-w-2xl mx-auto flex items-center justify-between">
-                            <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
-                                <span className="bg-yellow-400 text-yellow-900 w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm shadow-yellow-200">林</span>
-                                單元8 簡化計算
-                            </h1>
-                            <div className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-sm font-bold">
-                                國小四年級數學
-                            </div>
-                        </div>
-                    </header>
-
-                    {/* Main Content Container */}
-                    <main className="max-w-2xl mx-auto px-4">
-                        {currentTab === 0 && <AddSubPage />}
-                        {currentTab === 1 && <MulDivPage />}
-                        {currentTab === 2 && <SummaryPage />}
-                        {currentTab === 3 && <PracticePage />}
-                    </main>
-
-                    {/* Bottom Navigation for iPad/Mobile friendly */}
-                    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe">
-                        <div className="max-w-2xl mx-auto flex justify-between p-2">
-                            {tabs.map((tab) => {
-                                const isActive = currentTab === tab.id;
-                                return (
-                                    <button 
-                                        key={tab.id}
-                                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' }) || setCurrentTab(tab.id)}
-                                        className={`flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all ${
-                                            isActive 
-                                            ? `${tab.activeBg} ${tab.activeText} transform scale-105 font-black` 
-                                            : 'text-slate-400 hover:bg-slate-50 font-bold'
-                                        }`}
-                                    >
-                                        <i className={`fa-solid ${tab.icon} text-xl mb-1`}></i>
-                                        <span className="text-sm">{tab.title}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </nav>
-                    {/* Safe area padding for iOS devices */}
-                    <style dangerouslySetInnerHTML={{__html: `
-                        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-                    `}} />
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // 初始化
+        initInteractiveBlanks();
     </script>
 </body>
 </html>

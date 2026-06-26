@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>圖形偵探隊：周長與面積大挑戰</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+        body { 
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 避免手機點擊閃爍 */
+        button { -webkit-tap-highlight-color: transparent; }
+
+        /* 卡片懸浮與縮放效果 */
+        .detective-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .detective-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-slate-50 to-blue-100 min-h-screen pb-8 flex flex-col justify-between">
+
+    <!-- 主要應用程式容器 -->
+    <div id="app" class="flex flex-col items-center justify-start flex-grow p-4 z-10 relative"></div>
+
+    <!-- API Key 設定彈窗 -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 animate-fade-in-up text-left">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-slate-500"></i> 設定 Gemini API Key
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-slate-500 text-sm mb-4 leading-relaxed font-medium">
+                「偵探學長助教」功能需要使用 Gemini API。金鑰將儲存於您的瀏覽器中，不會上傳至其他伺服器。
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="貼上您的 API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 font-mono text-sm" />
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveApiKey()" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl shadow-md transition">
+                        儲存設定
+                    </button>
+                    <button onclick="clearApiKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl transition">
+                        清除金鑰
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 text-center">
+                    沒有金鑰？可至 Google AI Studio 免費申請。
+                </p>
+            </div>
+        </div>
+    </div>
+
+<script>
+// --- 題目數據 (共10題) ---
+const questions = [
+  {
+    id: 1, type: "perimeter", category: "周長",
+    question: "這個圖形原本是一個長方形，被剪掉了一個角。請問它的周長是多少公分？",
+    svgData: { shape: "L-shape-p" },
+    options: [
+      { id: 'A', text: "36 公分", isCorrect: true },
+      { id: 'B', text: "18 公分", isCorrect: false },
+      { id: 'C', text: "42 公分", isCorrect: false },
+      { id: 'D', text: "30 公分", isCorrect: false },
+    ],
+    hint: "試試看！把「凹進去」的兩條紅線，向外推到虛線的位置，是不是就補成一個完整的長方形了呢？",
+    explanation: "利用「平移法」，凹進去的邊長可以推出來，補成一個完整的長方形。長是10，寬是8，周長 = (10 + 8) × 2 = 36。"
+  },
+  {
+    id: 2, type: "perimeter", category: "周長",
+    question: "這是一個階梯形狀。請算出塗色圖形的周長是多少？",
+    svgData: { shape: "stairs" },
+    options: [
+      { id: 'A', text: "24 公分", isCorrect: false },
+      { id: 'B', text: "48 公分", isCorrect: true },
+      { id: 'C', text: "144 公分", isCorrect: false },
+      { id: 'D', text: "36 公分", isCorrect: false },
+    ],
+    hint: "不管階梯有幾層，只要把橫的線往上推，直的線往右推，它就會變成一個正方形喔！",
+    explanation: "將階梯的邊線向外平移，會形成一個邊長12公分的正方形。周長 = 12 × 4 = 48 (或是 (12+12)×2)。"
+  },
+  {
+    id: 3, type: "perimeter", category: "周長",
+    question: "這個十字圖形，每一段短短的邊長都是 5 公分。請問它的周長是多少？",
+    svgData: { shape: "cross" },
+    options: [
+      { id: 'A', text: "20 公分", isCorrect: false },
+      { id: 'B', text: "40 公分", isCorrect: false },
+      { id: 'C', text: "60 公分", isCorrect: true },
+      { id: 'D', text: "25 公分", isCorrect: false },
+    ],
+    hint: "數數看，這個十字形總共有幾條邊？每一條邊都是 5 公分喔！",
+    explanation: "這個圖形由 12 條邊組成。算式：5 × 12 = 60 公分。這題不能用補成長方形的方法，要直接算邊長總和。"
+  },
+  {
+    id: 4, type: "perimeter", category: "周長",
+    question: "這是一個「凹」字型的圖形。請問它的周長是多少公分？",
+    svgData: { shape: "U-shape" },
+    options: [
+      { id: 'A', text: "36 公分", isCorrect: false },
+      { id: 'B', text: "42 公分", isCorrect: true },
+      { id: 'C', text: "39 公分", isCorrect: false },
+      { id: 'D', text: "80 公分", isCorrect: false },
+    ],
+    hint: "注意喔！把橫的線推出來雖然可以補滿長方形，但「凹進去」的那兩條直的邊線，是多出來的喔！",
+    explanation: "補成大長方形周長是 (10+8)×2=36。但還要加上凹進去的兩條邊(深度3)，所以是 36 + 3 + 3 = 42。"
+  },
+  {
+    id: 5, type: "perimeter", category: "周長",
+    question: "這是一個「凸」字型的圖形，請算出它的周長。",
+    svgData: { shape: "T-shape-p" },
+    options: [
+      { id: 'A', text: "36 公分", isCorrect: true },
+      { id: 'B', text: "26 公分", isCorrect: false },
+      { id: 'C', text: "18 公分", isCorrect: false },
+      { id: 'D', text: "44 公分", isCorrect: false },
+    ],
+    hint: "試著把上面突出來的兩側橫線「向下」移動，是不是剛好可以補滿下面的長邊呢？",
+    explanation: "這個圖形的邊線經過平移，剛好等於一個長10、寬8的長方形。周長 = (10 + 8) × 2 = 36。"
+  },
+  {
+    id: 6, type: "area", category: "面積",
+    question: "這是一個大長方形被挖掉一小塊正方形。請問剩下塗色部分的面積是多少？",
+    svgData: { shape: "L-shape-a" },
+    options: [
+      { id: 'A', text: "80 平方公分", isCorrect: false },
+      { id: 'B', text: "71 平方公分", isCorrect: true },
+      { id: 'C', text: "74 平方公分", isCorrect: false },
+      { id: 'D', text: "9 平方公分", isCorrect: false },
+    ],
+    hint: "面積可以用「扣」的！先算原本完整的大長方形面積，再扣掉空白的小正方形面積。",
+    explanation: "大長方形面積 = 10 × 8 = 80。挖掉的小正方形面積 = 3 × 3 = 9。塗色面積 = 80 - 9 = 71。"
+  },
+  {
+    id: 7, type: "area", category: "面積",
+    question: "兩個一樣大的長方形疊在一起（如圖）。請問塗色部分的總面積是多少？",
+    svgData: { shape: "overlap" },
+    options: [
+      { id: 'A', text: "768 平方公分", isCorrect: false },
+      { id: 'B', text: "668 平方公分", isCorrect: true },
+      { id: 'C', text: "568 平方公分", isCorrect: false },
+      { id: 'D', text: "384 平方公分", isCorrect: false },
+    ],
+    hint: "如果你把兩個長方形的面積直接相加，中間重疊的地方是不是被算了兩次？記得要扣掉一次喔！",
+    explanation: "左上長方形=384，右下長方形=384。中間重疊正方形=100。總面積 = 384 + 384 - 100 = 668。"
+  },
+  {
+    id: 8, type: "area", category: "面積",
+    question: "這是由兩個長方形組成的圖形。請問它的面積是多少？",
+    svgData: { shape: "T-shape" },
+    options: [
+      { id: 'A', text: "58 平方公分", isCorrect: true },
+      { id: 'B', text: "40 平方公分", isCorrect: false },
+      { id: 'C', text: "18 平方公分", isCorrect: false },
+      { id: 'D', text: "60 平方公分", isCorrect: false },
+    ],
+    hint: "把圖形切成兩塊長方形分開算，最後再加起來！",
+    explanation: "上面長方形面積 = 10 × 4 = 40。下面長方形面積 = 3 × 6 = 18。總面積 = 40 + 18 = 58。"
+  },
+  {
+    id: 9, type: "area", category: "面積",
+    question: "這是一個由「大正方形」和「小正方形」拼成的圖形。請問它的總面積是多少？",
+    svgData: { shape: "two-squares" },
+    options: [
+      { id: 'A', text: "36 平方公分", isCorrect: false },
+      { id: 'B', text: "9 平方公分", isCorrect: false },
+      { id: 'C', text: "45 平方公分", isCorrect: true },
+      { id: 'D', text: "27 平方公分", isCorrect: false },
+    ],
+    hint: "這是兩個正方形喔！分別算出大正方形和小正方形的面積，再加起來。",
+    explanation: "大正方形面積 = 6 × 6 = 36。小正方形面積 = 3 × 3 = 9。總面積 = 36 + 9 = 45。"
+  },
+  {
+    id: 10, type: "area", category: "面積",
+    question: "這像是一個相框。大正方形邊長 10 公分，中間挖掉一個邊長 4 公分的小正方形。請問塗色面積是多少？",
+    svgData: { shape: "square-frame" },
+    options: [
+      { id: 'A', text: "100 平方公分", isCorrect: false },
+      { id: 'B', text: "84 平方公分", isCorrect: true },
+      { id: 'C', text: "16 平方公分", isCorrect: false },
+      { id: 'D', text: "60 平方公分", isCorrect: false },
+    ],
+    hint: "想像這是一張大正方形色紙，中間剪掉一個小正方形。用減法算算看！",
+    explanation: "大正方形面積 = 10 × 10 = 100。中間空白小正方形面積 = 4 × 4 = 16。塗色面積 = 100 - 16 = 84。"
+  }
+];
+
+// --- 應用程式狀態 ---
+let state = {
+    stage: 'start', // 'start', 'tips', 'playing', 'result'
+    currentQIndex: 0,
+    score: 0,
+    selectedOption: null,
+    isAnswerChecked: false,
+    showExplanation: false,
+    feedbackType: null
+};
+
+// AI 助教狀態
+let aiExplanation = null;
+let aiLoading = false;
+let isSpeaking = false;
+let currentUtterance = null;
+
+// --- API Key 管理 ---
+function getApiKey() {
+    return localStorage.getItem('gemini_api_key') || '';
+}
+
+function toggleSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    const input = document.getElementById('api-key-input');
+    input.value = getApiKey();
+    modal.classList.toggle('hidden');
+}
+
+function saveApiKey() {
+    const input = document.getElementById('api-key-input');
+    const key = input.value.trim();
+    if (key) {
+        localStorage.setItem('gemini_api_key', key);
+        alert('API Key 儲存成功！');
+    } else {
+        localStorage.removeItem('gemini_api_key');
+        alert('已清除 API Key。');
+    }
+    toggleSettingsModal();
+    render();
+}
+
+function clearApiKey() {
+    localStorage.removeItem('gemini_api_key');
+    const input = document.getElementById('api-key-input');
+    input.value = '';
+    alert('已清除 API Key。');
+    toggleSettingsModal();
+    render();
+}
+
+// --- AI Tutor API 呼叫 ---
+async function callGeminiAPI(prompt, apiKey, retries = 3, delay = 1000) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 老師現在有點忙，請稍後再試。";
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+        }
+    }
+}
+
+async function handleAskAI() {
+    const key = getApiKey();
+    if (!key) {
+        alert('請先點選右上角齒輪設定 Gemini API Key，即可使用偵探學長助解題！');
+        toggleSettingsModal();
+        return;
+    }
+
+    aiLoading = true;
+    aiExplanation = null;
+    render();
+
+    const q = questions[state.currentQIndex];
+    const prompt = `你現在是一位超級會教數學的國小老師，也是「圖形偵探隊」的偵探學長。請根據以下資訊，引導新進偵探隊員解密圖形的周長與面積：
+    【任務資訊】
+    - 任務類型：${q.category} 挑戰 (周長或面積)
+    - 題目敘述：${q.question}
+    - 解密提示：${q.hint}
+    - 完整詳解說明：${q.explanation}
+
+    【您的任務】
+    1. 請使用國小四年級（9-10歲）聽得懂的簡單詞彙，語氣要活潑、自信、富有「探案解謎」的樂趣，多使用「偵探隊員你好！」、「讓我們拿出放大鏡觀察這個圖形」等偵探口吻。
+    2. 請「不要」直接透露計算結果或最終答案（例如不要直接說出 36 公分或 71 平方公分）。
+    3. 您的引導重點是分析圖形特徵：
+       - 如果是「周長」，引導他們觀察是否能用「平移法」把凹線向外推，補成完整的長方形？推完後有沒有多出多餘的線段要加回去？
+       - 如果是「面積」，引導他們思考是用「切割法」切成多個長方形算完相加，還是用「填補法」拿大長方形減去被挖空的空白長方形？
+    4. 輸出排版請包含適當的換行與 emoji。
+    5. 最後給予隊員溫暖且激勵的探案肯定。
+    請使用繁體中文回答。`;
+
+    try {
+        const result = await callGeminiAPI(prompt, key);
+        aiExplanation = result;
+    } catch (error) {
+        aiExplanation = "報告隊長！通訊系統遭受干擾，請檢查金鑰設定或稍後再試。";
+    } finally {
+        aiLoading = false;
+        render();
+    }
+}
+
+function handleSpeak() {
+    if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        render();
+    } else {
+        if (!aiExplanation) return;
+        const cleanText = aiExplanation.replace(/[\*#_`~]/g, '');
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'zh-TW';
+        utterance.rate = 0.95;
+        utterance.onend = () => {
+            isSpeaking = false;
+            render();
+        };
+        utterance.onerror = () => {
+            isSpeaking = false;
+            render();
+        };
+        window.speechSynthesis.speak(utterance);
+        isSpeaking = true;
+        currentUtterance = utterance;
+        render();
+    }
+}
+
+// --- SVG 渲染函數 ---
+function getSvgHTML(shapeName) {
+    const strokeColor = "#374151"; const fillColor = "#93C5FD"; const dottedColor = "#9CA3AF"; const textColor = "#1F2937";
+    const commonClasses = "w-full h-48 drop-shadow-md";
+
+    switch(shapeName) {
+        case "L-shape-p":
+            return `<svg viewBox="0 0 200 160" class="${commonClasses}">
+                <path d="M20,20 H160 V100 H120 V140 H20 Z" fill="${fillColor}" stroke="${strokeColor}" stroke-width="3" />
+                <path d="M160,100 V140 H120" fill="none" stroke="${dottedColor}" stroke-width="2" stroke-dasharray="5,5" />
+                <text x="90" y="15" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">10</text>
+                <text x="10" y="80" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">8</text>
+            </svg>`;
+        case "stairs":
+            return `<svg viewBox="0 0 200 200" class="${commonClasses}">
+                <path d="M20,180 H180 V140 H140 V100 H100 V60 H60 V20 H20 Z" fill="#FDE047" stroke="${strokeColor}" stroke-width="3" />
+                <path d="M20,20 H180 V180" fill="none" stroke="${dottedColor}" stroke-width="2" stroke-dasharray="5,5" />
+                <text x="100" y="195" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">12</text>
+                <text x="10" y="100" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">12</text>
+            </svg>`;
+        case "cross":
+            return `<svg viewBox="0 0 200 200" class="${commonClasses}">
+                <path d="M75,75 V25 H125 V75 H175 V125 H125 V175 H75 V125 H25 V75 H75 Z" fill="#6EE7B7" stroke="${strokeColor}" stroke-width="3" />
+                <text x="100" y="20" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">5</text>
+                <text x="150" y="70" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">5</text>
+            </svg>`;
+        case "U-shape":
+            return `<svg viewBox="0 0 200 160" class="${commonClasses}">
+                <path d="M20,20 V148 H180 V20 H130 V68 H70 V20 H20 Z" fill="#FCA5A5" stroke="${strokeColor}" stroke-width="3" />
+                <path d="M20,20 H180" fill="none" stroke="${dottedColor}" stroke-width="2" stroke-dasharray="5,5" />
+                <text x="100" y="160" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">10</text>
+                <text x="10" y="84" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">8</text>
+                <text x="100" y="50" text-anchor="middle" fill="#B91C1C" font-size="14" font-weight="bold">3</text>
+                <line x1="100" y1="20" x2="100" y2="68" stroke="#B91C1C" stroke-width="1" stroke-dasharray="2,2" />
+            </svg>`;
+        case "T-shape-p":
+            return `<svg viewBox="0 0 200 160" class="${commonClasses}">
+                <path d="M60,20 H140 V60 H180 V148 H20 V60 H60 V20 Z" fill="#D8B4FE" stroke="${strokeColor}" stroke-width="3" />
+                <path d="M20,20 H180 V148 H20 Z" fill="none" stroke="${dottedColor}" stroke-width="2" stroke-dasharray="5,5" opacity="0.5" />
+                <text x="100" y="160" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">10</text>
+                <text x="190" y="84" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">8</text>
+            </svg>`;
+        case "L-shape-a":
+            return `<svg viewBox="0 0 200 160" class="${commonClasses}">
+                <path d="M20,20 H180 V98 H132 V148 H20 Z" fill="#C4B5FD" stroke="${strokeColor}" stroke-width="3" />
+                <path d="M180,98 V148 H132" fill="none" stroke="${dottedColor}" stroke-width="2" stroke-dasharray="4,4" />
+                <text x="100" y="15" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">10</text>
+                <text x="10" y="84" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">8</text>
+                <text x="156" y="110" text-anchor="middle" fill="${textColor}" font-size="12" font-weight="bold">3</text>
+                <text x="120" y="130" text-anchor="middle" fill="${textColor}" font-size="12" font-weight="bold">3</text>
+            </svg>`;
+        case "overlap":
+            return `<svg viewBox="0 0 240 180" class="${commonClasses}">
+                <rect x="90" y="60" width="120" height="80" fill="#FCA5A5" stroke="${strokeColor}" stroke-width="2" />
+                <rect x="20" y="20" width="120" height="80" fill="#FCA5A5" fill-opacity="0.8" stroke="${strokeColor}" stroke-width="2" />
+                <rect x="90" y="60" width="50" height="50" fill="none" stroke="#B91C1C" stroke-width="2" stroke-dasharray="4,4" />
+                <text x="80" y="15" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">24</text>
+                <text x="10" y="60" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">16</text>
+                <text x="115" y="55" text-anchor="middle" fill="#B91C1C" font-size="12" font-weight="bold">10</text>
+                <text x="80" y="90" text-anchor="middle" fill="#B91C1C" font-size="12" font-weight="bold">10</text>
+            </svg>`;
+        case "T-shape":
+            return `<svg viewBox="0 0 200 200" class="${commonClasses}">
+                <rect x="25" y="20" width="150" height="60" fill="#6EE7B7" stroke="${strokeColor}" stroke-width="3" />
+                <rect x="77.5" y="80" width="45" height="90" fill="#6EE7B7" stroke="${strokeColor}" stroke-width="3" />
+                <text x="100" y="15" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">10</text>
+                <text x="15" y="50" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">4</text>
+                <text x="65" y="125" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">6</text>
+                <text x="100" y="185" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">3</text>
+            </svg>`;
+        case "two-squares":
+            return `<svg viewBox="0 0 200 200" class="${commonClasses}">
+                <rect x="20" y="60" width="120" height="120" fill="#FDBA74" stroke="${strokeColor}" stroke-width="3" />
+                <rect x="140" y="120" width="60" height="60" fill="#FDBA74" stroke="${strokeColor}" stroke-width="3" />
+                <text x="80" y="55" text-anchor="middle" fill="${textColor}" font-size="16" font-weight="bold">6</text>
+                <text x="170" y="115" text-anchor="middle" fill="${textColor}" font-size="16" font-weight="bold">3</text>
+            </svg>`;
+        case "square-frame":
+            return `<svg viewBox="0 0 200 200" class="${commonClasses}">
+                <rect x="25" y="25" width="150" height="150" fill="#818CF8" stroke="${strokeColor}" stroke-width="3" />
+                <rect x="70" y="70" width="60" height="60" fill="#FFFFFF" stroke="${strokeColor}" stroke-width="2" stroke-dasharray="4,4" />
+                <text x="100" y="20" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">10</text>
+                <text x="15" y="100" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">10</text>
+                <text x="100" y="88" text-anchor="middle" fill="${textColor}" font-size="14" font-weight="bold">4</text>
+            </svg>`;
+        default:
+            return '';
+    }
+}
+
+// --- 動作函數 ---
+function goTips() {
+    state.stage = 'tips';
+    
+    // 重設語音
+    aiExplanation = null;
+    aiLoading = false;
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    
+    render();
+}
+
+function goHome() {
+    state.stage = 'start';
+    
+    // 重設語音
+    aiExplanation = null;
+    aiLoading = false;
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    
+    render();
+}
+
+function startGame() {
+    state = {
+        stage: 'playing',
+        currentQIndex: 0,
+        score: 0,
+        selectedOption: null,
+        isAnswerChecked: false,
+        showExplanation: false,
+        feedbackType: null
+    };
+    
+    aiExplanation = null;
+    aiLoading = false;
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    
+    render();
+}
+
+function selectOption(optId) {
+    if (state.isAnswerChecked) return;
+    state.selectedOption = optId;
+    render();
+}
+
+function checkAnswer() {
+    if (!state.selectedOption) return;
+    
+    const currentQ = questions[state.currentQIndex];
+    const isCorrect = currentQ.options.find(opt => opt.id === state.selectedOption).isCorrect;
+    
+    state.isAnswerChecked = true;
+    
+    if (isCorrect) {
+        state.score += 10;
+        state.feedbackType = 'correct';
+        state.showExplanation = true;
+    } else {
+        state.feedbackType = 'incorrect';
+    }
+    render();
+}
+
+function showExplanation() {
+    state.showExplanation = true;
+    render();
+}
+
+function nextQuestion() {
+    if (state.currentQIndex < questions.length - 1) {
+        state.currentQIndex++;
+        state.selectedOption = null;
+        state.isAnswerChecked = false;
+        state.showExplanation = false;
+        state.feedbackType = null;
+        
+        // 重設 AI 求解狀態
+        aiExplanation = null;
+        aiLoading = false;
+        isSpeaking = false;
+        window.speechSynthesis.cancel();
+    } else {
+        state.stage = 'result';
+    }
+    render();
+}
+
+// --- 渲染畫面 ---
+function render() {
+    const app = document.getElementById('app');
+    
+    if (state.stage === 'start') {
+        app.innerHTML = `
+            <div class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden relative fade-in">
+                <!-- 設定按鈕 -->
+                <button onclick="toggleSettingsModal()" class="absolute top-4 right-4 bg-white p-3 rounded-full text-slate-500 hover:text-slate-700 shadow-sm border border-slate-100 transition hover:rotate-45 duration-300 z-50 animate-pulse" title="API 設定">
+                    <i class="fa-solid fa-gear text-xl"></i>
+                </button>
+
+                <div class="bg-gradient-to-tr from-yellow-400 to-amber-400 p-8 text-center relative overflow-hidden">
+                    <div class="absolute -top-6 -left-6 w-16 h-16 bg-white/20 rounded-full"></div>
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-white/20 rounded-full"></div>
+                    <h1 class="text-4xl font-black text-indigo-900 mb-2 tracking-tight">圖形偵探隊</h1>
+                    <p class="text-indigo-800 font-medium">周長與面積大挑戰</p>
+                </div>
+                <div class="p-8">
+                    <div class="space-y-4 text-gray-600 mb-8 text-left font-medium">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-100 p-2 rounded-full text-blue-600 w-10 h-10 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-circle-check text-xl"></i>
+                            </div>
+                            <span>一共 10 題幾何探案</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="bg-green-100 p-2 rounded-full text-green-600 w-10 h-10 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-rotate-left text-xl"></i>
+                            </div>
+                            <span>掌握平移、切割、大小填補心法</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="bg-purple-100 p-2 rounded-full text-purple-600 w-10 h-10 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+                            </div>
+                            <span>配備「AI 偵探學長助教」</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="goTips()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xl font-bold py-4 rounded-2xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> 開始挑戰
+                    </button>
+                </div>
+
+                <!-- 設計者頁尾 -->
+                <footer class="mt-4 mb-6 text-center text-xs text-slate-400">
+                    設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+                </footer>
+            </div>
+        `;
+    } 
+    else if (state.stage === 'tips') {
+        app.innerHTML = `
+            <div class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden fade-in">
+                <div class="bg-indigo-600 p-6 text-center">
+                    <h2 class="text-2xl font-bold text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-yellow-300"></i> 闖關小秘籍
+                    </h2>
+                </div>
+                <div class="p-6 space-y-6">
+                    <!-- 周長秘訣 -->
+                    <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-200 text-left">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="bg-yellow-400 p-2 rounded-lg text-yellow-900 w-8 h-8 flex items-center justify-center">
+                                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-yellow-800">周長怎麼算？</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-yellow-900 leading-relaxed font-medium">
+                            <li class="flex items-start gap-2">
+                                <span class="font-bold shrink-0">1. 平移法：</span>
+                                <span>把凹進去的邊線「推」出來，補成一個大長方形。</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="font-bold shrink-0">2. 小心陷阱：</span>
+                                <span>如果是「凹」字型，推出來後，還有兩條直的邊會多出來喔！</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- 面積秘訣 -->
+                    <div class="bg-blue-50 rounded-xl p-4 border border-blue-200 text-left">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="bg-blue-400 p-2 rounded-lg text-white w-8 h-8 flex items-center justify-center">
+                                <i class="fa-solid fa-scissors"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-blue-800">面積怎麼算？</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-blue-900 leading-relaxed font-medium">
+                            <li class="flex items-start gap-2">
+                                <span class="font-bold shrink-0">1. 切割法：</span>
+                                <span>把圖形切成兩個長方形，分別算出面積再相加。</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="font-bold shrink-0">2. 填補法：</span>
+                                <span>算出全部大長方形的面積，再扣掉空白的部分（大減小）。</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button onclick="startGame()" class="w-full bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 rounded-2xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-pointer"></i> 我準備好了！
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    else if (state.stage === 'playing') {
+        const q = questions[state.currentQIndex];
+        const progress = ((state.currentQIndex + 1) / questions.length) * 100;
+        
+        let optionsHTML = '';
+        q.options.forEach(opt => {
+            let btnClass = "py-4 px-2 rounded-xl font-bold text-lg transition-all border-2 w-full ";
+            if (state.isAnswerChecked) {
+                if (opt.isCorrect) btnClass += "bg-green-100 border-green-500 text-green-700 ";
+                else if (state.selectedOption === opt.id) btnClass += "bg-red-100 border-red-500 text-red-700 ";
+                else btnClass += "bg-gray-50 border-gray-200 text-gray-400 ";
+            } else {
+                if (state.selectedOption === opt.id) btnClass += "bg-indigo-100 border-indigo-500 text-indigo-700 shadow-inner ";
+                else btnClass += "bg-white border-gray-200 text-gray-600 hover:border-indigo-300 hover:bg-indigo-50 shadow-sm ";
+            }
+            optionsHTML += `<button onclick="selectOption('${opt.id}')" ${state.isAnswerChecked ? 'disabled' : ''} class="${btnClass}">${opt.text}</button>`;
+        });
+
+        let feedbackHTML = '';
+        if (state.isAnswerChecked) {
+            if (state.feedbackType === 'correct') {
+                feedbackHTML = `
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 text-left">
+                        <div class="flex items-center gap-2 text-green-700 font-bold mb-2">
+                            <i class="fa-solid fa-circle-check"></i> <span>答對了！</span>
+                        </div>
+                        <p class="text-green-800 text-sm font-medium leading-relaxed">${q.explanation}</p>
+                    </div>
+                `;
+            } else {
+                feedbackHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 text-left">
+                        <div class="flex items-center gap-2 text-red-700 font-bold mb-2">
+                            <i class="fa-solid fa-circle-xmark"></i> <span>再想一下...</span>
+                        </div>
+                        <p class="text-red-800 text-sm mb-2 font-medium leading-relaxed">${q.hint}</p>
+                        ${!state.showExplanation ? `<button onclick="showExplanation()" class="text-xs underline text-red-600 font-bold mt-1">我看懂了，看詳解</button>` : ''}
+                        ${state.showExplanation ? `<p class="text-gray-700 text-sm mt-2 border-t border-red-200 pt-2 font-medium leading-relaxed">${q.explanation}</p>` : ''}
+                    </div>
+                `;
+            }
+            feedbackHTML += `
+                <button onclick="nextQuestion()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors">
+                    <span>${state.currentQIndex < questions.length - 1 ? "下一題" : "看成績"}</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            `;
+        } else {
+            const btnClass = state.selectedOption ? 'bg-indigo-600 text-white hover:bg-indigo-700 transform active:scale-95' : 'bg-gray-200 text-gray-400 cursor-not-allowed';
+            feedbackHTML = `<button onclick="checkAnswer()" ${!state.selectedOption ? 'disabled' : ''} class="w-full py-3.5 rounded-xl font-bold text-lg shadow-md transition-all ${btnClass}">送出答案</button>`;
+        }
+
+        // AI Tutor 區塊渲染
+        let aiTutorHTML = '';
+        if (!aiExplanation && !aiLoading) {
+            aiTutorHTML = `
+                <button onclick="handleAskAI()" class="w-full bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold py-3 px-6 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i>
+                  <span>✨ 呼叫偵探學長助教</span>
+                </button>
+            `;
+        } else if (aiLoading) {
+            aiTutorHTML = `
+                <div class="w-full bg-white p-4 rounded-2xl shadow-sm border border-purple-100 flex items-center justify-center space-x-3 animate-pulse">
+                  <div class="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                  <div class="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                  <div class="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                  <span class="text-purple-500 font-medium">偵探學長正在拿起放大鏡...</span>
+                </div>
+            `;
+        } else if (aiExplanation) {
+            aiTutorHTML = `
+                <div class="w-full bg-white p-6 rounded-2xl shadow-md border-l-4 border-purple-400 animate-fade-in-up relative text-left">
+                  <div class="flex justify-between items-start mb-2">
+                     <h4 class="font-bold text-purple-600 flex items-center gap-1.5">
+                       <i class="fa-solid fa-wand-magic-sparkles"></i> 偵探學長的線索
+                     </h4>
+                     <button onclick="handleSpeak()" class="text-slate-400 hover:text-purple-500 transition-colors" title="朗讀線索">
+                       ${isSpeaking ? '<i class="fa-solid fa-circle-stop text-2xl text-red-500"></i>' : '<i class="fa-solid fa-volume-high text-xl"></i>'}
+                     </button>
+                  </div>
+                  <p class="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm md:text-base font-medium">
+                    ${aiExplanation}
+                  </p>
+                </div>
+            `;
+        }
+
+        app.innerHTML = `
+            <!-- 頂部進度條 -->
+            <div class="w-full max-w-4xl flex justify-between items-center mb-4 px-2">
+                <button onclick="goHome()" class="text-gray-400 hover:text-gray-600 flex items-center gap-2 font-bold transition">
+                    <i class="fa-solid fa-arrow-left"></i> 回首頁
+                </button>
+                <div class="flex-1 mx-4 bg-gray-200 h-3 rounded-full overflow-hidden">
+                    <div class="bg-yellow-400 h-full transition-all duration-500 ease-out" style="width: ${progress}%"></div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-indigo-900 font-bold text-lg bg-white px-3 py-1 rounded-lg shadow-sm">
+                        ${state.score} 分
+                    </div>
+                    <button onclick="toggleSettingsModal()" class="bg-white p-2 rounded-xl text-slate-400 hover:text-slate-600 border border-slate-100 transition shadow-sm" title="API 設定">
+                       <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 雙欄排版 -->
+            <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                <!-- 左欄：題目、圖形與 AI 區 -->
+                <div class="md:col-span-8 space-y-4">
+                    <div class="bg-white rounded-3xl shadow-lg border-b-8 border-indigo-200 overflow-hidden relative">
+                        <div class="bg-indigo-500 p-4 border-b border-indigo-100 flex justify-between items-center">
+                            <span class="bg-white text-indigo-700 text-xs px-2.5 py-1 rounded-md font-bold tracking-wider">${q.category}</span>
+                            <i class="fa-solid fa-circle-question text-indigo-200 text-xl"></i>
+                        </div>
+                        <div class="p-6 flex flex-col items-center">
+                            <p class="text-lg text-gray-800 font-bold mb-4 text-center leading-relaxed">
+                                ${q.question}
+                            </p>
+                            <div class="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-6 flex justify-center items-center">
+                                 ${getSvgHTML(q.svgData.shape)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI 助教 -->
+                    <div class="w-full">
+                        ${aiTutorHTML}
+                    </div>
+                </div>
+
+                <!-- 右欄：選項與作答區 -->
+                <div class="md:col-span-4 w-full space-y-6">
+                    <div class="bg-white rounded-3xl p-6 shadow-lg border-b-8 border-indigo-200 flex flex-col justify-center min-h-[300px]">
+                       <h3 class="text-xl font-bold text-slate-700 mb-6 text-center">請選擇正確答案</h3>
+                       <div class="grid grid-cols-1 gap-3 w-full mb-4">
+                            ${optionsHTML}
+                       </div>
+                       <div class="w-full ${state.isAnswerChecked ? 'animate-fade-in-up' : ''}">
+                            ${feedbackHTML}
+                       </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 設計者頁尾 -->
+            <footer class="mt-12 text-center text-xs text-slate-400">
+                設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+            </footer>
+        `;
+    }
+    else if (state.stage === 'result') {
+        app.innerHTML = `
+            <div class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden text-center fade-in">
+                <div class="bg-gradient-to-tr from-green-400 to-emerald-500 p-8">
+                    <h2 class="text-3xl font-black text-white mb-2">挑戰完成！</h2>
+                    <div class="text-6xl font-black text-white drop-shadow-md mt-4">${state.score} <span class="text-2xl">分</span></div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">重點觀念複習</h3>
+                    <div class="space-y-3 mb-8 text-left font-medium">
+                        <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-400">
+                            <h4 class="font-bold text-yellow-800 mb-1">周長陷阱</h4>
+                            <p class="text-sm text-gray-600 leading-relaxed">「凹」進去的圖形，除了大長方形周長外，別忘了加上凹進去的兩側邊長（深度邊）喔！</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-400">
+                            <h4 class="font-bold text-blue-800 mb-1">面積秘訣</h4>
+                            <p class="text-sm text-gray-600 leading-relaxed">遇到中空圖形（像相框），用「大減小」的方法最快；遇到組合圖形，分開計算後再加起來。</p>
+                        </div>
+                    </div>
+                    <button onclick="goTips()" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 hover:bg-indigo-700 transition active:scale-95">
+                        <i class="fa-solid fa-rotate-left"></i> 再挑戰一次
+                    </button>
+                </div>
+
+                <!-- 設計者頁尾 -->
+                <footer class="mt-4 mb-6 text-center text-xs text-slate-400">
+                    設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+                </footer>
+            </div>
+        `;
+    }
+}
+
+// 初始渲染
+render();
+</script>
+
+</body>
+</html>

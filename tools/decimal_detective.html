@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小數偵探社：闖關大挑戰</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 隱藏滾動條 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 背景氣泡飄浮動畫 */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            bottom: -150px;
+            animation: float 15s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            50% { transform: translateY(-60vh) translateX(50px) rotate(180deg); opacity: 0.6; border-radius: 50%; }
+            100% { transform: translateY(-120vh) translateX(-50px) rotate(360deg); opacity: 0; }
+        }
+
+        /* 簡單的淡入動畫 */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 卡片懸浮與縮放效果 */
+        .detective-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .detective-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 text-gray-800 min-h-screen relative overflow-x-hidden flex flex-col justify-between">
+
+    <!-- 背景氣泡層 -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="bubble w-12 h-12 left-10" style="animation-delay: 0s; animation-duration: 12s;"></div>
+        <div class="bubble w-20 h-20 left-1/4" style="animation-delay: 2s; animation-duration: 18s;"></div>
+        <div class="bubble w-16 h-16 left-1/2" style="animation-delay: 4s; animation-duration: 14s;"></div>
+        <div class="bubble w-24 h-24 left-3/4" style="animation-delay: 1s; animation-duration: 20s;"></div>
+        <div class="bubble w-10 h-10 left-[90%]" style="animation-delay: 6s; animation-duration: 10s;"></div>
+    </div>
+
+    <!-- 主要應用程式容器 -->
+    <div id="app" class="w-full flex-grow flex flex-col items-center p-4 z-10 relative"></div>
+
+    <!-- API Key 設定彈窗 -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 animate-fade-in text-left">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-slate-500"></i> 設定 Gemini API Key
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-slate-500 text-sm mb-4 leading-relaxed font-medium">
+                「偵探學長助教」功能需要使用 Gemini API。金鑰將儲存於您的瀏覽器中，不會上傳至其他伺服器。
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="貼上您的 API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 font-mono text-sm" />
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveApiKey()" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl shadow-md transition">
+                        儲存設定
+                    </button>
+                    <button onclick="clearApiKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl transition">
+                        清除金鑰
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 text-center">
+                    沒有金鑰？可至 Google AI Studio 免費申請。
+                </p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- 應用程式狀態 ---
+    let state = {
+        gameState: 'start', // 'start', 'playing', 'result'
+        currentStep: 1,     // 1 to 5 for questions
+        score: 0,
+        currentAns: { 1: null, 2: null, 3: null, 4: null, 5: null },
+        feedbackType: null, // null, 'correct', 'incorrect'
+        feedbackMsg: ''
+    };
+
+    // AI Tutor 狀態
+    let aiExplanation = null;
+    let aiLoading = false;
+    let isSpeaking = false;
+    let currentUtterance = null;
+
+    // --- 題目詮釋與提示資料 ---
+    const tasksMetadata = {
+        1: {
+            title: "誰的說法正確？",
+            hint: "1片 = 100格，1條 = 10格，1格 = 0.01。那麼，0.99片是幾格呢？1條積木又是幾格呢？利用格數換算就對啦！",
+            correctAnswer: 3, // 甲和乙都正確
+            explanation: "甲：0.99片 = 99格。99格 + 1格 = 100格 = 1片，正確。\n乙：1條 = 10格。10格 + 1格 = 11格 = 0.11片，正確。\n因此甲和乙都正確！"
+        },
+        2: {
+            title: "誰的數字最大？",
+            hint: "先對齊每個嫌疑犯的位值！甲是 909.09；乙說他有 1個10，因此他的十位數是 1，代表 910.09；丙是 909.90。比較看看整數部分喔！",
+            correctAnswer: 2, // 乙
+            explanation: "甲為 909.09。\n乙的十位數填入 1 後，代表 910.09。\n丙為 909.90。\n比較整數部分：910 > 909，所以乙 (910.09) 最大！"
+        },
+        3: {
+            title: "拼圖大考驗 (進位篇)",
+            hint: "試試看！將小數點後兩位相加：0.98 + 0.02 = 1.00，也就是進位成 1。再把這個整數 1 加到原本的整數 1 上面，結果是多少片呢？",
+            correctAnswer: 1, // ⭕ 正確 (Yes)
+            explanation: "1.98片 加上 2格 (0.02) 的計算為：1.98 + 0.02 = 2.00。小數點後方的 0 可以省略，因此剛好等於 2 片，說法正確！"
+        },
+        4: {
+            title: "數字變裝秀",
+            hint: "代號 B 是 3個10 和 2個0.01。2個0.01代表百分位是 2。所以 B 翻譯出來的數字是 30.02 喔！現在與 A (30.2) 相比，誰的十分位數字比較大呢？",
+            correctAnswer: 1, // A 比較大 (30.2)
+            explanation: "B 的十分位是 0，百分位是 2，所以 B 是 30.02。\nA 是 30.2 (可以看成 30.20)。\n比較十分位：2 > 0，所以 A 比較大！"
+        },
+        5: {
+            title: "誰是最大的嫌疑犯？",
+            hint: "6.1 的十分位是 1 (可以看成 6.10)，而 6.09 的十分位 is 0。比大小不是看小數點後有幾位數，而是要從最高位值（十分位、百分位...）開始依序向後比喔！",
+            correctAnswer: 0, // 錯，要看位值！
+            explanation: "6.1 可以補零寫成 6.10。比較 6.10 與 6.09：\n個位數相同 (6)，十分位數 1 > 0，因此 6.1 大於 6.09。6.09 的說法是錯誤的！"
+        }
+    };
+
+    // --- API Key 管理 ---
+    function getApiKey() {
+        return localStorage.getItem('gemini_api_key') || '';
+    }
+
+    function toggleSettingsModal() {
+        const modal = document.getElementById('settings-modal');
+        const input = document.getElementById('api-key-input');
+        input.value = getApiKey();
+        modal.classList.toggle('hidden');
+    }
+
+    function saveApiKey() {
+        const input = document.getElementById('api-key-input');
+        const key = input.value.trim();
+        if (key) {
+            localStorage.setItem('gemini_api_key', key);
+            alert('API Key 儲存成功！');
+        } else {
+            localStorage.removeItem('gemini_api_key');
+            alert('已清除 API Key。');
+        }
+        toggleSettingsModal();
+        render();
+    }
+
+    function clearApiKey() {
+        localStorage.removeItem('gemini_api_key');
+        const input = document.getElementById('api-key-input');
+        input.value = '';
+        alert('已清除 API Key。');
+        toggleSettingsModal();
+        render();
+    }
+
+    // --- AI Tutor API 呼叫 ---
+    async function callGeminiAPI(prompt, apiKey, retries = 3, delay = 1000) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 老師現在有點忙，請稍後再試。";
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+            }
+        }
+    }
+
+    async function handleAskAI() {
+        const key = getApiKey();
+        if (!key) {
+            alert('請點選右上角齒輪設定 Gemini API Key，即可使用偵探學長助教！');
+            toggleSettingsModal();
+            return;
+        }
+
+        aiLoading = true;
+        aiExplanation = null;
+        render();
+
+        const step = state.currentStep;
+        const meta = tasksMetadata[step];
+        
+        let questionContext = "";
+        if (step === 1) {
+            questionContext = "題目是探討『0.99片百格板 + 1格 = 1片(甲)』與『1條積木 + 1格 = 0.11片(乙)』。引導學生理解 1片=100格，1條=10格，1格=0.01，將小數和條/格轉換為格數來檢驗。";
+        } else if (step === 2) {
+            questionContext = "題目是比較『甲: 909.09』、『乙: 9[十位數填空]0.09，乙說有 1個10』與『丙: 909.90』的大小。引導學生將乙的十位數填上 1 得到 910.09，然後對齊位值表，比較整數部分 (910 贏過 909)。";
+        } else if (step === 3) {
+            questionContext = "題目是驗算『1.98片加上2格(0.02)是否剛好等於2片』。引導學生先將小數點後兩位相加 (0.98+0.02 = 1.00 進位)，再與整數 1 相加。";
+        } else if (step === 4) {
+            questionContext = "題目是翻譯代號 B『3個10和2個0.01』並與 A『30.2』比較大小。引導學生將 B 翻譯為 30.02，並比較 A (30.2) 與 B (30.02) 的十分位大小 (2 > 0)。";
+        } else if (step === 5) {
+            questionContext = "題目是爭論『6.1 是否大於 6.09』，其中 6.09 狡辯說自己有三位數所以比較大。引導學生理解 6.1 可以看作 6.10，並指出比大小要對齊位值（十分位 1 大於 0），位數多不代表數字大。";
+        }
+
+        const prompt = `你現在是一位超級會教數學的國小老師，也是「小數偵探社」的偵探學長。請根據以下資訊，引導新進偵探隊員解密二位小數的位值觀念：
+        【任務資訊】
+        - 任務難度：國小中年級 (三年級/四年級) 二位小數與位值表單元
+        - 任務關卡：Mission ${step}/5 - ${meta.title}
+        - 任務情境引導：${questionContext}
+        - 簡要詳解提示：${meta.explanation}
+
+        【您的任務】
+        1. 請使用國小中低年級（8-10歲）聽得懂的簡單詞彙，語氣要活潑、自信、富有「探案解謎」的樂趣，多使用「偵探隊員你好！」、「讓我們拿出位值表放大鏡觀察」等偵探口吻。
+        2. 請「不要」直接透露計算結果或最終正確答案選項（例如不要直接說出應該選『甲和乙都正確』、『乙』、『正確』、『A比較大』、『錯，要看位值！』）。
+        3. 您的引導重點是分析圖表特徵與位值關係，引導隊員思維。例如：「看看十分位和百分位，是哪一個位置的數字不一樣呢？」、「一條積木是10格，一格是0.01片，那合起來是多少呢？」
+        4. 輸出排版請包含適當的換行與 emoji，增加閱讀樂趣。
+        5. 最後給予隊員溫暖且激勵的探案肯定。
+        請使用繁體中文回答。`;
+
+        try {
+            const result = await callGeminiAPI(prompt, key);
+            aiExplanation = result;
+        } catch (error) {
+            aiExplanation = "報告隊長！通訊網絡受到磁場干擾，請檢查 API Key 是否正確或稍後再試。";
+        } finally {
+            aiLoading = false;
+            render();
+        }
+    }
+
+    function handleSpeak() {
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            render();
+        } else {
+            if (!aiExplanation) return;
+            const cleanText = aiExplanation.replace(/[\*#_`~]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.95;
+            utterance.onend = () => {
+                isSpeaking = false;
+                render();
+            };
+            utterance.onerror = () => {
+                isSpeaking = false;
+                render();
+            };
+            window.speechSynthesis.speak(utterance);
+            isSpeaking = true;
+            currentUtterance = utterance;
+            render();
+        }
+    }
+
+    // --- 動作函數 ---
+    function goStartScreen() {
+        state.gameState = 'start';
+        state.currentStep = 1;
+        state.score = 0;
+        state.currentAns = { 1: null, 2: null, 3: null, 4: null, 5: null };
+        state.feedbackType = null;
+        state.feedbackMsg = '';
+        
+        aiExplanation = null;
+        aiLoading = false;
+        isSpeaking = false;
+        window.speechSynthesis.cancel();
+        
+        render();
+    }
+
+    function startChallenge() {
+        state.gameState = 'playing';
+        state.currentStep = 1;
+        state.score = 0;
+        state.currentAns = { 1: null, 2: null, 3: null, 4: null, 5: null };
+        state.feedbackType = null;
+        state.feedbackMsg = '';
+        
+        aiExplanation = null;
+        aiLoading = false;
+        isSpeaking = false;
+        window.speechSynthesis.cancel();
+        
+        render();
+    }
+
+    function selectOption(taskNum, ansVal) {
+        if (state.feedbackType === 'correct') return;
+        state.currentAns[taskNum] = ansVal;
+        
+        // 重設目前的錯誤回饋
+        state.feedbackType = null;
+        state.feedbackMsg = '';
+        render();
+    }
+
+    function checkAnswer() {
+        const step = state.currentStep;
+        const meta = tasksMetadata[step];
+        const selected = state.currentAns[step];
+
+        // 各關卡額外的輸入檢驗
+        if (step === 1) {
+            const input1 = document.getElementById('q1-input1').value;
+            const input2 = document.getElementById('q1-input2').value;
+            if (input1 !== "99" || input2 !== "10") {
+                state.feedbackType = 'incorrect';
+                state.feedbackMsg = "🕵️‍♂️ 還有線索沒解開！請先完成思考填空：<br>1. 0.99 片是幾格？<br>2. 1 條積木是幾格？";
+                render();
+                return;
+            }
+        } else if (step === 2) {
+            const yiTen = document.getElementById('yi-10').value;
+            if (yiTen !== "1") {
+                state.feedbackType = 'incorrect';
+                state.feedbackMsg = "⚠️ 位值表填錯囉！乙嫌疑犯說他有「1 個 10」，十位數要填 1 喔！";
+                render();
+                return;
+            }
+        } else if (step === 3) {
+            const sumVal = document.getElementById('q3-sum').value;
+            if (sumVal !== "1.00") {
+                state.feedbackType = 'incorrect';
+                state.feedbackMsg = "⚠️ 計算有誤！0.98 加 0.02 會進位喔！<br>98個小格 + 2個小格 = 100個小格 = 1.00。";
+                render();
+                return;
+            }
+        } else if (step === 4) {
+            const bVal = document.getElementById('q4-b-val').value;
+            if (bVal !== "30.02") {
+                state.feedbackType = 'incorrect';
+                state.feedbackMsg = "⚠️ 翻譯錯誤！B 有「2 個 0.01」，所以 2 要放在百分位 (百分位是小數點後第二位，所以是 30.02) 喔！";
+                render();
+                return;
+            }
+        }
+
+        // 檢查最終答案選項
+        if (selected === null) {
+            state.feedbackType = 'incorrect';
+            state.feedbackMsg = "🕵️‍♂️ 偵探隊員，您還沒有選擇答案選項喔！";
+            render();
+            return;
+        }
+
+        const isCorrect = (selected === meta.correctAnswer);
+
+        if (isCorrect) {
+            state.score += 20;
+            state.feedbackType = 'correct';
+            state.feedbackMsg = "🎉 破案成功！" + meta.explanation.replace(/\n/g, '<br>');
+            
+            // 觸發碎紙花
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#34D399', '#60A5FA', '#FBBF24', '#F472B6', '#A78BFA']
+            });
+        } else {
+            state.feedbackType = 'incorrect';
+            state.feedbackMsg = "🤔 再想一下...<br>" + meta.hint;
+        }
+        render();
+    }
+
+    function nextStep() {
+        // 重設語音
+        aiExplanation = null;
+        aiLoading = false;
+        isSpeaking = false;
+        window.speechSynthesis.cancel();
+
+        if (state.currentStep < 5) {
+            state.currentStep++;
+            state.feedbackType = null;
+            state.feedbackMsg = '';
+            render();
+        } else {
+            state.gameState = 'result';
+            render();
+        }
+    }
+
+    function prevStep() {
+        // 重設語音
+        aiExplanation = null;
+        aiLoading = false;
+        isSpeaking = false;
+        window.speechSynthesis.cancel();
+
+        if (state.currentStep > 1) {
+            state.currentStep--;
+            state.feedbackType = null;
+            state.feedbackMsg = '';
+            render();
+        } else {
+            state.gameState = 'start';
+            render();
+        }
+    }
+
+    // --- 畫面渲染主函數 ---
+    function render() {
+        const app = document.getElementById('app');
+
+        if (state.gameState === 'start') {
+            app.innerHTML = `
+                <div class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden relative fade-in border-b-8 border-indigo-400">
+                    <!-- 設定按鈕 -->
+                    <button onclick="toggleSettingsModal()" class="absolute top-4 right-4 bg-white p-3 rounded-full text-slate-500 hover:text-slate-700 shadow-sm border border-slate-100 transition hover:rotate-45 duration-300 z-50 animate-pulse" title="API 設定">
+                        <i class="fa-solid fa-gear text-xl"></i>
+                    </button>
+
+                    <div class="bg-gradient-to-tr from-yellow-300 via-amber-400 to-orange-400 p-8 text-center relative overflow-hidden">
+                        <div class="absolute -top-6 -left-6 w-16 h-16 bg-white/20 rounded-full"></div>
+                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-white/20 rounded-full"></div>
+                        
+                        <div class="mb-4 flex justify-center">
+                             <div class="bg-white/90 w-20 h-20 rounded-full flex items-center justify-center shadow-md text-amber-500 text-4xl animate-bounce">
+                                <i class="fa-solid fa-user-secret"></i>
+                             </div>
+                        </div>
+                        <h1 class="text-3xl font-black text-indigo-900 mb-1 tracking-wider">小數偵探社</h1>
+                        <p class="text-indigo-800 font-medium">二位小數 ‧ 闖關大挑戰</p>
+                    </div>
+
+                    <div class="p-8">
+                        <p class="text-slate-600 text-center font-bold text-lg mb-6 leading-relaxed">
+                            歡迎來到小數偵探訓練營！<br>這裡有 5 個神秘的數字謎團等待你用「位值表放大鏡」去破解！
+                        </p>
+                        
+                        <div class="bg-indigo-50/80 p-4 rounded-2xl border border-indigo-100 text-left space-y-3 mb-8">
+                            <h4 class="font-black text-indigo-900 text-center border-b border-indigo-200 pb-2 mb-2">
+                                🕵️‍♂️ 必備線索對照表
+                            </h4>
+                            <div class="flex items-center gap-3 text-slate-700 font-medium">
+                                <span class="text-2xl shrink-0">🟦</span>
+                                <span>1 片百格板 = <strong>1.00</strong> (個位)</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-slate-700 font-medium">
+                                <span class="text-2xl shrink-0">🟧</span>
+                                <span>1 條積木 = <strong>0.10</strong> (十分位)</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-slate-700 font-medium">
+                                <span class="text-2xl shrink-0">⬜</span>
+                                <span>1 格 = <strong>0.01</strong> (百分位)</span>
+                            </div>
+                        </div>
+
+                        <button onclick="startChallenge()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xl font-bold py-4 rounded-2xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play"></i> 開始闖關挑戰
+                        </button>
+                    </div>
+
+                    <!-- 設計者頁尾 -->
+                    <footer class="mt-2 mb-6 text-center text-xs text-slate-400">
+                        設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+                    </footer>
+                </div>
+            `;
+        }
+
+        else if (state.gameState === 'playing') {
+            const step = state.currentStep;
+            const progress = (step / 5) * 100;
+            const meta = tasksMetadata[step];
+            const selected = state.currentAns[step];
+
+            // 關卡具體內容 HTML 生成
+            let questionContentHTML = '';
+            if (step === 1) {
+                questionContentHTML = `
+                    <div class="space-y-4 w-full">
+                        <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 text-left">
+                            <label class="block text-indigo-950 font-black text-base mb-1">🔎 步驟 1：檢查「甲」的說法</label>
+                            <p class="text-slate-700 text-sm mb-2 font-medium">甲說：「0.99 片百格板 + 1 格 = 1 片」？</p>
+                            <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center font-bold text-slate-700">
+                                思考：0.99 片 = 
+                                <select id="q1-input1" class="mx-2 px-3 py-1 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-indigo-600">
+                                    <option value="?">?</option>
+                                    <option value="9">9</option>
+                                    <option value="90">90</option>
+                                    <option value="99">99</option>
+                                </select> 格
+                            </div>
+                        </div>
+
+                        <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 text-left">
+                            <label class="block text-indigo-950 font-black text-base mb-1">🔎 步驟 2：檢查「乙」的說法</label>
+                            <p class="text-slate-700 text-sm mb-2 font-medium">乙說：「1 條積木 + 1 格 = 0.11 片」？</p>
+                            <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center font-bold text-slate-700">
+                                思考：1 條積木 = 
+                                <select id="q1-input2" class="mx-2 px-3 py-1 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-indigo-600">
+                                    <option value="?">?</option>
+                                    <option value="1">1</option>
+                                    <option value="10">10</option>
+                                    <option value="100">100</option>
+                                </select> 格
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 2) {
+                questionContentHTML = `
+                    <div class="space-y-4 w-full">
+                        <div class="overflow-x-auto bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                            <table class="place-value-table w-full border-collapse bg-white rounded-xl overflow-hidden text-center text-sm font-bold text-slate-700">
+                                <thead>
+                                    <tr class="bg-amber-400 text-amber-950 font-bold">
+                                        <th class="p-2.5 border border-amber-300">嫌疑犯</th>
+                                        <th class="p-2.5 border border-amber-300">百位</th>
+                                        <th class="p-2.5 border border-amber-300">十位</th>
+                                        <th class="p-2.5 border border-amber-300">個位</th>
+                                        <th class="p-2.5 border border-amber-300">十分位</th>
+                                        <th class="p-2.5 border border-amber-300">百分位</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm font-bold text-slate-700">
+                                    <tr class="border-b">
+                                        <td class="p-2 border bg-slate-50">甲</td>
+                                        <td colspan="5" class="p-2 text-center text-indigo-600 text-base">909 + 0.09 = 909.09</td>
+                                    </tr>
+                                    <tr class="border-b bg-amber-50/50">
+                                        <td class="p-2 border bg-amber-100/50">乙</td>
+                                        <td class="p-2 border text-center">9</td>
+                                        <td class="p-2 border text-center">
+                                            <select id="yi-10" class="px-2 py-0.5 rounded border border-slate-300 text-indigo-600 focus:outline-none">
+                                                <option>0</option>
+                                                <option>1</option>
+                                                <option>9</option>
+                                            </select>
+                                        </td>
+                                        <td class="p-2 border text-center">0</td>
+                                        <td class="p-2 border text-center">0</td>
+                                        <td class="p-2 border text-center">9</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-2 border bg-slate-50">丙</td>
+                                        <td colspan="5" class="p-2 text-center text-indigo-600 text-base">9個百、9個一、9個0.1 = 909.90</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="bg-red-50 text-red-600 text-xs p-3 rounded-xl border border-red-100 font-bold text-left flex items-start gap-1.5">
+                             <i class="fa-solid fa-circle-info mt-0.5"></i>
+                             <span>乙爆料線索：我的位值中有「1 個 10」喔！十位數該填什麼？</span>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 3) {
+                questionContentHTML = `
+                    <div class="space-y-4 w-full">
+                        <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 text-left space-y-3">
+                            <p class="text-slate-700 font-bold text-base leading-relaxed">
+                                ❓ <strong>謎題：</strong>「1.98 片百格板」加上「2 格 (0.01)」，會剛好進位變成 2 片嗎？
+                            </p>
+                            <div class="bg-white p-4 rounded-xl border border-purple-200 space-y-3 font-bold text-slate-700 text-sm md:text-base">
+                                <div class="flex items-center flex-wrap gap-1">
+                                    <span>1. 先將小數點後兩位加起來：</span>
+                                    <span>0.98 + 0.02 = </span>
+                                    <select id="q3-sum" class="px-2 py-0.5 rounded border border-slate-300 text-indigo-600 focus:outline-none">
+                                        <option value="?">?</option>
+                                        <option value="0.910">0.910</option>
+                                        <option value="1.00">1.00</option>
+                                        <option value="0.100">0.100</option>
+                                    </select>
+                                </div>
+                                <div class="text-slate-400 text-xs border-t pt-2 border-slate-100">
+                                    2. 再加上原本的整數 1：<br>
+                                    1 + (上面加完得到的 1.00) = <strong class="text-purple-600 text-base">2.00</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 4) {
+                questionContentHTML = `
+                    <div class="space-y-4 w-full">
+                        <div class="overflow-x-auto bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                            <table class="w-full border-collapse bg-white rounded-xl overflow-hidden text-sm font-bold text-slate-700">
+                                <thead>
+                                    <tr class="bg-purple-500 text-white">
+                                        <th class="p-2.5 border border-purple-400">代號</th>
+                                        <th class="p-2.5 border border-purple-400 text-left">密碼描述</th>
+                                        <th class="p-2.5 border border-purple-400 text-center">翻譯後的數字</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-2 border text-center bg-slate-50">A</td>
+                                        <td class="p-2 border text-left text-slate-600">3 個 10、2 個 0.1</td>
+                                        <td class="p-2 border text-center text-purple-600 text-base">30.2</td>
+                                    </tr>
+                                    <tr class="border-b bg-purple-50/20">
+                                        <td class="p-2 border text-center bg-purple-100/50">B</td>
+                                        <td class="p-2 border text-left text-slate-600">3 個 10、2 個 0.01</td>
+                                        <td class="p-2 border text-center">
+                                            <select id="q4-b-val" class="px-2 py-1 rounded border border-slate-300 text-purple-600 focus:outline-none">
+                                                <option value="?">請選擇</option>
+                                                <option value="30.2">30.2</option>
+                                                <option value="30.02">30.02</option>
+                                                <option value="3.02">3.02</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 5) {
+                questionContentHTML = `
+                    <div class="space-y-4 w-full">
+                        <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 text-center space-y-4">
+                            <p class="text-slate-600 font-bold text-base">這兩個數字正在劇烈爭吵：</p>
+                            <div class="text-4xl font-black text-purple-600 tracking-wider">
+                                6.1 <span class="text-slate-300 text-2xl font-medium">vs</span> 6.09
+                            </div>
+                            <div class="bg-white p-4 rounded-xl border border-slate-200 text-left relative">
+                                 <span class="absolute -top-3 left-4 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">💬 6.09的歪理</span>
+                                 <p class="text-slate-700 text-sm font-semibold leading-relaxed pt-1.5">
+                                    「我有三位數字 (6、0、9)，你只有兩位數字 (6、1)，我數字比較長，所以我一定比較大！」
+                                 </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 選項按鈕 HTML 生成
+            let optionsHTML = '';
+            let answersSet = [];
+            if (step === 1) {
+                answersSet = [
+                    { id: 1, text: "只有甲正確" },
+                    { id: 2, text: "只有乙正確" },
+                    { id: 3, text: "甲和乙都正確" },
+                    { id: 4, text: "甲和乙都不正確" }
+                ];
+            } else if (step === 2) {
+                answersSet = [
+                    { id: 1, text: "甲最大 (909.09)" },
+                    { id: 2, text: "乙最大 (910.09)" },
+                    { id: 3, text: "丙最大 (909.90)" }
+                ];
+            } else if (step === 3) {
+                answersSet = [
+                    { id: 1, text: "⭕ 正確 (Yes)" },
+                    { id: 0, text: "❌ 錯誤 (No)" }
+                ];
+            } else if (step === 4) {
+                answersSet = [
+                    { id: 1, text: "A 比較大 (30.2)" },
+                    { id: 2, text: "B 比較大 (30.02)" }
+                ];
+            } else if (step === 5) {
+                answersSet = [
+                    { id: 1, text: "對，數字越長越大" },
+                    { id: 0, text: "錯，要看位值！" }
+                ];
+            }
+
+            answersSet.forEach(opt => {
+                let btnClass = "py-3 px-3 rounded-2xl font-bold text-base transition-all border-2 w-full text-center ";
+                if (state.feedbackType === 'correct') {
+                    if (opt.id === meta.correctAnswer) btnClass += "bg-green-100 border-green-500 text-green-700 shadow-sm ";
+                    else btnClass += "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed ";
+                } else if (state.feedbackType === 'incorrect') {
+                    if (selected === opt.id) btnClass += "bg-red-100 border-red-500 text-red-700 shadow-inner ";
+                    else btnClass += "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 ";
+                } else {
+                    if (selected === opt.id) btnClass += "bg-indigo-100 border-indigo-500 text-indigo-700 shadow-inner ";
+                    else btnClass += "bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50/50 shadow-sm ";
+                }
+                optionsHTML += `<button onclick="selectOption(${step}, ${opt.id})" ${state.feedbackType === 'correct' ? 'disabled' : ''} class="${btnClass}">${opt.text}</button>`;
+            });
+
+            // 回饋區塊 HTML
+            let feedbackHTML = '';
+            if (state.feedbackType) {
+                if (state.feedbackType === 'correct') {
+                    feedbackHTML = `
+                        <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-left animate-fade-in">
+                            <div class="flex items-center gap-2 text-green-700 font-bold mb-1.5">
+                                <i class="fa-solid fa-circle-check text-xl"></i> <span>答對了！</span>
+                            </div>
+                            <p class="text-green-800 text-sm font-medium leading-relaxed">${state.feedbackMsg}</p>
+                        </div>
+                        <button onclick="nextStep()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition active:scale-95">
+                            <span>${step < 5 ? "前往下一關" : "領取結算證書"}</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    `;
+                } else {
+                    feedbackHTML = `
+                        <div class="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 text-left animate-fade-in">
+                            <div class="flex items-center gap-2 text-red-700 font-bold mb-1">
+                                <i class="fa-solid fa-triangle-exclamation"></i> <span>發現思維盲點...</span>
+                            </div>
+                            <p class="text-red-800 text-sm font-semibold leading-relaxed">${state.feedbackMsg}</p>
+                        </div>
+                        <button onclick="checkAnswer()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-md transition active:scale-95">
+                            再次送出偵探報告
+                        </button>
+                    `;
+                }
+            } else {
+                const btnClass = selected !== null ? 'bg-indigo-600 text-white hover:bg-indigo-700 transform active:scale-95' : 'bg-slate-200 text-slate-400 cursor-not-allowed';
+                feedbackHTML = `<button onclick="checkAnswer()" ${selected === null ? 'disabled' : ''} class="w-full py-3.5 rounded-xl font-bold text-lg shadow-md transition-all ${btnClass}">送出答案報告</button>`;
+            }
+
+            // AI 助教區塊 HTML
+            let aiTutorHTML = '';
+            if (!aiExplanation && !aiLoading) {
+                aiTutorHTML = `
+                    <button onclick="handleAskAI()" class="w-full bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold py-3 px-6 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i>
+                      <span>✨ 呼叫偵探學長助教</span>
+                    </button>
+                `;
+            } else if (aiLoading) {
+                aiTutorHTML = `
+                    <div class="w-full bg-white p-4 rounded-2xl shadow-sm border border-purple-100 flex items-center justify-center space-x-3 animate-pulse">
+                      <div class="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                      <div class="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                      <div class="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                      <span class="text-purple-500 font-medium">學長正在翻閱小數線索...</span>
+                    </div>
+                `;
+            } else if (aiExplanation) {
+                aiTutorHTML = `
+                    <div class="w-full bg-white p-6 rounded-2xl shadow-md border-l-4 border-purple-400 animate-fade-in relative text-left">
+                      <div class="flex justify-between items-start mb-2">
+                         <h4 class="font-bold text-purple-600 flex items-center gap-1.5">
+                           <i class="fa-solid fa-wand-magic-sparkles"></i> 偵探學長的線索
+                         </h4>
+                         <button onclick="handleSpeak()" class="text-slate-400 hover:text-purple-500 transition-colors" title="朗讀線索">
+                           ${isSpeaking ? '<i class="fa-solid fa-circle-stop text-2xl text-red-500"></i>' : '<i class="fa-solid fa-volume-high text-xl"></i>'}
+                         </button>
+                      </div>
+                      <p class="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm md:text-base font-medium">
+                        ${aiExplanation}
+                      </p>
+                    </div>
+                `;
+            }
+
+            app.innerHTML = `
+                <!-- 頂部資訊列 -->
+                <div class="w-full max-w-4xl flex justify-between items-center mb-4 px-2">
+                    <button onclick="prevStep()" class="text-slate-500 hover:text-slate-700 flex items-center gap-2 font-bold transition">
+                        <i class="fa-solid fa-arrow-left"></i> 回上一頁
+                    </button>
+                    <div class="flex-1 mx-4 bg-slate-200 h-3 rounded-full overflow-hidden">
+                        <div class="bg-gradient-to-r from-teal-400 to-purple-400 h-full transition-all duration-500 ease-out" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-indigo-900 font-bold text-lg bg-white px-3 py-1 rounded-lg shadow-sm border border-slate-100">
+                            ${state.score} 分
+                        </div>
+                        <button onclick="toggleSettingsModal()" class="bg-white p-2 rounded-xl text-slate-400 hover:text-slate-600 border border-slate-100 transition shadow-sm" title="API 設定">
+                           <i class="fa-solid fa-gear"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 雙欄排版卡片 -->
+                <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                    <!-- 左欄：關卡提示與題目 -->
+                    <div class="md:col-span-8 space-y-4">
+                        <div class="bg-white rounded-3xl shadow-lg border-b-8 border-indigo-200 overflow-hidden relative">
+                            <div class="bg-indigo-500 p-4 border-b border-indigo-100 flex justify-between items-center text-white">
+                                <span class="bg-white text-indigo-700 text-xs px-2.5 py-1 rounded-md font-bold tracking-wider">Mission ${step}/5</span>
+                                <span class="font-black text-sm md:text-base">${meta.title}</span>
+                            </div>
+                            <div class="p-6 flex flex-col items-center">
+                                ${questionContentHTML}
+                            </div>
+                        </div>
+
+                        <!-- AI 助教 -->
+                        <div class="w-full">
+                            ${aiTutorHTML}
+                        </div>
+                    </div>
+
+                    <!-- 右欄：選項與作答區 -->
+                    <div class="md:col-span-4 w-full space-y-6">
+                        <div class="bg-white rounded-3xl p-6 shadow-lg border-b-8 border-indigo-200 flex flex-col justify-center min-h-[300px]">
+                           <h3 class="text-xl font-bold text-slate-700 mb-6 text-center">請選擇嫌疑密碼</h3>
+                           <div class="grid grid-cols-1 gap-3 w-full mb-4">
+                                ${optionsHTML}
+                           </div>
+                           <div class="w-full">
+                                ${feedbackHTML}
+                           </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 設計者頁尾 -->
+                <footer class="mt-12 text-center text-xs text-slate-400">
+                    設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+                </footer>
+            `;
+        }
+
+        else if (state.gameState === 'result') {
+            app.innerHTML = `
+                <div class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden text-center fade-in border-b-8 border-emerald-400">
+                    <div class="bg-gradient-to-tr from-emerald-400 to-teal-500 p-8">
+                        <div class="text-6xl mb-3">🎓</div>
+                        <h2 class="text-3xl font-black text-white mb-2">特訓通關完成！</h2>
+                        <div class="text-6xl font-black text-white drop-shadow-md mt-4">${state.score} <span class="text-2xl">分</span></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4">📜 小數偵探社重點筆記</h3>
+                        <div class="space-y-3 mb-8 text-left font-medium">
+                            <div class="bg-amber-50 p-4 rounded-xl border-l-4 border-amber-400 text-sm text-slate-700">
+                                <h4 class="font-bold text-amber-800 mb-1">百格板轉換規律</h4>
+                                <p class="leading-relaxed">1片 = 100格，1條 = 10格，因此 1格代表 0.01。計算時將所有單位換算成「格數」最不容易出錯！</p>
+                            </div>
+                            <div class="bg-indigo-50 p-4 rounded-xl border-l-4 border-indigo-400 text-sm text-slate-700">
+                                <h4 class="font-bold text-indigo-800 mb-1">大小比較要看位值</h4>
+                                <p class="leading-relaxed">比大小並非字數越長數字就越大。例如 6.1 等於 6.10，從十分位 (1 > 0) 比較，6.1 明顯大於 6.09 喔！</p>
+                            </div>
+                        </div>
+                        <button onclick="goStartScreen()" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 hover:bg-indigo-700 transition active:scale-95">
+                            <i class="fa-solid fa-rotate-left"></i> 再次挑戰特訓
+                        </button>
+                    </div>
+
+                    <!-- 設計者頁尾 -->
+                    <footer class="mt-2 mb-6 text-center text-xs text-slate-400">
+                        設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+                    </footer>
+                </div>
+            `;
+        }
+    }
+
+    // 初始渲染
+    render();
+</script>
+
+</body>
+</html>

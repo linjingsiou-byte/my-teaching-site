@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>時鐘特攻隊</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 隱藏滾動條 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 背景氣泡飄浮動畫 */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            bottom: -150px;
+            animation: float 15s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            50% { transform: translateY(-60vh) translateX(50px) rotate(180deg); opacity: 0.6; border-radius: 50%; }
+            100% { transform: translateY(-120vh) translateX(-50px) rotate(360deg); opacity: 0; }
+        }
+
+        /* 簡單的淡入動畫 */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 彈出縮放動畫 */
+        .scale-up { animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        @keyframes scaleUp { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* 卡片懸浮與縮放效果 */
+        .detective-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .detective-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 抖動動畫 */
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100 text-gray-800 min-h-screen relative overflow-x-hidden flex flex-col justify-between">
+
+    <!-- 背景氣泡層 -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="bubble w-12 h-12 left-10" style="animation-delay: 0s; animation-duration: 12s;"></div>
+        <div class="bubble w-20 h-20 left-1/4" style="animation-delay: 2s; animation-duration: 18s;"></div>
+        <div class="bubble w-16 h-16 left-1/2" style="animation-delay: 4s; animation-duration: 14s;"></div>
+        <div class="bubble w-24 h-24 left-3/4" style="animation-delay: 1s; animation-duration: 20s;"></div>
+        <div class="bubble w-10 h-10 left-[90%]" style="animation-delay: 6s; animation-duration: 10s;"></div>
+    </div>
+
+    <!-- 頂部右上角設定按鈕 -->
+    <div class="absolute top-4 right-4 z-50">
+        <button onclick="toggleSettingsModal()" class="bg-white/80 hover:bg-white text-slate-600 w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform hover:rotate-45 active:scale-95 backdrop-blur-sm">
+            <i class="fa-solid fa-gear text-lg"></i>
+        </button>
+    </div>
+
+    <!-- 主要應用程式容器 -->
+    <div id="app" class="w-full flex-grow flex flex-col items-center p-4 z-10 relative"></div>
+
+    <!-- API Key 設定彈窗 -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 animate-fade-in text-left">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-slate-500"></i> 設定 Gemini API Key
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-slate-500 text-sm mb-4 leading-relaxed font-medium">
+                「AI 探長助教」功能需要使用 Gemini API。金鑰將儲存於您的瀏覽器中，不會上傳至其他伺服器。
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="貼上您的 API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 font-mono text-sm" />
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveApiKey()" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl shadow-md transition">
+                        儲存設定
+                    </button>
+                    <button onclick="clearApiKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl transition">
+                        清除金鑰
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 text-center">
+                    沒有金鑰？可至 Google AI Studio 免費申請。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Tutor 彈窗 -->
+    <div id="ai-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[90] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border-4 border-purple-400 animate-fade-in text-left">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-purple-100 w-10 h-10 rounded-full flex items-center justify-center text-purple-600">
+                        <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-purple-800">AI 探長助教提示</h3>
+                </div>
+                <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="ai-content-box" class="bg-purple-50/50 rounded-2xl p-4 min-h-[120px] mb-4 text-slate-700 leading-relaxed relative flex items-center justify-center">
+                <!-- 內容會由 JS 動態塞入 -->
+            </div>
+
+            <div class="flex gap-3">
+                <button id="tts-btn" onclick="handleSpeak()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-volume-high"></i> 語音朗讀提示
+                </button>
+                <button onclick="closeAIModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-xl transition">
+                    知道了！
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- 應用程式狀態 ---
+    let state = {
+        currentStage: 'intro', // 'intro', 'concept-direction', 'concept-angle', 'practice-1', 'practice-2', 'practice-3', 'practice-4', 'practice-5', 'summary'
+        angle: 0,
+        showHint: false,
+        feedback: null // null, 'correct', 'incorrect'
+    };
+
+    // AI Tutor 狀態
+    let aiExplanation = null;
+    let aiLoading = false;
+    let isSpeaking = false;
+    let currentUtterance = null;
+
+    // AI 結案特攻故事狀態
+    let aiStory = null;
+    let aiStoryLoading = false;
+
+    // --- 關卡與題目資料庫 ---
+    const progressStages = ['concept-direction', 'concept-angle', 'practice-1', 'practice-2', 'practice-3', 'practice-4', 'practice-5'];
+
+    const practiceQuestions = {
+        'practice-1': {
+            title: "題目 1",
+            question: "妹妹的手錶「快了 15 分鐘」，要把分針調回正確時刻。",
+            aiHint: "🕵️‍♂️ 探長提示：時間快了，代表手錶上的指針跑得太快、太前面了。就像在看電視倒帶一樣，我們要把它往回調喔！想一想，倒帶是順時針還是逆時針？而 15 分鐘對應了多少度呢？（提示：分針每走 1 分鐘是 6 度，所以 6 乘以 15 是多少度呢？）🔍",
+            hints: [
+                "時間「快了」代表跑太前面，要像倒帶一樣往回轉（逆時針）。",
+                "15 分鐘是幾度？ (6 × 15 = ?)"
+            ],
+            options: [
+                { id: "opt1", text: "① 順時針旋轉 90 度", correct: false },
+                { id: "opt2", text: "② 順時針旋轉 3 度", correct: false },
+                { id: "opt3", text: "③ 逆時針旋轉 3 度", correct: false },
+                { id: "opt4", text: "④ 逆時針旋轉 90 度", correct: true }
+            ],
+            correctMsg: "快了就要「逆時針」調回去！",
+            hintMsg: "哎呀！再想一下：快了要「倒帶」喔！"
+        },
+        'practice-2': {
+            title: "題目 2",
+            question: "從 10時10分 到 10時45分，分針旋轉了多少度？",
+            aiHint: "🕵️‍♂️ 探長提示：先算算看從 10 分走到 45 分，分針一共走了幾分鐘呢？（計算：45 減去 10 等於幾？）得到分鐘數之後，再乘上『分針每分鐘旋轉 6 度』的魔法常數，就可以破解答案了！🕰️",
+            hints: [
+                "經過幾分鐘：45 - 10 = ?",
+                "旋轉角度：6 × 分鐘數 = ?"
+            ],
+            options: [
+                { id: "opt1", text: "210 度", correct: true },
+                { id: "opt2", text: "180 度", correct: false },
+                { id: "opt3", text: "70 度", correct: false },
+                { id: "opt4", text: "35 度", correct: false }
+            ],
+            correctMsg: "6 × 35 = 210 度！",
+            hintMsg: "先算經過幾分鐘，再乘以 6 喔！"
+        },
+        'practice-3': {
+            title: "題目 3",
+            question: "這次手錶「慢了 20 分鐘」，要調回正確時間，分針該怎麼轉？",
+            aiHint: "🕵️‍♂️ 探長提示：手錶慢了，代表它走得太慢，落在了後面。我們需要幫它往前加速追趕到正確的時間！前進要用順時針喔。那 20 分鐘代表分針需要轉動多少度？用 6 乘以 20 算算看！⏰",
+            hints: [
+                "「慢了」表示落在後面，要往前追趕（順時針）。",
+                "6 度/分鐘 × 20 分鐘 = 120 度。"
+            ],
+            options: [
+                { id: "opt1", text: "① 逆時針旋轉 120 度", correct: false },
+                { id: "opt2", text: "② 順時針旋轉 120 度", correct: true },
+                { id: "opt3", text: "③ 順時針旋轉 20 度", correct: false },
+                { id: "opt4", text: "④ 逆時針旋轉 20 度", correct: false }
+            ],
+            correctMsg: "慢了就要「順時針」往前追！",
+            hintMsg: "慢了就要往前跑（順時針）才追得到喔！"
+        },
+        'practice-4': {
+            title: "題目 4",
+            question: "分針從數字 12 走到數字 4，請問分針旋轉了多少度？",
+            aiHint: "🕵️‍♂️ 探長提示：分針從 12 走到 4，代表走了多少分鐘呢？時鐘上的每個大數字格子代表 5 分鐘。從 12 走到 4 有 4 大格，所以是 5 × 4 = 20 分鐘。算出經過 20 分鐘後，再利用 1 分鐘是 6 度的規則乘開，就得到答案囉！🧩",
+            hints: [
+                "「分針」從 12 走到 4 是幾分鐘呢？ (5, 10, 15, 20 分鐘...)"
+            ],
+            options: [
+                { id: "opt1", text: "90 度", correct: false },
+                { id: "opt2", text: "100 度", correct: false },
+                { id: "opt3", text: "120 度", correct: true },
+                { id: "opt4", text: "4 度", correct: false }
+            ],
+            correctMsg: "6 度/分鐘 × 20分鐘 = 120 度！",
+            hintMsg: "數字 4 代表走了 20 分鐘喔！"
+        },
+        'practice-5': {
+            title: "題目 5",
+            question: "挑戰題：分針順時針旋轉了「60 度」，請問經過了幾分鐘？",
+            aiHint: "🕵️‍♂️ 探長提示：這是一題逆向挑戰！以往我們是用分鐘數乘以 6 算出角度，現在已經知道角度是 60 度，要想倒回去算分鐘數，就要用除法囉！想一想，60 度裡面包含多少個 6 度呢？（算式：60 除以 6）🌟",
+            hints: [
+                "1 分鐘是 6 度。",
+                "60 度裡面有幾個 6 度呢？(60 ÷ 6)"
+            ],
+            options: [
+                { id: "opt1", text: "10 分鐘", correct: true },
+                { id: "opt2", text: "6 分鐘", correct: false },
+                { id: "opt3", text: "60 分鐘", correct: false },
+                { id: "opt4", text: "360 分鐘", correct: false }
+            ],
+            correctMsg: "60 ÷ 6 = 10 分鐘！",
+            hintMsg: "用除法算算看：60 除以 6 等於多少？"
+        }
+    };
+
+    const fallbackStories = [
+        "恭喜你！經過這場特訓，你已經是能夠一眼看穿『順時針旋轉』與『逆時針修正』的時鐘特攻隊大師了！連最難的換算與挑戰題都難不倒你，太優秀了！⏱️🔥🚀",
+        "太強了！你成功修好了妹妹的手錶！現在你已經掌握了『時間與角度的魔法公式』：分針走 1 分鐘就是 6 度。不管時間快慢，你都能精準調整。繼續保持這份好奇心吧！🌟📐🎖️",
+        "真不敢相信！你竟然這麼快就完成所有特訓了！從今天起，你就是『時鐘特攻隊』的黃牌特務。記得，生活中的時間大小事，都能用角度去觀察它喔！💖🔥💯"
+    ];
+
+    // --- API Key 管理 ---
+    function getApiKey() {
+        return localStorage.getItem('gemini_api_key') || '';
+    }
+
+    function toggleSettingsModal() {
+        const modal = document.getElementById('settings-modal');
+        const input = document.getElementById('api-key-input');
+        input.value = getApiKey();
+        modal.classList.toggle('hidden');
+    }
+
+    function saveApiKey() {
+        const input = document.getElementById('api-key-input');
+        const key = input.value.trim();
+        if (key) {
+            localStorage.setItem('gemini_api_key', key);
+            alert('API Key 儲存成功！');
+        } else {
+            localStorage.removeItem('gemini_api_key');
+            alert('已清除 API Key。');
+        }
+        toggleSettingsModal();
+        render();
+    }
+
+    function clearApiKey() {
+        localStorage.removeItem('gemini_api_key');
+        const input = document.getElementById('api-key-input');
+        input.value = '';
+        alert('已清除 API Key。');
+        toggleSettingsModal();
+        render();
+    }
+
+    // --- AI Tutor API 呼叫 ---
+    async function callGeminiAPI(prompt, apiKey, retries = 3, delay = 1000) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 老師現在有點忙，請稍後再試。";
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+            }
+        }
+    }
+
+    async function handleAskAI() {
+        const key = getApiKey();
+        if (!key) {
+            alert('請點選右上角齒輪設定 Gemini API Key，即可召喚 AI 探長為您解惑！');
+            toggleSettingsModal();
+            return;
+        }
+
+        const modal = document.getElementById('ai-modal');
+        const contentBox = document.getElementById('ai-content-box');
+        
+        modal.classList.remove('hidden');
+        contentBox.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-4 w-full">
+                <i class="fa-solid fa-spinner animate-spin text-purple-400 text-3xl mb-2"></i>
+                <p class="text-sm text-purple-400 font-bold">探長正在思考中...</p>
+            </div>
+        `;
+
+        aiLoading = true;
+        aiExplanation = null;
+
+        const currentQ = practiceQuestions[state.currentStage];
+        const questionText = currentQ.question;
+        const hintText = currentQ.aiHint;
+
+        const prompt = `你現在是一位超級會教數學的國小老師，也是「時鐘特攻隊」的大隊長。請根據以下資訊，引導新加入的特攻隊員找到時鐘旋轉與角度的秘密：
+        【題目資訊】
+        - 適合年級：國小中低年級 (三年級/四年級) 角度與時鐘夾角、旋轉單元
+        - 題目目標：${questionText}
+        - 簡要詳解與思路提示：${hintText}
+
+        【您的任務】
+        1. 請使用國小中低年級（8-10歲）聽得懂的簡單詞彙，語氣要活潑、自信、富有「時鐘解密特攻隊」的樂趣，多使用「特攻隊員你好！」、「讓我們拿出放大鏡觀察這個時鐘」等口吻。
+        2. 請「不要」直接透露計算結果或最終正確答案選項（例如不要直接說出應該選哪個選項）。
+        3. 您的引導重點是分析順時針/逆時針與旋轉角度的關係：
+           - 慢了要「往前調」（順時針），快了要「往回調」（逆時針）。
+           - 分針每走1分鐘就是旋轉6度，引導他們怎麼利用乘法或除法來做轉換。
+        4. 輸出排版請包含適當的換行與 emoji，增加學生的讀寫趣味與對話感。
+        5. 最後給予隊員溫慢且激勵的特攻任務肯定。
+        請使用繁體中文回答。`;
+
+        try {
+            const result = await callGeminiAPI(prompt, key);
+            aiExplanation = result;
+            
+            // 簡單格式化換行與文字粗體
+            let formattedResult = result
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            contentBox.innerHTML = `<div class="w-full text-base font-medium text-slate-700 leading-relaxed">${formattedResult}</div>`;
+        } catch (error) {
+            aiExplanation = "報告特攻隊員！大腦通訊被宇宙射線干擾，請檢查 API Key 設定。";
+            contentBox.innerHTML = `<p class="text-rose-500 font-bold">${aiExplanation}</p>`;
+        } finally {
+            aiLoading = false;
+        }
+    }
+
+    function closeAIModal() {
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+        }
+        document.getElementById('ai-modal').classList.add('hidden');
+    }
+
+    function handleSpeak() {
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            updateTTSButtonState();
+        } else {
+            if (!aiExplanation) return;
+            // 清除 markdown 符號
+            const cleanText = aiExplanation.replace(/[\*#_`~]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.95;
+            utterance.onend = () => {
+                isSpeaking = false;
+                updateTTSButtonState();
+            };
+            utterance.onerror = () => {
+                isSpeaking = false;
+                updateTTSButtonState();
+            };
+            window.speechSynthesis.speak(utterance);
+            isSpeaking = true;
+            currentUtterance = utterance;
+            updateTTSButtonState();
+        }
+    }
+
+    function updateTTSButtonState() {
+        const btn = document.getElementById('tts-btn');
+        if (!btn) return;
+        if (isSpeaking) {
+            btn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i> 停止朗讀`;
+            btn.classList.replace('bg-indigo-500', 'bg-rose-500');
+            btn.classList.replace('hover:bg-indigo-600', 'hover:bg-rose-600');
+        } else {
+            btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> 語音朗讀提示`;
+            btn.classList.replace('bg-rose-500', 'bg-indigo-500');
+            btn.classList.replace('hover:bg-rose-600', 'hover:bg-indigo-600');
+        }
+    }
+
+    // --- AI 結案故事生成 ---
+    async function generateAiStory() {
+        const key = getApiKey();
+        const storyBox = document.getElementById('ai-story-box');
+        if (!storyBox) return;
+
+        if (!key) {
+            // 沒有 API Key，隨機輪播預設故事
+            aiStoryLoading = true;
+            storyBox.innerHTML = `
+                <div class="flex items-center justify-center py-4">
+                    <i class="fa-solid fa-spinner animate-spin text-indigo-400 text-2xl mr-2"></i>
+                    <p class="text-sm text-indigo-400 font-bold">正在撰寫特攻結案報告...</p>
+                </div>
+            `;
+            setTimeout(() => {
+                const randomStory = fallbackStories[Math.floor(Math.random() * fallbackStories.length)];
+                aiStory = randomStory;
+                aiStoryLoading = false;
+                renderStoryBox(randomStory);
+            }, 1200);
+            return;
+        }
+
+        aiStoryLoading = true;
+        storyBox.innerHTML = `
+            <div class="flex items-center justify-center py-4">
+                <i class="fa-solid fa-spinner animate-spin text-indigo-400 text-2xl mr-2"></i>
+                <p class="text-sm text-indigo-400 font-bold">正透過 AI 撰寫您專屬的結案故事...</p>
+            </div>
+        `;
+
+        const prompt = `你現在是「時鐘特攻隊」的大隊長。一位小隊員剛剛成功通過了所有時鐘特攻特訓（包括辨別順時針與逆時針、計算分針走動度數、以及完成所有分針旋轉的變換問題）。
+        請為他寫一份充滿熱情、幽默且富有數學教育啟發的「特攻結案報告故事」。
+        要求：
+        1. 使用適合國小學童（8-10歲）的語調，以熱烈的語氣讚揚他的時間與角度控制能力。
+        2. 提及他學會了「快了逆時針、慢了順時針」以及「分針每分鐘6度」的計算魔法。
+        3. 字數在 150 字以內，並多放些可愛的 emoji（時鐘、閃電、勳章、獎杯等）。
+        請用繁體中文回答。`;
+
+        try {
+            const result = await callGeminiAPI(prompt, key);
+            aiStory = result;
+            aiStoryLoading = false;
+            renderStoryBox(result);
+        } catch (error) {
+            const randomStory = fallbackStories[0];
+            aiStory = randomStory;
+            aiStoryLoading = false;
+            renderStoryBox(randomStory);
+        }
+    }
+
+    function renderStoryBox(storyText) {
+        const storyBox = document.getElementById('ai-story-box');
+        if (!storyBox) return;
+        let formatted = storyText.replace(/\n/g, '<br>');
+        storyBox.innerHTML = `
+            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-100 animate-fade-in">
+                <h4 class="font-bold text-indigo-800 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-indigo-600"></i> 大隊長給你的話：
+                </h4>
+                <p class="text-slate-700 leading-relaxed font-medium">
+                    ${formatted}
+                </p>
+            </div>
+        `;
+    }
+
+    // --- HTML 時鐘繪製功能 ---
+    function getClockFaceHTML(minuteAngle, showAngle = false, label = "") {
+        // 刻度
+        let ticksHTML = "";
+        for (let i = 0; i < 12; i++) {
+            const rot = i * 30;
+            const height = i % 3 === 0 ? '12px' : '8px';
+            const width = i % 3 === 0 ? '4px' : '2px';
+            const bgColor = i % 3 === 0 ? '#475569' : '#cbd5e1';
+            ticksHTML += `
+                <div
+                    class="absolute origin-bottom"
+                    style="transform: rotate(${rot}deg) translate(0, -88px); height: ${height}; width: ${width}; background-color: ${bgColor};"
+                ></div>
+            `;
+        }
+
+        // 數字
+        let numbersHTML = "";
+        const nums = [12, 3, 6, 9];
+        for (let num of nums) {
+            const rot = num * 30;
+            numbersHTML += `
+                <span
+                    class="absolute font-bold text-slate-500"
+                    style="transform: rotate(${rot}deg) translate(0, -75px) rotate(-${rot}deg);"
+                >${num}</span>
+            `;
+        }
+
+        // 角度 conic gradient 覆蓋
+        let conicStyle = "";
+        if (showAngle) {
+            if (minuteAngle >= 0) {
+                conicStyle = `background: conic-gradient(rgba(250, 204, 21, 0.3) ${minuteAngle}deg, transparent 0deg);`;
+            } else {
+                const positiveAngle = Math.abs(minuteAngle);
+                const startAngle = (360 + minuteAngle) % 360;
+                conicStyle = `background: conic-gradient(from ${startAngle}deg, rgba(250, 204, 21, 0.3) ${positiveAngle}deg, transparent 0deg);`;
+            }
+        }
+
+        return `
+            <div class="relative flex flex-col items-center justify-center my-4">
+                <div class="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full border-4 border-indigo-200 bg-white shadow-xl flex items-center justify-center overflow-hidden">
+                    <!-- 刻度 -->
+                    ${ticksHTML}
+                    <!-- 數字 -->
+                    ${numbersHTML}
+                    <!-- 中心點 -->
+                    <div class="absolute w-3 h-3 bg-indigo-600 rounded-full z-20"></div>
+                    <!-- 分針 -->
+                    <div
+                        class="absolute w-1.5 h-20 sm:h-24 bg-indigo-500 rounded-full origin-bottom z-10 transition-transform duration-700 ease-out"
+                        style="bottom: 50%; transform: rotate(${minuteAngle}deg);"
+                    >
+                        <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-indigo-500"></div>
+                    </div>
+                    <!-- 角度扇形輔助 -->
+                    ${showAngle ? `<div class="absolute inset-0 rounded-full z-0" style="${conicStyle}"></div>` : ''}
+                </div>
+                <p class="mt-2 font-bold text-indigo-600 text-lg">${label}</p>
+            </div>
+        `;
+    }
+
+    // --- 答題機制 ---
+    function handleAnswer(isCorrect, questionKey) {
+        if (state.feedback) return; // 避免重複點擊
+
+        if (isCorrect) {
+            state.feedback = 'correct';
+            render();
+
+            // 撒花特效
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.75 } });
+            }
+
+            // 倒數切換下一題
+            setTimeout(() => {
+                state.feedback = null;
+                state.showHint = false;
+                
+                // 次關切換
+                switch (questionKey) {
+                    case 'practice-1': state.currentStage = 'practice-2'; break;
+                    case 'practice-2': state.currentStage = 'practice-3'; break;
+                    case 'practice-3': state.currentStage = 'practice-4'; break;
+                    case 'practice-4': state.currentStage = 'practice-5'; break;
+                    case 'practice-5': state.currentStage = 'summary'; break;
+                }
+                render();
+            }, 1800);
+        } else {
+            state.feedback = 'incorrect';
+            render();
+        }
+    }
+
+    function toggleTeacherHint() {
+        state.showHint = !state.showHint;
+        render();
+    }
+
+    // --- 順逆時針概念按鈕動作 ---
+    function changeClockAngle(delta) {
+        state.angle += delta;
+        render();
+    }
+
+    // --- 重啟遊戲 ---
+    function handleRestart() {
+        state.currentStage = 'intro';
+        state.angle = 0;
+        state.showHint = false;
+        state.feedback = null;
+        aiExplanation = null;
+        aiStory = null;
+        render();
+    }
+
+    // --- HTML 畫面生成核心 ---
+    function render() {
+        const app = document.getElementById('app');
+        
+        // 進度條 HTML
+        let progressHTML = "";
+        if (state.currentStage !== 'intro' && state.currentStage !== 'summary') {
+            const currentIdx = progressStages.indexOf(state.currentStage);
+            let dots = "";
+            progressStages.forEach((s, idx) => {
+                const isActive = currentIdx >= idx;
+                const wClass = isActive ? "w-6" : "w-2";
+                const bgClass = isActive ? "bg-indigo-500" : "bg-indigo-200";
+                dots += `<div class="h-2 rounded-full transition-all duration-500 ${wClass} ${bgClass}"></div>`;
+            });
+            progressHTML = `
+                <div class="flex space-x-1 mb-6 justify-center items-center">
+                    ${dots}
+                </div>
+            `;
+        }
+
+        let stageHTML = "";
+
+        switch (state.currentStage) {
+            case 'intro':
+                stageHTML = `
+                    <div class="flex flex-col items-center text-center space-y-6 animate-fade-in w-full max-w-md">
+                        <div class="bg-indigo-100 p-5 rounded-full animate-bounce mt-4 shadow-inner">
+                            <i class="fa-regular fa-clock text-indigo-600 text-6xl"></i>
+                        </div>
+                        <h1 class="text-4xl font-black text-indigo-700 tracking-tight">
+                            時鐘特攻隊
+                        </h1>
+                        <p class="text-lg text-slate-600 font-medium">
+                            如果你是「時間管理大師」，你能幫妹妹把手錶修好嗎？
+                        </p>
+                        
+                        <div class="p-6 bg-white rounded-3xl shadow-xl border-b-4 border-indigo-100 w-full">
+                            <div class="text-6xl mb-4">⏱️</div>
+                            <p class="text-slate-500 font-bold mb-3">我們要學會的特殊技能：</p>
+                            <ul class="text-left mt-2 space-y-3 font-bold text-slate-700">
+                                <li class="flex items-center"><i class="fa-solid fa-circle-check text-emerald-400 mr-2 text-xl"></i> 分辨順時針與逆時針</li>
+                                <li class="flex items-center"><i class="fa-solid fa-circle-check text-emerald-400 mr-2 text-xl"></i> 計算分針轉動了幾度</li>
+                            </ul>
+                        </div>
+                        
+                        <button
+                            onclick="state.currentStage = 'concept-direction'; render();"
+                            class="w-full py-4 bg-yellow-400 hover:bg-yellow-500 text-indigo-900 font-black rounded-2xl text-xl shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2 border-b-4 border-yellow-600"
+                        >
+                            開始特訓 <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                `;
+                break;
+
+            case 'concept-direction':
+                stageHTML = `
+                    <div class="space-y-6 animate-fade-in w-full max-w-md">
+                        <div class="bg-white p-5 rounded-3xl shadow-xl border-l-8 border-yellow-400">
+                            <h2 class="text-2xl font-bold text-indigo-800 mb-2">特訓 1：方向感</h2>
+                            <p class="text-slate-500 font-bold mb-4">時鐘的指針有兩種跑法，點擊看看它們的變化：</p>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <button 
+                                    onclick="changeClockAngle(30)"
+                                    class="p-4 bg-indigo-50/50 rounded-2xl border-2 border-indigo-100 hover:bg-indigo-100 flex flex-col items-center transition active:scale-95"
+                                >
+                                    <i class="fa-solid fa-arrow-rotate-right text-indigo-600 text-3xl mb-2"></i>
+                                    <span class="font-bold text-indigo-700">順時針</span>
+                                    <span class="text-[10px] text-slate-400 mt-1">時間正常流動</span>
+                                </button>
+                                <button 
+                                    onclick="changeClockAngle(-30)"
+                                    class="p-4 bg-rose-50/50 rounded-2xl border-2 border-rose-100 hover:bg-rose-100 flex flex-col items-center transition active:scale-95"
+                                >
+                                    <i class="fa-solid fa-arrow-rotate-left text-rose-600 text-3xl mb-2"></i>
+                                    <span class="font-bold text-rose-700">逆時針</span>
+                                    <span class="text-[10px] text-slate-400 mt-1">倒退 / 往回調</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        ${getClockFaceHTML(state.angle, false, "試試看點擊上面的按鈕旋轉分針！")}
+
+                        <div class="text-center space-y-4">
+                            <div class="bg-indigo-100/70 border border-indigo-200 px-4 py-3 rounded-2xl text-indigo-800 font-bold text-sm leading-relaxed">
+                                💡 特務小撇步：想把「快了」的時間調回來，要用「逆時針」倒帶喔！
+                            </div>
+                            <button
+                                onclick="state.angle = 0; state.currentStage = 'concept-angle'; render();"
+                                class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-md hover:bg-indigo-700 border-b-4 border-indigo-800 transition active:scale-95"
+                            >
+                                我懂了，下一關！
+                            </button>
+                        </div>
+                    </div>
+                `;
+                break;
+
+            case 'concept-angle':
+                stageHTML = `
+                    <div class="space-y-6 animate-fade-in w-full max-w-md">
+                        <div class="bg-white p-5 rounded-3xl shadow-xl border-l-8 border-emerald-400">
+                            <h2 class="text-2xl font-bold text-emerald-800 mb-2">特訓 2：角度計算機</h2>
+                            <p class="text-slate-500 font-bold mb-4">分針走 1 圈是 60 分鐘，也就是旋轉 360 度。</p>
+                            
+                            <div class="my-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center shadow-inner">
+                               <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">分針旋轉魔法公式</div>
+                               <div class="text-2xl font-black text-indigo-600 flex justify-center items-center gap-2">
+                                   360 ÷ 60 = <span class="text-rose-500 text-4xl">6</span>
+                               </div>
+                               <div class="text-xs text-slate-500 font-bold mt-2"><i class="fa-solid fa-wand-magic-sparkles text-rose-400"></i> 分針每走 1 分鐘 = 轉動 6 度</div>
+                            </div>
+
+                            <div class="space-y-3 mt-4 text-slate-700 font-bold text-sm bg-slate-50/50 p-4 rounded-xl">
+                                <div class="flex justify-between items-center pb-2 border-b border-dashed border-slate-200">
+                                    <span>如果走了 10 分鐘...</span>
+                                    <span class="text-indigo-600 bg-indigo-50 px-2 py-1 rounded">6 × 10 = 60 度</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>如果走了 15 分鐘...</span>
+                                    <span class="text-indigo-600 bg-indigo-50 px-2 py-1 rounded">6 × 15 = 90 度</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onclick="state.currentStage = 'practice-1'; render();"
+                            class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-lg shadow-md border-b-4 border-emerald-700 transition active:scale-95"
+                        >
+                            來挑戰第一題！
+                        </button>
+                    </div>
+                `;
+                break;
+
+            case 'practice-1':
+            case 'practice-2':
+            case 'practice-3':
+            case 'practice-4':
+            case 'practice-5':
+                const q = practiceQuestions[state.currentStage];
+                const isPractice245 = state.currentStage === 'practice-2' || state.currentStage === 'practice-4' || state.currentStage === 'practice-5';
+                
+                // 選項佈局 (單欄或雙欄)
+                let optionsHTML = "";
+                if (isPractice245) {
+                    optionsHTML = `<div class="grid grid-cols-2 gap-3">`;
+                    q.options.forEach(opt => {
+                        const btnClass = opt.correct ? "option-btn-correct" : "option-btn";
+                        const dynamicStyle = state.feedback === 'correct' && opt.correct
+                            ? "bg-emerald-50 border-emerald-400 text-emerald-700"
+                            : (state.feedback === 'incorrect'
+                                ? "bg-rose-50 border-rose-300 text-rose-700"
+                                : "border-slate-200 hover:border-indigo-400 text-slate-700 hover:bg-slate-50");
+
+                        optionsHTML += `
+                            <button 
+                                onclick="handleAnswer(${opt.correct}, '${state.currentStage}')" 
+                                class="${btnClass} w-full p-4 rounded-2xl border-2 text-center font-bold text-lg transition-all active:scale-95 ${dynamicStyle}"
+                            >
+                                ${opt.text}
+                            </button>
+                        `;
+                    });
+                    optionsHTML += `</div>`;
+                } else {
+                    q.options.forEach(opt => {
+                        const btnClass = opt.correct ? "option-btn-correct" : "option-btn";
+                        const dynamicStyle = state.feedback === 'correct' && opt.correct
+                            ? "bg-emerald-50 border-emerald-400 text-emerald-700 shadow-sm"
+                            : (state.feedback === 'incorrect'
+                                ? "bg-rose-50 border-rose-300 text-rose-700"
+                                : "border-slate-200 hover:border-indigo-400 text-slate-700 hover:bg-slate-50");
+
+                        optionsHTML += `
+                            <button 
+                                onclick="handleAnswer(${opt.correct}, '${state.currentStage}')" 
+                                class="${btnClass} w-full p-3 rounded-2xl border-2 text-left font-bold transition-all active:scale-95 ${dynamicStyle}"
+                            >
+                                ${opt.text}
+                            </button>
+                        `;
+                    });
+                }
+
+                // 畫圖 / 時鐘顯示 (僅第四題有特殊時鐘，其他題使用精美 icon 點綴)
+                let visualHTML = "";
+                if (state.currentStage === 'practice-4') {
+                    visualHTML = `
+                        <div class="flex justify-center my-4">
+                            <div class="w-36 h-36 rounded-full border-4 border-indigo-200 relative bg-white flex items-center justify-center overflow-hidden shadow-md">
+                                <div class="absolute top-1 text-[10px] font-bold text-slate-400">12</div>
+                                <div class="absolute bottom-1 text-[10px] font-bold text-slate-400">6</div>
+                                <div class="absolute right-2 text-[10px] font-bold text-slate-400">3</div>
+                                <div class="absolute left-2 text-[10px] font-bold text-slate-400">9</div>
+                                <!-- 角度扇形 120度 -->
+                                <div class="absolute inset-0 rounded-full" style="background: conic-gradient(rgba(129, 140, 248, 0.25) 120deg, transparent 0deg);"></div>
+                                <!-- 分針指在4點鐘方向 (120度) -->
+                                <div class="absolute w-1 h-14 bg-indigo-500 rounded-full origin-bottom" style="bottom: 50%; transform: rotate(120deg); transform-origin: bottom;"></div>
+                                <div class="absolute w-2 h-2 bg-indigo-700 rounded-full z-10"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // 老師的提示卡片
+                let teacherHintHTML = "";
+                if (state.showHint) {
+                    let items = "";
+                    q.hints.forEach(h => {
+                        items += `<li>${h}</li>`;
+                    });
+                    teacherHintHTML = `
+                        <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 animate-fade-in relative text-left">
+                            <button onclick="toggleTeacherHint()" class="absolute top-2 right-2 text-yellow-600 hover:text-yellow-800">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                            <p class="text-sm text-yellow-800 font-bold mb-2 flex items-center gap-1">
+                                <i class="fa-solid fa-lightbulb"></i> 老師的特訓指示：
+                            </p>
+                            <ol class="list-decimal list-inside text-sm text-slate-700 space-y-1 font-semibold">
+                                ${items}
+                            </ol>
+                            <!-- 呼叫 AI 探長助教 -->
+                            <div class="mt-3 pt-3 border-t border-yellow-200/50 flex justify-end">
+                                <button 
+                                    onclick="handleAskAI()"
+                                    class="text-xs font-bold flex items-center gap-1.5 text-purple-700 bg-purple-100 hover:bg-purple-200 px-3 py-1.5 rounded-full transition active:scale-95"
+                                >
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> 召喚 AI 探長助教
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    teacherHintHTML = `
+                        <button 
+                            onclick="toggleTeacherHint()" 
+                            class="flex items-center text-sm font-bold text-indigo-500 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-full transition active:scale-95 self-start"
+                        >
+                            <i class="fa-solid fa-lightbulb mr-1.5"></i> 需要一點特訓提示嗎？
+                        </button>
+                    `;
+                }
+
+                // 回饋 Modal / 小提醒
+                let feedbackHTML = "";
+                if (state.feedback === 'correct') {
+                    feedbackHTML = `
+                        <div class="fixed inset-0 flex items-center justify-center bg-black/20 z-50 backdrop-blur-sm animate-fade-in">
+                            <div class="bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center max-w-xs text-center border-4 border-emerald-400 scale-up">
+                                <div class="text-5xl mb-2">🎉</div>
+                                <h3 class="text-2xl font-black text-emerald-500 mb-1">答對了！</h3>
+                                <p class="text-slate-600 font-bold leading-relaxed">${q.correctMsg}</p>
+                            </div>
+                        </div>
+                    `;
+                } else if (state.feedback === 'incorrect') {
+                    feedbackHTML = `
+                        <div class="bg-rose-100 text-rose-700 p-4 rounded-2xl text-center font-bold border border-rose-200 shadow-sm mt-4 animate-shake text-sm leading-relaxed">
+                            ${q.hintMsg} <br>
+                            <span class="text-xs font-semibold text-rose-500 flex items-center justify-center gap-1 mt-1">
+                                <i class="fa-solid fa-lightbulb"></i> 可點選提示開啟「AI 探長」提供分析引導喔！
+                            </span>
+                        </div>
+                    `;
+                }
+
+                // 設定卡片頂部顏色邊框
+                let borderClass = "border-indigo-500";
+                if (state.currentStage === 'practice-1') borderClass = "border-rose-400";
+                if (state.currentStage === 'practice-3') borderClass = "border-orange-400";
+                if (state.currentStage === 'practice-4') borderClass = "border-purple-500";
+                if (state.currentStage === 'practice-5') borderClass = "border-teal-500";
+
+                stageHTML = `
+                    <div class="space-y-4 animate-fade-in w-full max-w-md">
+                        <div class="bg-white p-5 rounded-3xl shadow-xl border-t-8 ${borderClass} relative overflow-hidden flex flex-col gap-3">
+                            <span class="absolute top-0 right-0 bg-slate-200 text-slate-700 text-xs font-black px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                                ${q.title}
+                            </span>
+                            <h3 class="font-bold text-lg text-slate-800 leading-snug mt-2">
+                                ${q.question}
+                            </h3>
+                            
+                            <!-- 老師提示按鈕/方塊 -->
+                            ${teacherHintHTML}
+                            
+                            <!-- 輔助繪圖層 -->
+                            ${visualHTML}
+
+                            <!-- 選項 -->
+                            <div class="space-y-2 mt-2">
+                                ${optionsHTML}
+                            </div>
+                        </div>
+                        
+                        <!-- 答題反饋層 -->
+                        ${feedbackHTML}
+                    </div>
+                `;
+                break;
+
+            case 'summary':
+                stageHTML = `
+                    <div class="space-y-6 animate-fade-in text-center w-full max-w-md">
+                        <div class="text-6xl animate-bounce">🏆</div>
+                        <h2 class="text-3xl font-black text-indigo-700 tracking-tight">恭喜修復完成！</h2>
+                        <p class="text-slate-600 font-bold">手錶已經精準運轉！你可以截圖把學習筆記存下來喔！</p>
+
+                        <div class="bg-white rounded-3xl shadow-xl overflow-hidden text-left border border-slate-100">
+                            <div class="bg-indigo-600 p-4 text-white font-bold text-center text-lg flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-book"></i> 時鐘特攻隊大師筆記
+                            </div>
+                            <div class="p-5 space-y-4">
+                                <!-- 表格化整理 -->
+                                <div class="grid grid-cols-3 gap-y-3 gap-x-2 text-sm border-b pb-4 border-slate-100 font-bold">
+                                    <div class="text-slate-400 col-span-1">手錶異常情境</div>
+                                    <div class="text-indigo-600 col-span-2 text-right">調整攻略 (特攻方案)</div>
+                                    
+                                    <div class="col-span-1 text-slate-700 font-bold">時間「快了」</div>
+                                    <div class="col-span-2 text-right font-black text-rose-500">
+                                        <i class="fa-solid fa-arrow-rotate-left mr-1"></i> 逆時針 (往回調)
+                                    </div>
+                                    
+                                    <div class="col-span-1 text-slate-700 font-bold">時間「慢了」</div>
+                                    <div class="col-span-2 text-right font-black text-emerald-500">
+                                        <i class="fa-solid fa-arrow-rotate-right mr-1"></i> 順時針 (往前調)
+                                    </div>
+                                </div>
+
+                                <div class="bg-yellow-50/70 p-4 rounded-2xl border border-yellow-100">
+                                    <h4 class="font-bold text-yellow-800 mb-2 text-center text-sm flex items-center justify-center gap-1.5">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> 旋轉角度密碼
+                                    </h4>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-center items-center space-x-2 text-xs font-mono font-black text-slate-700">
+                                            <span class="bg-white px-2 py-0.5 rounded shadow-sm border border-yellow-200 text-rose-500 text-sm">6</span>
+                                            <span>×</span>
+                                            <span>分鐘數</span>
+                                            <span>=</span>
+                                            <span>旋轉角度</span>
+                                        </div>
+                                        <div class="flex justify-center items-center space-x-2 text-xs font-mono font-black text-slate-700">
+                                            <span>旋轉角度</span>
+                                            <span>÷</span>
+                                            <span class="bg-white px-2 py-0.5 rounded shadow-sm border border-yellow-200 text-rose-500 text-sm">6</span>
+                                            <span>=</span>
+                                            <span>分鐘數</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- AI Story 結案故事區 -->
+                                <div id="ai-story-box" class="pt-4 border-t border-slate-100 flex flex-col gap-2">
+                                    <button 
+                                        onclick="generateAiStory()" 
+                                        class="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-black rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 border-b-4 border-indigo-700"
+                                    >
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> 生成專屬特攻結案故事
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onclick="handleRestart()"
+                            class="px-8 py-3 bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold rounded-full transition active:scale-95 inline-flex items-center gap-1"
+                        >
+                            <i class="fa-solid fa-arrow-rotate-right"></i> 再玩一次
+                        </button>
+                    </div>
+                `;
+                break;
+        }
+
+        app.innerHTML = `
+            <div class="w-full flex-grow flex flex-col items-center justify-center py-6">
+                <!-- 進度條 -->
+                ${progressHTML}
+                <!-- 關卡內容 -->
+                ${stageHTML}
+            </div>
+
+            <!-- 設計者頁尾 (置底) -->
+            <div class="w-full text-center py-4 text-slate-400 text-xs font-bold pointer-events-none mt-auto">
+                設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+            </div>
+        `;
+    }
+
+    // 初始化載入
+    document.addEventListener('DOMContentLoaded', () => {
+        render();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>分數做數大挑戰</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 隱藏滾動條 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 背景氣泡飄浮動畫 */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            bottom: -150px;
+            animation: float 15s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            50% { transform: translateY(-60vh) translateX(50px) rotate(180deg); opacity: 0.6; border-radius: 50%; }
+            100% { transform: translateY(-120vh) translateX(-50px) rotate(360deg); opacity: 0; }
+        }
+
+        /* 簡單的淡入動畫 */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 彈出縮放動畫 */
+        .scale-up { animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        @keyframes scaleUp { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* 抖動動畫 */
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-blue-50 to-indigo-100 text-gray-800 min-h-screen relative overflow-x-hidden flex flex-col justify-between">
+
+    <!-- 背景氣泡層 -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="bubble w-12 h-12 left-10" style="animation-delay: 0s; animation-duration: 12s;"></div>
+        <div class="bubble w-20 h-20 left-1/4" style="animation-delay: 2s; animation-duration: 18s;"></div>
+        <div class="bubble w-16 h-16 left-1/2" style="animation-delay: 4s; animation-duration: 14s;"></div>
+        <div class="bubble w-24 h-24 left-3/4" style="animation-delay: 1s; animation-duration: 20s;"></div>
+        <div class="bubble w-10 h-10 left-[90%]" style="animation-delay: 6s; animation-duration: 10s;"></div>
+    </div>
+
+    <!-- 設定金鑰按鈕 -->
+    <div class="absolute top-4 right-4 z-50">
+        <button onclick="toggleSettingsModal()" class="bg-white/85 hover:bg-white text-slate-600 w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform hover:rotate-45 active:scale-95 backdrop-blur-sm">
+            <i class="fa-solid fa-gear text-lg"></i>
+        </button>
+    </div>
+
+    <!-- 主要內容容器 -->
+    <div id="app" class="w-full flex-grow flex flex-col items-center p-4 z-10 relative"></div>
+
+    <!-- API Key 設定彈窗 -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 animate-fade-in text-left">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-slate-500"></i> 設定 Gemini API Key
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-slate-500 text-sm mb-4 leading-relaxed font-medium">
+                「AI 探長助教」功能需要使用 Gemini API。金鑰將儲存於您的瀏覽器中，不會上傳至其他伺服器。
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="貼上您的 API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 font-mono text-sm" />
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveApiKey()" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl shadow-md transition">
+                        儲存設定
+                    </button>
+                    <button onclick="clearApiKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl transition">
+                        清除金鑰
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 text-center">
+                    沒有金鑰？可至 Google AI Studio 免費申請。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Tutor 提示彈窗 -->
+    <div id="ai-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[90] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border-4 border-purple-400 animate-fade-in text-left">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-purple-100 w-10 h-10 rounded-full flex items-center justify-center text-purple-600">
+                        <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-purple-800">AI 探長助教提示</h3>
+                </div>
+                <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="ai-content-box" class="bg-purple-50/50 rounded-2xl p-4 min-h-[120px] mb-4 text-slate-700 leading-relaxed relative flex items-center justify-center">
+                <!-- 內容會由 JS 動態塞入 -->
+            </div>
+
+            <div class="flex gap-3">
+                <button id="tts-btn" onclick="handleSpeak()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-volume-high"></i> 語音朗讀提示
+                </button>
+                <button onclick="closeAIModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-xl transition">
+                    知道了！
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- 遊戲狀態 ---
+    let state = {
+        currentStage: 'intro', // 'intro', 'tutorial', 'game1', 'game2', 'game3', 'game4', 'game5', 'random-game', 'result'
+        score: 0,
+        feedback: null, // null or { type: 'success'|'error', message: '...' }
+        tutorial: {
+            input1: '',
+            input2: ''
+        },
+        game1: {
+            subStep: 0,
+            xiaoyu: '',
+            maruko: ''
+        },
+        gameTemplate: {
+            selections: {},
+            isCompleted: false,
+            hint: ''
+        },
+        randomLevelData: null
+    };
+
+    // AI Tutor 狀態
+    let aiExplanation = null;
+    let aiLoading = false;
+    let isSpeaking = false;
+    let currentUtterance = null;
+
+    // AI 結案報告故事狀態
+    let aiStory = null;
+    let aiStoryLoading = false;
+
+    // --- 闖關進度陣列 ---
+    const progressStages = ['tutorial', 'game1', 'game2', 'game3', 'game4', 'game5'];
+
+    // ----------------------------------------------------------------
+    // 本地端隨機關卡生成器 (無限挑戰模式)
+    // ----------------------------------------------------------------
+    const generateRandomLevelData = () => {
+        const totals = [12, 18, 20, 24, 30, 36, 40, 48, 60];
+        const total = totals[Math.floor(Math.random() * totals.length)];
+
+        const themes = [
+            { title: "寶可夢大師", unit: "隻", largeUnit: "箱", items: ["皮卡丘", "伊布", "胖丁", "快龍", "耿鬼"], icon: "fa-solid fa-gamepad", color: "purple" },
+            { title: "麥當勞點餐", unit: "份", largeUnit: "袋", items: ["大麥克", "薯條", "雞塊", "蛋捲冰淇淋"], icon: "fa-solid fa-utensils", color: "red" },
+            { title: "文具店購物", unit: "枝", largeUnit: "盒", items: ["鉛筆", "原子筆", "彩色筆", "螢光筆"], icon: "fa-regular fa-file-lines", color: "blue" },
+            { title: "體育課器材", unit: "顆", largeUnit: "籃", items: ["籃球", "躲避球", "排球", "網球"], icon: "fa-regular fa-circle", color: "green" },
+            { title: "尋寶遊戲", unit: "枚", largeUnit: "包", items: ["金幣", "鑽石", "紅寶石", "銀幣"], icon: "fa-regular fa-star", color: "pink" }
+        ];
+        
+        const theme = themes[Math.floor(Math.random() * themes.length)];
+        const shuffledItems = [...theme.items].sort(() => 0.5 - Math.random());
+        const selectedNames = shuffledItems.slice(0, 3);
+
+        const items = [];
+        const usedValues = new Set(); 
+
+        // 角色 1 (計算題)
+        let divisor1 = 0, num1 = 0, val1 = 0;
+        do {
+            const divisors = [];
+            for(let i=2; i<=total/2; i++) if(total % i === 0) divisors.push(i);
+            divisor1 = divisors[Math.floor(Math.random() * divisors.length)];
+            num1 = Math.floor(Math.random() * divisor1) + 1; 
+            if (Math.random() > 0.7) num1 += divisor1; // 30% 假分數
+            val1 = (total / divisor1) * num1;
+        } while (usedValues.has(val1));
+        usedValues.add(val1);
+        
+        items.push({
+            id: 'c1', name: selectedNames[0], desc: `${num1}/${divisor1} ${theme.largeUnit}`,
+            type: 'calc', divisor: divisor1, numerator: num1, correctVal: val1, 
+            options: generateOptions(val1)
+        });
+
+        // 角色 2 (計算題)
+        let divisor2 = 0, num2 = 0, val2 = 0;
+        do {
+            const divisors = [];
+            for(let i=2; i<=total/2; i++) if(total % i === 0) divisors.push(i);
+            divisor2 = divisors[Math.floor(Math.random() * divisors.length)];
+            num2 = Math.floor(Math.random() * divisor2) + 1;
+            if (Math.random() > 0.7) num2 += divisor2;
+            val2 = (total / divisor2) * num2;
+        } while (usedValues.has(val2));
+        usedValues.add(val2);
+
+        items.push({
+            id: 'c2', name: selectedNames[1], desc: `${num2}/${divisor2} ${theme.largeUnit}`,
+            type: 'calc', divisor: divisor2, numerator: num2, correctVal: val2, 
+            options: generateOptions(val2)
+        });
+
+        // 角色 3 (固定值)
+        let val3 = 0;
+        do {
+            val3 = Math.floor(total * (0.5 + Math.random() * 0.8)); 
+        } while (usedValues.has(val3));
+        usedValues.add(val3);
+
+        items.push({
+            id: 'c3', name: selectedNames[2], desc: '直接數', 
+            type: 'fixed', fixedVal: val3 
+        });
+
+        const isMax = Math.random() > 0.5;
+        const correctVal = isMax ? Math.max(val1, val2, val3) : Math.min(val1, val2, val3);
+        const correctIndex = items.findIndex(item => (item.type === 'calc' ? item.correctVal : item.fixedVal) === correctVal);
+        const correctName = items[correctIndex].name;
+
+        const finalChoices = [
+            { text: `${items[0].name} ${isMax?'最多':'最少'}`, isCorrect: 0 === correctIndex },
+            { text: `${items[1].name} ${isMax?'最多':'最少'}`, isCorrect: 1 === correctIndex },
+            { text: `${items[2].name} ${isMax?'最多':'最少'} (${correctVal}${theme.unit})`, isCorrect: 2 === correctIndex }
+        ];
+        
+        finalChoices[correctIndex].text = `${correctName} ${isMax?'最多':'最少'} (${correctVal}${theme.unit})`;
+
+        return {
+            title: `隨機挑戰：${theme.title}`,
+            colorTheme: theme.color,
+            icon: theme.icon,
+            total: total,
+            unit: theme.unit,
+            largeUnit: theme.largeUnit,
+            items: items,
+            questionText: `請問誰的${theme.unit}數${isMax?'最多':'最少'}？`,
+            choices: finalChoices.map(c => c.text),
+            correctChoiceIndex: correctIndex
+        };
+    };
+
+    const generateOptions = (correct) => {
+        const opts = new Set([correct]);
+        while(opts.size < 3) {
+            const offset = Math.floor(Math.random() * 5) + 1;
+            const sign = Math.random() > 0.5 ? 1 : -1;
+            const val = correct + (offset * sign);
+            if (val > 0) opts.add(val);
+        }
+        return Array.from(opts).sort((a,b) => a-b);
+    };
+
+    // ----------------------------------------------------------------
+    // API 金鑰與彈窗管理
+    // ----------------------------------------------------------------
+    function getApiKey() {
+        return localStorage.getItem('gemini_api_key') || '';
+    }
+
+    function toggleSettingsModal() {
+        const modal = document.getElementById('settings-modal');
+        const input = document.getElementById('api-key-input');
+        input.value = getApiKey();
+        modal.classList.toggle('hidden');
+    }
+
+    function saveApiKey() {
+        const input = document.getElementById('api-key-input');
+        const key = input.value.trim();
+        if (key) {
+            localStorage.setItem('gemini_api_key', key);
+            alert('API Key 儲存成功！');
+        } else {
+            localStorage.removeItem('gemini_api_key');
+            alert('已清除 API Key。');
+        }
+        toggleSettingsModal();
+        render();
+    }
+
+    function clearApiKey() {
+        localStorage.removeItem('gemini_api_key');
+        const input = document.getElementById('api-key-input');
+        input.value = '';
+        alert('已清除 API Key。');
+        toggleSettingsModal();
+        render();
+    }
+
+    // ----------------------------------------------------------------
+    // AI Tutor 探長提示邏輯
+    // ----------------------------------------------------------------
+    async function handleAskAI() {
+        const key = getApiKey();
+        if (!key) {
+            alert('請點選右上角齒輪設定 Gemini API Key，即可召喚 AI 探長為您解惑！');
+            toggleSettingsModal();
+            return;
+        }
+
+        const modal = document.getElementById('ai-modal');
+        const contentBox = document.getElementById('ai-content-box');
+        modal.classList.remove('hidden');
+        contentBox.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-4 w-full">
+                <i class="fa-solid fa-spinner animate-spin text-purple-400 text-3xl mb-2"></i>
+                <p class="text-sm text-purple-400 font-bold">探長正在思考中...</p>
+            </div>
+        `;
+
+        aiLoading = true;
+        aiExplanation = null;
+
+        // 收集目前題目資訊
+        let itemsInfo = "";
+        let totalVal = 0;
+        let unitName = "";
+        
+        if (state.currentStage === 'random-game' && state.randomLevelData) {
+            totalVal = state.randomLevelData.total;
+            unitName = state.randomLevelData.unit;
+            state.randomLevelData.items.forEach(it => {
+                if (it.type === 'calc' && !state.gameTemplate.selections[it.id]) {
+                    itemsInfo += `- 學生需計算：${it.name}拿了 ${it.desc}（分母是 ${it.divisor}，分子是 ${it.numerator}）是多少。\\n`;
+                }
+            });
+        } else {
+            // 固定關卡
+            const data = getCurrentStageData();
+            totalVal = data.total;
+            unitName = data.unit;
+            data.items.forEach(it => {
+                if (it.type === 'calc' && !state.gameTemplate.selections[it.id]) {
+                    itemsInfo += `- 學生需計算：${it.name}拿了 ${it.desc}（分母是 ${it.divisor}，分子是 ${it.numerator}）是多少。\\n`;
+                }
+            });
+        }
+
+        const prompt = `你現在是一位超級會教數學的國小老師，也是「分數做數大挑戰」的AI助教探長。請根據以下資訊，引導學生理解分數代表的數量概念：
+        【題目資訊】
+        - 適合年級：國小三、四年級 分數與數量的轉換單元
+        - 題目背景：全部（一箱/一盒/一包）共有 ${totalVal} ${unitName}。
+        - 待解問題：\\n${itemsInfo}
+        - 思路：使用「下除上乘」的口訣，先除以分母算出每一等份是多少，再乘以分子算出所求數量。如果分子大於分母（假分數），引導學生思考為什麼算出來的數量會大於一整箱的總量。
+
+        【您的任務】
+        1. 請使用國小三年級（8-9歲）聽得懂的簡單詞彙，語氣要溫柔、活潑、多用「偵探隊員你好！」、「讓我們拿出放大鏡一起拆解這道分數魔法」等探案口吻。
+        2. 請「不要」直接透露計算結果或最終正確答案數量（例如不要直接說出算出來是幾瓶/幾顆）。
+        3. 您的引導重點是概念拆解：
+           - 鼓勵他們把總數平分（除法）得到一堆的大小。
+           - 再依照分子拿走幾份（乘法）得到答案。
+        4. 輸出排版請包含適當的換行與 emoji，增加趣味。
+        5. 最後給予學生溫暖且激勵的特攻任務肯定。
+        請使用繁體中文回答。`;
+
+        try {
+            const result = await callGeminiAPI(prompt, key);
+            aiExplanation = result;
+            let formattedResult = result
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+            contentBox.innerHTML = `<div class="w-full text-base font-medium text-slate-700 leading-relaxed">${formattedResult}</div>`;
+        } catch (error) {
+            aiExplanation = "報告探員！總部通訊被太陽磁暴干擾，請檢查金鑰設定。";
+            contentBox.innerHTML = `<p class="text-rose-500 font-bold">${aiExplanation}</p>`;
+        } finally {
+            aiLoading = false;
+        }
+    }
+
+    function closeAIModal() {
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+        }
+        document.getElementById('ai-modal').classList.add('hidden');
+    }
+
+    function handleSpeak() {
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            updateTTSButtonState();
+        } else {
+            if (!aiExplanation) return;
+            const cleanText = aiExplanation.replace(/[\*#_`~]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.95;
+            utterance.onend = () => {
+                isSpeaking = false;
+                updateTTSButtonState();
+            };
+            utterance.onerror = () => {
+                isSpeaking = false;
+                updateTTSButtonState();
+            };
+            window.speechSynthesis.speak(utterance);
+            isSpeaking = true;
+            currentUtterance = utterance;
+            updateTTSButtonState();
+        }
+    }
+
+    function updateTTSButtonState() {
+        const btn = document.getElementById('tts-btn');
+        if (!btn) return;
+        if (isSpeaking) {
+            btn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i> 停止朗讀`;
+            btn.classList.replace('bg-indigo-500', 'bg-rose-500');
+            btn.classList.replace('hover:bg-indigo-600', 'hover:bg-rose-600');
+        } else {
+            btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> 語音朗讀提示`;
+            btn.classList.replace('bg-rose-500', 'bg-indigo-500');
+            btn.classList.replace('hover:bg-rose-600', 'hover:bg-indigo-600');
+        }
+    }
+
+    // --- AI 結案報告故事生成 ---
+    async function generateAiStory() {
+        const key = getApiKey();
+        const storyBox = document.getElementById('ai-story-box');
+        if (!storyBox) return;
+
+        if (!key) {
+            aiStoryLoading = true;
+            storyBox.innerHTML = `
+                <div class="flex items-center justify-center py-4">
+                    <i class="fa-solid fa-spinner animate-spin text-indigo-400 text-2xl mr-2"></i>
+                    <p class="text-sm text-indigo-400 font-bold">正在撰寫結案報告...</p>
+                </div>
+            `;
+            setTimeout(() => {
+                const randomStory = fallbackStories[Math.floor(Math.random() * fallbackStories.length)];
+                aiStory = randomStory;
+                aiStoryLoading = false;
+                renderStoryBox(randomStory);
+            }, 1200);
+            return;
+        }
+
+        aiStoryLoading = true;
+        storyBox.innerHTML = `
+            <div class="flex items-center justify-center py-4">
+                <i class="fa-solid fa-spinner animate-spin text-indigo-400 text-2xl mr-2"></i>
+                <p class="text-sm text-indigo-400 font-bold">正透過 AI 撰寫您專屬的結案故事...</p>
+            </div>
+        `;
+
+        const prompt = `你現在是「分數做數特攻隊」的大隊長。一位隊員剛剛成功通過了所有分數與數量的轉換關卡（總分得 ${state.score} 分），包括順利解答了假分數比真分數多的概念。
+        請為他寫一份充滿熱情、幽默且富有數學教育啟發的「特攻結案報告故事」。
+        要求：
+        1. 使用適合國小學童（8-10歲）的語調，以熱烈的語氣讚揚他的分數與數量轉換能力。
+        2. 提及他學會了「下除上乘」以及「假分數比一箱還多」的計算魔法。
+        3. 字數在 150 字以內，並多放些可愛的 emoji（巧克力、蘋果、星星、獎杯等）。
+        請用繁體中文回答。`;
+
+        try {
+            const result = await callGeminiAPI(prompt, key);
+            aiStory = result;
+            aiStoryLoading = false;
+            renderStoryBox(result);
+        } catch (error) {
+            const randomStory = fallbackStories[0];
+            aiStory = randomStory;
+            aiStoryLoading = false;
+            renderStoryBox(randomStory);
+        }
+    }
+
+    function renderStoryBox(storyText) {
+        const storyBox = document.getElementById('ai-story-box');
+        if (!storyBox) return;
+        let formatted = storyText.replace(/\n/g, '<br>');
+        storyBox.innerHTML = `
+            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-100 animate-fade-in">
+                <h4 class="font-bold text-indigo-800 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-indigo-600"></i> 探長大隊長給你的話：
+                </h4>
+                <p class="text-slate-700 leading-relaxed font-medium">
+                    ${formatted}
+                </p>
+            </div>
+        `;
+    }
+
+    const fallbackStories = [
+        "恭喜你！經過這場分數特訓，你已經是能夠一眼看穿『下除上乘』魔法的分數做數大師了！連最難的假分數題都難不倒你，太優秀了！✨🔢🎨",
+        "太強了！你成功破解了所有分數與數量的迷題！現在你已經擁有了『分數之眼』，不管平分成幾堆、拿走幾堆，都逃不過你的眼睛。繼續保持這份好奇心吧！🌟📐👮‍♂️",
+        "真不敢相信！你竟然這麼快就破案了！從今天起，你就是『分數特攻隊』的王牌探員。記得，心中的下除上乘口訣要隨時拿出來用喔！💖🔥💯"
+    ];
+
+    // ----------------------------------------------------------------
+    // 視覺化組件 HTML
+    // ----------------------------------------------------------------
+    function getVisualBoxHTML(total, divisor, numerator, highlightColor = "bg-amber-400") {
+        const groupSize = total / divisor;
+        let groupDivs = "";
+        for (let i = 0; i < divisor; i++) {
+            const isSelected = i < numerator;
+            let dots = "";
+            for (let j = 0; j < groupSize; j++) {
+                dots += `<div class="w-3 h-3 rounded-full ${isSelected ? highlightColor : 'bg-gray-200'}"></div>`;
+            }
+            const borderClass = isSelected ? 'border-indigo-400 bg-indigo-50 shadow-sm' : 'border-gray-100';
+            groupDivs += `
+                <div class="flex flex-wrap gap-1 p-1.5 rounded-lg border-2 ${borderClass}">
+                    ${dots}
+                </div>
+            `;
+        }
+        return `
+            <div class="my-4">
+              <div class="text-xs text-gray-500 mb-2 text-center font-bold">
+                一箱/一盒/一包有 ${total} 個，平分成 ${divisor} 堆
+              </div>
+              <div class="flex flex-wrap justify-center gap-2">
+                ${groupDivs}
+              </div>
+              <div class="text-xs text-indigo-600 font-bold mt-2 text-center">
+                 每堆有 ${groupSize} 個，取了 ${numerator} 堆
+              </div>
+            </div>
+        `;
+    }
+
+    // ----------------------------------------------------------------
+    // 關卡切換與處理
+    // ----------------------------------------------------------------
+    function setStage(stageName) {
+        state.currentStage = stageName;
+        state.feedback = null;
+        
+        // 重置模板狀態
+        state.gameTemplate = {
+            selections: {},
+            isCompleted: false,
+            hint: ''
+        };
+
+        if (stageName === 'tutorial') {
+            state.tutorial = { input1: '', input2: '' };
+        } else if (stageName === 'game1') {
+            state.game1 = { subStep: 0, xiaoyu: '', maruko: '' };
+        }
+        render();
+    }
+
+    function startRandomGame() {
+        state.randomLevelData = generateRandomLevelData();
+        setStage('random-game');
+    }
+
+    // --- 暖身題檢查 ---
+    function checkTutorialAnswer() {
+        const correctDiv = 6;
+        const correctFinal = 18;
+        const divVal = parseInt(state.tutorial.input1);
+        const mulVal = parseInt(state.tutorial.input2);
+
+        if (divVal === correctDiv && mulVal === correctFinal) {
+            state.feedback = { type: 'success', message: '太棒了！你已經學會把分數變成數量了！' };
+            render();
+            if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 40 });
+            setTimeout(() => {
+                state.feedback = null;
+                state.score += 10;
+                setStage('game1');
+            }, 1800);
+        } else {
+            if (divVal !== correctDiv) {
+                state.feedback = { type: 'error', message: '第一步錯囉！24瓶平分成4堆 (分母)，每堆是幾瓶？' };
+            } else {
+                state.feedback = { type: 'error', message: '第二步錯囉！每堆6瓶，我們要拿3堆 (分子)，共有幾瓶？' };
+            }
+            render();
+        }
+    }
+
+    // --- Game 1 答題邏輯 ---
+    function handleGame1NextStep() {
+        const xiaoyuVal = parseInt(state.game1.xiaoyu);
+        const marukoVal = parseInt(state.game1.maruko);
+
+        if (state.game1.subStep === 0) {
+            if (xiaoyuVal === 40) {
+                state.feedback = { type: 'success', message: '答對了！注意看，這是假分數，所以比一箱(24瓶)還多喔！' };
+                render();
+                if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 30 });
+                setTimeout(() => {
+                    state.feedback = null;
+                    state.game1.subStep = 1;
+                    render();
+                }, 1800);
+            } else {
+                state.feedback = { type: 'error', message: '算錯囉。24 ÷ 3 (分母) = 8，那 8 × 5 (分子) 是多少？' };
+                render();
+            }
+        } else if (state.game1.subStep === 1) {
+            if (marukoVal === 44) {
+                state.feedback = { type: 'success', message: '太強了！現在所有的數量都算出來了，來比較吧！' };
+                render();
+                if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 30 });
+                setTimeout(() => {
+                    state.feedback = null;
+                    state.game1.subStep = 2;
+                    render();
+                }, 1800);
+            } else {
+                state.feedback = { type: 'error', message: '再試試看。24 ÷ 6 (分母) = 4，那 4 × 11 (分子) 是多少？' };
+                render();
+            }
+        }
+    }
+
+    function handleGame1FinalSelect(choice) {
+        if (choice === 'correct') {
+            state.score += 40;
+            state.feedback = { type: 'success', message: '完全正確！你破解了第一關！' };
+            render();
+            if (typeof confetti === 'function') confetti({ particleCount: 60, spread: 50 });
+            setTimeout(() => {
+                state.feedback = null;
+                setStage('game2');
+            }, 1800);
+        } else {
+            state.feedback = { type: 'error', message: '看清楚剛剛算出來的數量喔：小玉 40 瓶、小丸子 44 瓶、花輪 38 瓶。' };
+            render();
+        }
+    }
+
+    // --- 選擇題型通用檢測 ---
+    function checkCalculation(id, clickVal, correctVal) {
+        if (state.feedback) return;
+        if (clickVal === correctVal) {
+            state.gameTemplate.selections[id] = clickVal;
+            
+            // 檢查是否所有題目都算完
+            let allDone = false;
+            let currentItems = [];
+            if (state.currentStage === 'random-game') {
+                currentItems = state.randomLevelData.items;
+            } else {
+                currentItems = getCurrentStageData().items;
+            }
+            
+            allDone = currentItems.every(it => it.type === 'fixed' || state.gameTemplate.selections[it.id]);
+            if (allDone) {
+                state.gameTemplate.isCompleted = true;
+            }
+            render();
+        } else {
+            state.feedback = { type: 'error', message: '算錯囉，再仔細用口訣算算看！' };
+            render();
+            setTimeout(() => {
+                state.feedback = null;
+                render();
+            }, 1500);
+        }
+    }
+
+    // 提示功能
+    function showLocalHint(total, divisor, numerator) {
+        const groupVal = total / divisor;
+        state.gameTemplate.hint = `把 ${total} 平分成 ${divisor} 堆，每堆是 ${total} ÷ ${divisor} = ${groupVal}。接著乘以 ${numerator} (分子) 就是答案囉！`;
+        render();
+    }
+
+    function handleFinalSelect(index, correctChoiceIndex, nextStageName, items) {
+        if (state.feedback) return;
+        
+        if (index === correctChoiceIndex) {
+            state.score += 50;
+            if (state.currentStage === 'random-game') {
+                state.feedback = { type: 'success', message: '挑戰成功！' };
+                render();
+                if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 60 });
+                setTimeout(() => {
+                    state.feedback = null;
+                    const shouldContinue = window.confirm("挑戰成功！要再來一局新的無限隨機挑戰嗎？");
+                    if (shouldContinue) {
+                        startRandomGame();
+                    } else {
+                        setStage('result');
+                    }
+                }, 800);
+            } else {
+                state.feedback = { type: 'success', message: '太棒了！下一關挑戰開始！' };
+                render();
+                if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 60 });
+                setTimeout(() => {
+                    state.feedback = null;
+                    setStage(nextStageName);
+                }, 1800);
+            }
+        } else {
+            const numsStr = items.map(item => {
+                if (item.type === 'fixed') return `${item.name}${item.fixedVal}`;
+                return `${item.name}${state.gameTemplate.selections[item.id]}`;
+            }).join('、');
+            state.feedback = { type: 'error', message: `比大小提示：各數量為 ${numsStr}。` };
+            render();
+            setTimeout(() => {
+                state.feedback = null;
+                render();
+            }, 2000);
+        }
+    }
+
+    // ----------------------------------------------------------------
+    // 固定關卡資料庫與讀取器
+    // ----------------------------------------------------------------
+    function getCurrentStageData() {
+        switch (state.currentStage) {
+            case 'game2':
+                return {
+                    title: "第 2 關：巧克力派對",
+                    colorTheme: "pink",
+                    icon: "fa-solid fa-cookie-bite",
+                    total: 48,
+                    unit: "顆",
+                    largeUnit: "盒",
+                    items: [
+                        { id: 'damao', name: '大毛', desc: '5/8 盒', type: 'calc', divisor: 8, numerator: 5, correctVal: 30, options: [25, 30, 40] },
+                        { id: 'ermao', name: '二毛', desc: '7/12 盒', type: 'calc', divisor: 12, numerator: 7, correctVal: 28, options: [24, 28, 35] },
+                        { id: 'sanmao', name: '三毛', desc: '9/16 盒', type: 'calc', divisor: 16, numerator: 9, correctVal: 27, options: [18, 27, 36] }
+                    ],
+                    questionText: "誰吃最少？誰吃最多？",
+                    choices: [
+                        "① 大毛最少，二毛最多",
+                        "② 二毛最少，三毛最多",
+                        "③ 三毛最少 (27)，大毛最多 (30)"
+                    ],
+                    correctChoiceIndex: 2,
+                    nextStageName: "game3"
+                };
+            case 'game3':
+                return {
+                    title: "第 3 關：蘋果大豐收",
+                    colorTheme: "red",
+                    icon: "fa-solid fa-apple-whole",
+                    total: 12,
+                    unit: "顆",
+                    largeUnit: "箱",
+                    items: [
+                        { id: 'mom', name: '媽媽', desc: '2/3 箱', type: 'calc', divisor: 3, numerator: 2, correctVal: 8, options: [6, 8, 9] },
+                        { id: 'dad', name: '爸爸', desc: '5/4 箱', type: 'calc', divisor: 4, numerator: 5, correctVal: 15, options: [12, 15, 18] },
+                        { id: 'grandma', name: '奶奶', desc: '直接買', type: 'fixed', fixedVal: 10 }
+                    ],
+                    questionText: "誰買的蘋果最多？",
+                    choices: [
+                        "① 媽媽最多",
+                        "② 爸爸最多 (15顆)",
+                        "③ 奶奶最多"
+                    ],
+                    correctChoiceIndex: 1,
+                    nextStageName: "game4"
+                };
+            case 'game4':
+                return {
+                    title: "第 4 關：貼紙收集冊",
+                    colorTheme: "blue",
+                    icon: "fa-regular fa-file-lines",
+                    total: 20,
+                    unit: "張",
+                    largeUnit: "包",
+                    items: [
+                        { id: 'ming', name: '小明', desc: '3/5 包', type: 'calc', divisor: 5, numerator: 3, correctVal: 12, options: [10, 12, 15] },
+                        { id: 'mei', name: '小美', desc: '5/4 包', type: 'calc', divisor: 4, numerator: 5, correctVal: 25, options: [20, 24, 25] },
+                        { id: 'hua', name: '小華', desc: '直接有', type: 'fixed', fixedVal: 18 }
+                    ],
+                    questionText: "誰的貼紙最少？",
+                    choices: [
+                        "① 小明最少 (12張)",
+                        "② 小美最少",
+                        "③ 小華最少"
+                    ],
+                    correctChoiceIndex: 0,
+                    nextStageName: "game5"
+                };
+            case 'game5':
+                return {
+                    title: "第 5 關：甜甜圈派對",
+                    colorTheme: "green",
+                    icon: "fa-regular fa-circle",
+                    total: 18,
+                    unit: "個",
+                    largeUnit: "盒",
+                    items: [
+                        { id: 'bro', name: '哥哥', desc: '5/6 盒', type: 'calc', divisor: 6, numerator: 5, correctVal: 15, options: [12, 15, 16] },
+                        { id: 'sis', name: '姊姊', desc: '4/3 盒', type: 'calc', divisor: 3, numerator: 4, correctVal: 24, options: [18, 20, 24] },
+                        { id: 'di', name: '弟弟', desc: '買了', type: 'fixed', fixedVal: 20 }
+                    ],
+                    questionText: "誰的甜甜圈最多？",
+                    choices: [
+                        "① 哥哥最多",
+                        "② 姊姊最多 (24個)",
+                        "③ 弟弟最多"
+                    ],
+                    correctChoiceIndex: 1,
+                    nextStageName: "result"
+                };
+        }
+        return null;
+    }
+
+    // ----------------------------------------------------------------
+    // 渲染函數 HTML 生成
+    // ----------------------------------------------------------------
+    function render() {
+        const app = document.getElementById('app');
+        
+        // 1. 進度條
+        let progressHTML = "";
+        if (progressStages.includes(state.currentStage)) {
+            const currentIdx = progressStages.indexOf(state.currentStage);
+            let dots = "";
+            progressStages.forEach((s, idx) => {
+                const isActive = currentIdx >= idx;
+                const wClass = isActive ? "w-6" : "w-2";
+                const bgClass = isActive ? "bg-indigo-500" : "bg-indigo-200";
+                dots += `<div class="h-2 rounded-full transition-all duration-500 ${wClass} ${bgClass}"></div>`;
+            });
+            progressHTML = `
+                <div class="flex space-x-1 mb-6 justify-center items-center">
+                    ${dots}
+                </div>
+            `;
+        }
+
+        let stageHTML = "";
+
+        switch (state.currentStage) {
+            case 'intro':
+                stageHTML = `
+                    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 animate-fade-in w-full max-w-sm">
+                        <div class="bg-yellow-100 p-6 rounded-full mb-2 shadow-inner">
+                            <i class="fa-solid fa-calculator text-yellow-600 text-6xl"></i>
+                        </div>
+                        <h1 class="text-3xl font-black text-indigo-800 tracking-tight">分數做數大挑戰</h1>
+                        <p class="text-gray-600 text-lg px-4 font-semibold leading-relaxed">
+                            跟著林老師，一起把分數變成數量吧！
+                        </p>
+                        
+                        <div class="w-full space-y-3">
+                            <button 
+                                onclick="setStage('tutorial')"
+                                class="w-full py-4 px-6 bg-indigo-600 text-white hover:bg-indigo-700 font-bold rounded-2xl text-lg shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform border-b-4 border-indigo-800"
+                            >
+                                開始闖關 (共5關) <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+
+                            <button 
+                                onclick="startRandomGame()"
+                                class="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 font-bold rounded-2xl text-lg shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform border-2 border-white"
+                            >
+                                <i class="fa-solid fa-dna"></i> 無限挑戰模式
+                            </button>
+                        </div>
+                    </div>
+                `;
+                break;
+
+            case 'tutorial':
+                const divValStr = state.tutorial.input1;
+                const mulValStr = state.tutorial.input2;
+                
+                stageHTML = `
+                    <div class="bg-white rounded-3xl shadow-xl p-6 w-full max-w-md border-b-4 border-indigo-200 animate-fade-in">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">暖身題</span>
+                            <span class="text-indigo-900 font-bold">分數: ${state.score}</span>
+                        </div>
+                        
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">一箱飲料有 24 瓶</h2>
+                        <p class="text-gray-600 mb-4 font-medium">請問 <span class="text-indigo-600 font-black text-2xl">3/4</span> 箱是幾瓶？</p>
+                        
+                        ${getVisualBoxHTML(24, 4, 3, "bg-amber-400")}
+
+                        <div class="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-inner">
+                            <div class="flex flex-col gap-1">
+                                <span class="font-bold text-gray-700 text-sm">步驟 1：全部 24 瓶，平分成 4 堆</span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="font-mono text-lg font-bold">24 ÷ 4 =</span>
+                                    <input 
+                                        type="tel" 
+                                        value="${divValStr}"
+                                        oninput="state.tutorial.input1 = this.value; render();"
+                                        class="border-2 border-indigo-100 rounded-xl px-2 py-1.5 text-center text-lg font-bold w-20 focus:border-indigo-500 outline-none text-indigo-700 bg-white" 
+                                        placeholder="?"
+                                    />
+                                    <span class="font-bold text-gray-700">(瓶/堆)</span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-1">
+                                <span class="font-bold text-gray-700 text-sm">步驟 2：我要拿 3 堆 (分子)</span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="font-mono text-lg font-bold">${divValStr || '?'} × 3 =</span>
+                                    <input 
+                                        type="tel" 
+                                        value="${mulValStr}"
+                                        oninput="state.tutorial.input2 = this.value; render();"
+                                        class="border-2 border-indigo-100 rounded-xl px-2 py-1.5 text-center text-lg font-bold w-20 focus:border-indigo-500 outline-none text-indigo-700 bg-white" 
+                                        placeholder="?"
+                                    />
+                                    <span class="font-bold text-gray-700">(瓶)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <button 
+                                onclick="checkTutorialAnswer()"
+                                class="w-full py-4 bg-amber-400 text-amber-900 hover:bg-amber-500 font-black rounded-2xl text-lg shadow-md flex items-center justify-center gap-2 active:scale-95 transition-transform border-b-4 border-amber-600"
+                            >
+                                檢查答案
+                            </button>
+                        </div>
+                        
+                        ${state.feedback ? `
+                            <div class="mt-4 p-3 rounded-xl text-center flex items-center justify-center gap-2 animate-shake ${state.feedback.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800 font-bold text-sm'}">
+                                ${state.feedback.type === 'success' ? '<i class="fa-solid fa-circle-check text-green-600"></i>' : '<i class="fa-solid fa-circle-xmark text-red-600"></i>'}
+                                ${state.feedback.message}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                break;
+
+            case 'game1':
+                const step = state.game1.subStep;
+                stageHTML = `
+                    <div class="bg-white rounded-3xl shadow-xl p-6 w-full max-w-md border-b-4 border-indigo-200 animate-fade-in">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">第 1 關：飲料大比拚</span>
+                            <span class="text-indigo-900 font-bold">分數: ${state.score}</span>
+                        </div>
+
+                        <p class="mb-4 font-medium text-gray-700">一箱飲料有 24 瓶，請幫大家算出實際拿了幾瓶？</p>
+
+                        <!-- 小玉 -->
+                        <div class="p-4 rounded-2xl mb-3 transition-colors border ${step === 0 ? 'bg-indigo-50 border-indigo-400' : 'bg-slate-50 border-slate-100'}">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-gray-800">小玉</div>
+                                <div class="bg-white px-3 py-1 rounded-full text-xs font-black text-indigo-600 shadow-sm border border-slate-100">買了 5/3 箱</div>
+                            </div>
+                            ${step > 0 ? `
+                                <div class="text-right font-black text-green-600 mt-1"><i class="fa-solid fa-circle-check"></i> 共 40 瓶</div>
+                            ` : `
+                                <div class="mt-2 flex items-center justify-end gap-2">
+                                   <span class="text-sm font-bold text-gray-500">24 ÷ 3 × 5 = </span>
+                                   <input 
+                                        type="tel" 
+                                        value="${state.game1.xiaoyu}"
+                                        oninput="state.game1.xiaoyu = this.value; render();"
+                                        class="border-2 border-indigo-100 rounded-xl px-2 py-1.5 text-center text-lg font-bold w-20 focus:border-indigo-500 outline-none text-indigo-700 bg-white"
+                                   />
+                                   <span class="font-bold text-gray-700">瓶</span>
+                                </div>
+                            `}
+                        </div>
+
+                        <!-- 小丸子 -->
+                        <div class="p-4 rounded-2xl mb-3 transition-colors border ${step === 1 ? 'bg-indigo-50 border-indigo-400' : 'bg-slate-50 border-slate-100'}">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-gray-800">小丸子</div>
+                                <div class="bg-white px-3 py-1 rounded-full text-xs font-black text-indigo-600 shadow-sm border border-slate-100">買了 11/6 箱</div>
+                            </div>
+                            ${step > 1 ? `
+                                <div class="text-right font-black text-green-600 mt-1"><i class="fa-solid fa-circle-check"></i> 共 44 瓶</div>
+                            ` : `
+                                <div class="mt-2 flex items-center justify-end gap-2">
+                                    ${step === 1 ? '<span class="text-sm font-bold text-gray-500">24 ÷ 6 × 11 = </span>' : ''}
+                                    <input 
+                                        type="tel" 
+                                        value="${state.game1.maruko}"
+                                        oninput="state.game1.maruko = this.value; render();"
+                                        ${step !== 1 ? 'disabled class="border-2 border-gray-100 rounded-xl px-2 py-1.5 text-center text-lg font-bold w-20 outline-none text-gray-300 bg-gray-50"' : 'class="border-2 border-indigo-100 rounded-xl px-2 py-1.5 text-center text-lg font-bold w-20 focus:border-indigo-500 outline-none text-indigo-700 bg-white"'}
+                                        placeholder="?"
+                                    />
+                                    <span class="font-bold text-gray-700">瓶</span>
+                                </div>
+                            `}
+                        </div>
+
+                        <!-- 花輪 -->
+                        <div class="p-4 rounded-2xl mb-6 bg-slate-50 border border-slate-100">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-gray-800">花輪</div>
+                                <div class="bg-white px-3 py-1 rounded-full text-xs font-black text-slate-500 shadow-sm border border-slate-100">直接說數量</div>
+                            </div>
+                            <div class="text-right font-bold text-slate-700 mt-1">買了 38 瓶</div>
+                        </div>
+
+                        ${step < 2 ? `
+                            <button 
+                                onclick="handleGame1NextStep()"
+                                class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl text-lg shadow-md hover:bg-indigo-700 active:scale-95 transition-transform border-b-4 border-indigo-800"
+                            >
+                                ${step === 0 ? '檢查小玉的答案' : '檢查小丸子的答案'}
+                            </button>
+                        ` : `
+                            <div class="space-y-2 animate-fade-in">
+                                <p class="text-center font-black text-indigo-800 mb-2">請問誰買最多？誰買最少？</p>
+                                <button 
+                                    onclick="handleGame1FinalSelect('wrong1')" 
+                                    class="w-full p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/20 text-left font-bold text-slate-700 transition active:scale-98"
+                                >
+                                    ① 小丸子最多，小玉最少
+                                </button>
+                                <button 
+                                    onclick="handleGame1FinalSelect('correct')" 
+                                    class="w-full p-4 rounded-2xl border-2 border-indigo-300 bg-indigo-50/50 hover:bg-indigo-100/50 text-indigo-900 text-left font-black transition active:scale-98"
+                                >
+                                    ② 小丸子最多 (44)，花輪最少 (38)
+                                </button>
+                                <button 
+                                    onclick="handleGame1FinalSelect('wrong2')" 
+                                    class="w-full p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/20 text-left font-bold text-slate-700 transition active:scale-98"
+                                >
+                                    ③ 花輪最多，小玉最少
+                                </button>
+                            </div>
+                        `}
+
+                        ${state.feedback ? `
+                            <div class="mt-4 p-3 rounded-xl text-center font-bold animate-shake ${state.feedback.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800 text-sm'}">
+                                ${state.feedback.message}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                break;
+
+            case 'game2':
+            case 'game3':
+            case 'game4':
+            case 'game5':
+            case 'random-game':
+                let data = null;
+                let isRandom = false;
+                if (state.currentStage === 'random-game') {
+                    data = state.randomLevelData;
+                    isRandom = true;
+                } else {
+                    data = getCurrentStageData();
+                }
+
+                // 顏色配置樣式
+                const themeColors = {
+                    pink: { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-200' },
+                    red: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200' },
+                    blue: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
+                    green: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200' },
+                    purple: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200' }
+                };
+                const theme = themeColors[data.colorTheme] || themeColors.pink;
+
+                // 繪製各個子題計算
+                let itemsHTML = "";
+                data.items.forEach((item, index) => {
+                    const isLast = index === data.items.length - 1;
+                    const borderClass = isLast ? 'mb-6' : 'border-b pb-3 mb-3';
+                    
+                    let calcAreaHTML = "";
+                    if (item.type === 'fixed') {
+                        calcAreaHTML = `<span class="text-slate-700 font-black text-lg">${item.fixedVal} ${data.unit}</span>`;
+                    } else if (state.gameTemplate.selections[item.id]) {
+                        calcAreaHTML = `<span class="text-green-600 font-black text-lg"><i class="fa-solid fa-circle-check"></i> ${state.gameTemplate.selections[item.id]} ${data.unit}</span>`;
+                    } else {
+                        // 繪製點選按鈕
+                        let buttons = "";
+                        item.options.forEach(opt => {
+                            buttons += `
+                                <button 
+                                    onclick="checkCalculation('${item.id}', ${opt}, ${item.correctVal})"
+                                    class="bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 px-3 py-1.5 rounded-lg border font-bold text-sm transition-colors active:scale-95"
+                                >
+                                    ${opt}
+                                </button>
+                            `;
+                        });
+                        calcAreaHTML = `<div class="flex gap-1.5">${buttons}</div>`;
+                    }
+
+                    // 局部提示小標
+                    let calcHintHTML = "";
+                    if (item.type !== 'fixed' && !state.gameTemplate.selections[item.id] && !state.gameTemplate.hint) {
+                        calcHintHTML = `<div class="text-[10px] text-slate-400 text-right mt-1 font-bold">公式: ${data.total} ÷ ${item.divisor} × ${item.numerator}</div>`;
+                    }
+
+                    itemsHTML += `
+                        <div class="${borderClass} flex flex-col">
+                            <div class="flex justify-between items-center w-full">
+                                <span class="font-bold text-slate-800">
+                                    ${item.name} 
+                                    <span class="text-xs font-normal text-slate-500">(${item.desc})</span>
+                                </span>
+                                ${calcAreaHTML}
+                            </div>
+                            ${calcHintHTML}
+                        </div>
+                    `;
+                });
+
+                // 需要幫忙提示區域
+                let hintAreaHTML = "";
+                if (!state.gameTemplate.isCompleted) {
+                    if (!state.gameTemplate.hint) {
+                        // 取得目前第一個還沒算完的子題
+                        const pendingItem = data.items.find(it => it.type === 'calc' && !state.gameTemplate.selections[it.id]);
+                        if (pendingItem) {
+                            hintAreaHTML = `
+                                <div class="mb-4">
+                                    <button 
+                                        onclick="showLocalHint(${data.total}, ${pendingItem.divisor}, ${pendingItem.numerator})"
+                                        class="w-full py-3 bg-gradient-to-r from-teal-400 to-emerald-400 text-white rounded-xl shadow-md font-black flex items-center justify-center gap-2 hover:from-teal-500 hover:to-emerald-500 transition-all active:scale-95"
+                                    >
+                                        <i class="fa-solid fa-lightbulb"></i> 需要幫助嗎？點我看提示
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        hintAreaHTML = `
+                            <div class="mb-4 bg-teal-50 border border-teal-200 p-4 rounded-2xl text-sm text-teal-900 flex flex-col gap-2 animate-fade-in text-left">
+                                <div class="flex gap-2 items-start">
+                                    <i class="fa-solid fa-lightbulb shrink-0 mt-0.5 text-teal-600 text-lg"></i>
+                                    <p class="font-bold leading-relaxed">${state.gameTemplate.hint}</p>
+                                </div>
+                                <div class="pt-2 border-t border-teal-200/50 flex justify-end">
+                                    <button 
+                                        onclick="handleAskAI()"
+                                        class="text-xs font-black flex items-center gap-1.5 text-purple-700 bg-purple-100 hover:bg-purple-200 px-3 py-1.5 rounded-full transition active:scale-95"
+                                    >
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> 召喚 AI 探長助教
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                // 所有子題算完，呈現最終題目選擇
+                let finalQuestionHTML = "";
+                if (state.gameTemplate.isCompleted) {
+                    let choicesBtns = "";
+                    data.choices.forEach((choice, index) => {
+                        choicesBtns += `
+                            <button 
+                                onclick="handleFinalSelect(${index}, ${data.correctChoiceIndex}, '${data.nextStageName}', ${JSON.stringify(data.items).replace(/"/g, '&quot;')})"
+                                class="w-full p-4 rounded-2xl border-2 text-left transition-all font-bold active:scale-98 ${index === data.correctChoiceIndex ? 'hover:bg-indigo-50 hover:border-indigo-300 text-indigo-900 border-indigo-100 shadow-sm' : 'hover:bg-slate-50 border-slate-200 text-slate-700'}"
+                            >
+                                ${choice}
+                            </button>
+                        `;
+                    });
+                    finalQuestionHTML = `
+                        <div class="animate-fade-in space-y-3">
+                            <p class="text-center font-black text-indigo-800 mb-2">${data.questionText}</p>
+                            ${choicesBtns}
+                        </div>
+                    `;
+                }
+
+                // 答題反饋漂浮框
+                let feedbackBubbleHTML = "";
+                if (state.feedback) {
+                    feedbackBubbleHTML = `
+                        <div class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-lg z-50 animate-bounce font-bold text-center">
+                            ${state.feedback.message}
+                        </div>
+                    `;
+                }
+
+                // 解析 icon class string
+                const iconHTML = data.icon ? `<i class="${data.icon} text-sm"></i>` : `<i class="fa-solid fa-wand-magic-sparkles text-sm"></i>`;
+
+                stageHTML = `
+                    <div class="bg-white rounded-3xl shadow-xl p-6 w-full max-w-md border-b-4 border-indigo-200 animate-fade-in">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="${theme.bg} ${theme.text} px-3 py-1 rounded-full text-sm font-black flex items-center gap-1">
+                                ${iconHTML} ${data.title}
+                            </span>
+                            <span class="text-indigo-900 font-bold">分數: ${state.score}</span>
+                        </div>
+
+                        <p class="mb-4 font-medium text-gray-600 text-sm leading-relaxed">
+                            ${data.largeUnit ? `一${data.largeUnit}總共有 ${data.total} ${data.unit}` : `總共有 ${data.total} ${data.unit}`}。請點擊算出對應的數量：
+                        </p>
+
+                        <!-- 子題區域 -->
+                        ${itemsHTML}
+
+                        <!-- 提示按鈕 -->
+                        ${hintAreaHTML}
+
+                        <!-- 最終單選題 -->
+                        ${finalQuestionHTML}
+
+                        <!-- 漂浮反饋 -->
+                        ${feedbackBubbleHTML}
+                    </div>
+                `;
+                break;
+
+            case 'result':
+                stageHTML = `
+                    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in w-full max-w-md">
+                        <div class="text-amber-400 text-7xl mb-4 animate-bounce">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <h2 class="text-3xl font-black text-indigo-900 mb-2">全數通關！</h2>
+                        <p class="text-xl text-gray-700 mb-6 font-bold">你的總分是：<span class="text-3xl font-black text-amber-500">${state.score}</span> 分</p>
+                        
+                        <div class="bg-white p-6 rounded-3xl shadow-xl w-full text-left space-y-4 mb-8 border-b-4 border-indigo-100">
+                          <h3 class="font-black text-lg border-b pb-2 text-indigo-600 flex items-center gap-1.5">
+                             <i class="fa-solid fa-book"></i> 林老師的小秘笈：
+                          </h3>
+                          <p class="text-gray-600 text-sm font-semibold leading-relaxed">
+                            1. <span class="font-bold text-slate-800">下除上乘</span>：分數轉換時，先除以分母（算出一堆是多少），再乘以分子（拿走幾堆）。
+                          </p>
+                          <p class="text-gray-600 text-sm font-semibold leading-relaxed">
+                            2. <span class="font-bold text-slate-800">假分數的秘密</span>：分子比分母大，代表拿的數量比「原本一整箱/盒/包」還要多喔！
+                          </p>
+                          
+                          <!-- AI Story Story box -->
+                          <div id="ai-story-box" class="pt-4 border-t border-slate-100 flex flex-col gap-2">
+                                <button 
+                                    onclick="generateAiStory()" 
+                                    class="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-black rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 border-b-4 border-indigo-700"
+                                >
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> 生成專屬分數結案故事
+                                </button>
+                          </div>
+                        </div>
+
+                        <div class="space-y-3 w-full max-w-xs">
+                            <button 
+                                onclick="state.score = 0; setStage('intro');"
+                                class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 border-b-4 border-indigo-800"
+                            >
+                                <i class="fa-solid fa-arrow-rotate-right"></i> 回到主畫面
+                            </button>
+                            <button 
+                                onclick="startRandomGame()"
+                                class="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 border-b-4 border-purple-800"
+                            >
+                                <i class="fa-solid fa-dna"></i> 再玩一次無限模式
+                            </button>
+                        </div>
+                    </div>
+                `;
+                break;
+        }
+
+        app.innerHTML = `
+            <div class="w-full flex-grow flex flex-col items-center justify-center py-6">
+                <!-- 進度條 -->
+                ${progressHTML}
+                <!-- 關卡內容 -->
+                ${stageHTML}
+            </div>
+
+            <!-- 設計者頁尾 (置底) -->
+            <div class="w-full text-center py-4 text-slate-400 text-xs font-bold pointer-events-none mt-auto">
+                設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+            </div>
+        `;
+    }
+
+    // 初始化頁面
+    document.addEventListener('DOMContentLoaded', () => {
+        render();
+    });
+</script>
+</body>
+</html>

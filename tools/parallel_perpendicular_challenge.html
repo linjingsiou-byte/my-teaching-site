@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>平行與垂直大挑戰</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 隱藏滾動條 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 背景氣泡飄浮動畫 */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            bottom: -150px;
+            animation: float 15s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            50% { transform: translateY(-60vh) translateX(50px) rotate(180deg); opacity: 0.6; border-radius: 50%; }
+            100% { transform: translateY(-120vh) translateX(-50px) rotate(360deg); opacity: 0; }
+        }
+
+        /* 簡單的淡入動畫 */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 彈出縮放動畫 */
+        .scale-up { animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        @keyframes scaleUp { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* 抖動動畫 */
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 text-gray-800 min-h-screen relative overflow-x-hidden flex flex-col justify-between">
+
+    <!-- 背景氣泡層 -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="bubble w-12 h-12 left-10" style="animation-delay: 0s; animation-duration: 12s;"></div>
+        <div class="bubble w-20 h-20 left-1/4" style="animation-delay: 2s; animation-duration: 18s;"></div>
+        <div class="bubble w-16 h-16 left-1/2" style="animation-delay: 4s; animation-duration: 14s;"></div>
+        <div class="bubble w-24 h-24 left-3/4" style="animation-delay: 1s; animation-duration: 20s;"></div>
+        <div class="bubble w-10 h-10 left-[90%]" style="animation-delay: 6s; animation-duration: 10s;"></div>
+    </div>
+
+    <!-- 頂部設定金鑰按鈕 -->
+    <div class="absolute top-4 right-4 z-50">
+        <button onclick="toggleSettingsModal()" class="bg-white/80 hover:bg-white text-slate-600 w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform hover:rotate-45 active:scale-95 backdrop-blur-sm">
+            <i class="fa-solid fa-gear text-lg"></i>
+        </button>
+    </div>
+
+    <!-- 主要應用容器 -->
+    <div id="app" class="w-full flex-grow flex flex-col items-center p-4 z-10 relative"></div>
+
+    <!-- API Key 設定彈窗 -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 animate-fade-in text-left">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-slate-500"></i> 設定 Gemini API Key
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-slate-500 text-sm mb-4 leading-relaxed font-medium">
+                「AI 探長助教」功能需要使用 Gemini API。金鑰將儲存於您的瀏覽器中，不會上傳至其他伺服器。
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="貼上您的 API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 font-mono text-sm" />
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveApiKey()" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl shadow-md transition">
+                        儲存設定
+                    </button>
+                    <button onclick="clearApiKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl transition">
+                        清除金鑰
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 text-center">
+                    沒有金鑰？可至 Google AI Studio 免費申請。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Tutor 彈窗 -->
+    <div id="ai-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[90] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border-4 border-purple-400 animate-fade-in text-left">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-purple-100 w-10 h-10 rounded-full flex items-center justify-center text-purple-600">
+                        <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-purple-800">AI 探長助教提示</h3>
+                </div>
+                <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="ai-content-box" class="bg-purple-50/50 rounded-2xl p-4 min-h-[120px] mb-4 text-slate-700 leading-relaxed relative flex items-center justify-center">
+                <!-- 內容由 JS 動態注入 -->
+            </div>
+
+            <div class="flex gap-3">
+                <button id="tts-btn" onclick="handleSpeak()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-volume-high"></i> 語音朗讀提示
+                </button>
+                <button onclick="closeAIModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-xl transition">
+                    知道了！
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- 應用程式狀態 ---
+    let state = {
+        currentScreen: 'welcome', // 'welcome', 'game', 'result'
+        currentQuestionIndex: 0,
+        score: 0,
+        selectedOption: null, // option object
+        showFeedback: false,
+        isCorrect: false,
+        showHint: false
+    };
+
+    // AI Tutor 狀態
+    let aiExplanation = null;
+    let aiLoading = false;
+    let isSpeaking = false;
+    let currentUtterance = null;
+
+    // AI 結案故事狀態
+    let aiStory = null;
+    let aiStoryLoading = false;
+
+    // --- 題目資料庫 ---
+    const questions = [
+        {
+            id: 1,
+            type: 'trapezoid',
+            title: '第一關：直角梯形的秘密',
+            description: '這是一個「直角梯形」。請問在這個圖形中，有幾組邊是「互相垂直」的？',
+            visualType: 'rightTrapezoid',
+            options: [
+                { id: 'A', text: '1 組', correct: false },
+                { id: 'B', text: '2 組', correct: true },
+                { id: 'C', text: '3 組', correct: false },
+                { id: 'D', text: '4 組', correct: false },
+            ],
+            hint: '仔細數數看圖中有幾個直角記號（小方框）？每一個直角記號代表一組互相垂直的邊喔！',
+            explanation: '直角梯形有一個腰垂直於上底，也垂直於下底。圖中有兩個直角記號，所以共有 2 組互相垂直的邊。'
+        },
+        {
+            id: 2,
+            type: 'clock',
+            title: '第二關：時鐘大發現',
+            description: '看看現在的時間是 9 點鐘。請問時針（短針）和分針（長針）形成了什麼關係？',
+            visualType: 'clockVisual',
+            options: [
+                { id: 'A', text: '互相平行', correct: false },
+                { id: 'B', text: '互相垂直', correct: true },
+                { id: 'C', text: '重疊', correct: false },
+                { id: 'D', text: '無法判斷', correct: false },
+            ],
+            hint: '觀察兩根針夾角的形狀，是不是像正方形的角落一樣大？',
+            explanation: '9點整的時候，時針指向9，分針指向12，兩者之間的夾角剛好是90度，所以是「互相垂直」。'
+        },
+        {
+            id: 3,
+            type: 'grid',
+            title: '第三關：街道棋盤',
+            description: '這是一張街道圖。直線A和直線B都垂直於直線C。請問直線A和直線B的關係是什麼？',
+            visualType: 'gridMap',
+            options: [
+                { id: 'A', text: '互相垂直', correct: false },
+                { id: 'B', text: '互相平行', correct: true },
+                { id: 'C', text: '互相交叉', correct: false },
+                { id: 'D', text: '沒有關係', correct: false },
+            ],
+            hint: '想像這是梯子的兩根直桿，它們都被同一根橫桿垂直固定住了，那這兩根直桿會相交嗎？',
+            explanation: '當兩條直線同時垂直於第三條直線時，這兩條直線會「互相平行」。就像斑馬線或梯子一樣。'
+        },
+        {
+            id: 4,
+            type: 'polygons',
+            title: '第四關：形狀大閱兵',
+            description: '觀察下面三個圖形（長方形、平行四邊形、菱形）。哪一個圖形的「相鄰兩邊」是互相垂直的？',
+            visualType: 'shapesComparison',
+            options: [
+                { id: 'A', text: '只有長方形', correct: true },
+                { id: 'B', text: '只有平行四邊形', correct: false },
+                { id: 'C', text: '只有菱形', correct: false },
+                { id: 'D', text: '全部都是', correct: false },
+            ],
+            hint: '「相鄰兩邊」就是連在一起的兩個邊。找找看哪個圖形的角落是直角（90度）？',
+            explanation: '只有「長方形」（和正方形）的四個角都是直角，所以它的相鄰兩邊互相垂直。平行四邊形和菱形的鄰邊通常不是直角。'
+        },
+        {
+            id: 5,
+            type: 'lines',
+            title: '第五關：線條迷宮',
+            description: '觀察下圖中的直線，關於它們的關係，哪一個敘述是「錯誤」的？',
+            visualType: 'intersectingLines',
+            options: [
+                { id: 'A', text: '直線「甲」與直線「丁」互相平行', correct: false },
+                { id: 'B', text: '直線「乙」與直線「丙」互相平行', correct: false },
+                { id: 'C', text: '直線「甲」與直線「戊」互相垂直', correct: false },
+                { id: 'D', text: '直線「丁」與直線「己」互相垂直', correct: true }, 
+            ],
+            hint: '找找看直角符號（小方框），有方框才代表垂直喔！平行線就像鐵軌一樣永遠不會相交。',
+            explanation: '圖中直線「丁」和「己」雖然相交，但沒有直角符號，目測角度也不是90度，所以說它們垂直是錯誤的敘述。'
+        },
+        {
+            id: 6,
+            type: 'shapes',
+            title: '第六關：三角拼圖',
+            description: '圖中有兩個三角形（甲是銳角三角形，乙是直角三角形）。請問圖中共有幾組「互相平行」和「互相垂直」的線？',
+            visualType: 'triangles',
+            options: [
+                { id: 'A', text: '1 組平行， 2 組垂直', correct: true },
+                { id: 'B', text: '1 組平行， 1 組垂直', correct: false },
+                { id: 'C', text: '0 組平行， 2 組垂直', correct: false },
+                { id: 'D', text: '0 組平行， 1 組垂直', correct: false },
+            ],
+            hint: '1. 先找三角形乙自己的直角（1組垂直）。\\n2. 再看兩個三角形交接處的直角記號（1組垂直）。\\n3. 想想看：如果兩條線都垂直於同一條線，這兩條線會是什麼關係？',
+            explanation: '正確答案是 (A)。\\n垂直(2組)：三角形乙本身的直角、以及乙的一邊垂直於甲的一邊。\\n平行(1組)：因為乙的兩股互相垂直，且其中一股又垂直於甲的一邊，所以乙的另一股會平行於甲的該邊。'
+        }
+    ];
+
+    // --- API Key 管理 ---
+    function getApiKey() {
+        return localStorage.getItem('gemini_api_key') || '';
+    }
+
+    function toggleSettingsModal() {
+        const modal = document.getElementById('settings-modal');
+        const input = document.getElementById('api-key-input');
+        input.value = getApiKey();
+        modal.classList.toggle('hidden');
+    }
+
+    function saveApiKey() {
+        const input = document.getElementById('api-key-input');
+        const key = input.value.trim();
+        if (key) {
+            localStorage.setItem('gemini_api_key', key);
+            alert('API Key 儲存成功！');
+        } else {
+            localStorage.removeItem('gemini_api_key');
+            alert('已清除 API Key。');
+        }
+        toggleSettingsModal();
+        render();
+    }
+
+    function clearApiKey() {
+        localStorage.removeItem('gemini_api_key');
+        const input = document.getElementById('api-key-input');
+        input.value = '';
+        alert('已清除 API Key。');
+        toggleSettingsModal();
+        render();
+    }
+
+    // --- AI Tutor API 呼叫 ---
+    async function callGeminiAPI(prompt, apiKey, retries = 3, delay = 1000) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 老師現在有點忙，請稍後再試。";
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+            }
+        }
+    }
+
+    async function handleAskAI() {
+        const key = getApiKey();
+        if (!key) {
+            alert('請點選右上角齒輪設定 Gemini API Key，即可召喚 AI 探長為您解惑！');
+            toggleSettingsModal();
+            return;
+        }
+
+        const modal = document.getElementById('ai-modal');
+        const contentBox = document.getElementById('ai-content-box');
+        
+        modal.classList.remove('hidden');
+        contentBox.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-4 w-full">
+                <i class="fa-solid fa-spinner animate-spin text-purple-400 text-3xl mb-2"></i>
+                <p class="text-sm text-purple-400 font-bold">探長正在思考中...</p>
+            </div>
+        `;
+
+        aiLoading = true;
+        aiExplanation = null;
+
+        const currentQ = questions[state.currentQuestionIndex];
+        const questionText = currentQ.description;
+        const hintText = currentQ.hint;
+
+        const prompt = `你現在是一位超級會教數學的國小老師，也是「平行與垂直大挑戰」的AI助教探長。請根據以下資訊，引導學生理解幾何線條平行與垂直的概念：
+        【題目資訊】
+        - 適合年級：國小四年級 平行與垂直單元
+        - 題目：${questionText}
+        - 圖片類型：${currentQ.visualType}
+        - 簡要詳解與思路提示：${hintText}
+
+        【您的任務】
+        1. 請使用國小四年級（9-10歲）聽得懂的簡單語句，語氣要活潑、自信、多使用「偵探隊員你好！」、「讓我們拿出幾何放大鏡觀察這張圖」等偵探口吻。
+        2. 請「不要」直接透露正確選項或答案（例如不要直接說選A、B、C或D，也不要說出答案是哪一個選項名稱）。
+        3. 您的引導重點是觀察特徵：
+           - 直角記號（小正方形方框）是垂直的鐵證。
+           - 平行線就像鐵軌或斑馬線一樣，不論怎麼延長都絕對不會相交。
+           - 引導學生數直角方塊或看兩條線的方向。
+        4. 輸出排版請包含適當的換行與 emoji，增加趣味。
+        5. 最後給予隊員溫暖且激勵的探案肯定。
+        請使用繁體中文回答。`;
+
+        try {
+            const result = await callGeminiAPI(prompt, key);
+            aiExplanation = result;
+            
+            // 簡單格式化換行與文字粗體
+            let formattedResult = result
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            contentBox.innerHTML = `<div class="w-full text-base font-medium text-slate-700 leading-relaxed">${formattedResult}</div>`;
+        } catch (error) {
+            aiExplanation = "報告隊員！大腦通訊被磁場干擾，請檢查金鑰設定。";
+            contentBox.innerHTML = `<p class="text-rose-500 font-bold">${aiExplanation}</p>`;
+        } finally {
+            aiLoading = false;
+        }
+    }
+
+    function closeAIModal() {
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+        }
+        document.getElementById('ai-modal').classList.add('hidden');
+    }
+
+    function handleSpeak() {
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            updateTTSButtonState();
+        } else {
+            if (!aiExplanation) return;
+            const cleanText = aiExplanation.replace(/[\*#_`~]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.95;
+            utterance.onend = () => {
+                isSpeaking = false;
+                updateTTSButtonState();
+            };
+            utterance.onerror = () => {
+                isSpeaking = false;
+                updateTTSButtonState();
+            };
+            window.speechSynthesis.speak(utterance);
+            isSpeaking = true;
+            currentUtterance = utterance;
+            updateTTSButtonState();
+        }
+    }
+
+    function updateTTSButtonState() {
+        const btn = document.getElementById('tts-btn');
+        if (!btn) return;
+        if (isSpeaking) {
+            btn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i> 停止朗讀`;
+            btn.classList.replace('bg-indigo-500', 'bg-rose-500');
+            btn.classList.replace('hover:bg-indigo-600', 'hover:bg-rose-600');
+        } else {
+            btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> 語音朗讀提示`;
+            btn.classList.replace('bg-rose-500', 'bg-indigo-500');
+            btn.classList.replace('hover:bg-rose-600', 'hover:bg-indigo-600');
+        }
+    }
+
+    // --- AI 結案故事生成 ---
+    async function generateAiStory() {
+        const key = getApiKey();
+        const storyBox = document.getElementById('ai-story-box');
+        if (!storyBox) return;
+
+        if (!key) {
+            aiStoryLoading = true;
+            storyBox.innerHTML = `
+                <div class="flex items-center justify-center py-4">
+                    <i class="fa-solid fa-spinner animate-spin text-indigo-400 text-2xl mr-2"></i>
+                    <p class="text-sm text-indigo-400 font-bold">正在撰寫結案報告...</p>
+                </div>
+            `;
+            setTimeout(() => {
+                const randomStory = fallbackStories[Math.floor(Math.random() * fallbackStories.length)];
+                aiStory = randomStory;
+                aiStoryLoading = false;
+                renderStoryBox(randomStory);
+            }, 1200);
+            return;
+        }
+
+        aiStoryLoading = true;
+        storyBox.innerHTML = `
+            <div class="flex items-center justify-center py-4">
+                <i class="fa-solid fa-spinner animate-spin text-indigo-400 text-2xl mr-2"></i>
+                <p class="text-sm text-indigo-400 font-bold">正透過 AI 撰寫您專屬的結案故事...</p>
+            </div>
+        `;
+
+        const prompt = `你現在是「幾何平行與垂直特攻隊」的大隊長。一位隊員剛剛成功通過了所有六關幾何挑戰（得 ${state.score} 分），成功掌握了直角梯形、9點鐘垂直、同垂直於第三線則平行、長方形相鄰垂直、以及複雜線條與三角形的平行垂直分析。
+        請為他寫一份充滿熱情、幽默且富有數學教育啟發的「幾何探案結案報告故事」。
+        要求：
+        1. 使用適合國小學童（9-11歲）的語調，以熱烈的語氣讚揚他的幾何空間觀察能力。
+        2. 提及他學會了「直角記號代表垂直」、「同垂直第三線即平行」以及「鐵軌般永遠不相交的平行」的幾何魔法。
+        3. 字數在 150 字以內，並多放些可愛的 emoji（放大鏡、尺、三角形、獎章等）。
+        請用繁體中文回答。`;
+
+        try {
+            const result = await callGeminiAPI(prompt, key);
+            aiStory = result;
+            aiStoryLoading = false;
+            renderStoryBox(result);
+        } catch (error) {
+            const randomStory = fallbackStories[0];
+            aiStory = randomStory;
+            aiStoryLoading = false;
+            renderStoryBox(randomStory);
+        }
+    }
+
+    function renderStoryBox(storyText) {
+        const storyBox = document.getElementById('ai-story-box');
+        if (!storyBox) return;
+        let formatted = storyText.replace(/\n/g, '<br>');
+        storyBox.innerHTML = `
+            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-100 animate-fade-in">
+                <h4 class="font-bold text-indigo-800 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-indigo-600"></i> 大隊長給你的話：
+                </h4>
+                <p class="text-slate-700 leading-relaxed font-medium">
+                    ${formatted}
+                </p>
+            </div>
+        `;
+    }
+
+    const fallbackStories = [
+        "恭喜你！經過這場幾何特訓，你已經是能夠一眼看穿『平行』與『垂直』的超級大師了！連最難的三角與迷宮題都難不倒你，太優秀了！✨📐🔍",
+        "太強了！你成功破解了所有線條的迷題！現在你已經擁有了『幾何之眼』，不管線條怎麼相交或平行，都逃不過你的眼睛。繼續保持這份好奇心吧！🌟📐👮‍♂️",
+        "真不敢相信！你竟然這麼快就破案了！從今天起，你就是『幾何特攻隊』的王牌探員。記得，心中的平行與垂直判定心法要隨時拿出來用喔！💖🔥💯"
+    ];
+
+    // --- 題目選項與控制點擊 ---
+    function handleOptionClick(option) {
+        if (state.showFeedback) return;
+        state.selectedOption = option;
+        render();
+    }
+
+    function handleSubmit() {
+        if (!state.selectedOption) return;
+        
+        const correct = state.selectedOption.correct;
+        state.isCorrect = correct;
+        if (correct) {
+            state.score += 100;
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 50, spread: 45, origin: { y: 0.8 } });
+            }
+        }
+        state.showFeedback = true;
+        render();
+    }
+
+    function nextQuestion() {
+        state.showFeedback = false;
+        state.selectedOption = null;
+        state.showHint = false;
+        if (state.currentQuestionIndex < questions.length - 1) {
+            state.currentQuestionIndex += 1;
+            render();
+        } else {
+            state.currentScreen = 'result';
+            render();
+        }
+    }
+
+    function restartGame() {
+        state.score = 0;
+        state.currentQuestionIndex = 0;
+        state.showFeedback = false;
+        state.selectedOption = null;
+        state.showHint = false;
+        state.currentScreen = 'welcome';
+        aiExplanation = null;
+        aiStory = null;
+        render();
+    }
+
+    function toggleLocalHint() {
+        state.showHint = !state.showHint;
+        render();
+    }
+
+    // --- SVG 視覺化渲染器 ---
+    function getVisualHTML(visualType) {
+        switch (visualType) {
+            case 'rightTrapezoid':
+                return `
+                    <div class="w-full bg-white rounded-2xl border-2 border-slate-200 p-4 mb-4 relative overflow-hidden shadow-inner flex justify-center">
+                        <svg viewBox="0 0 400 300" class="w-full max-w-sm h-auto">
+                            <rect width="100%" height="100%" fill="#F8FAFC" />
+                            
+                            <!-- 梯形外觀 -->
+                            <path d="M 100 80 L 240 80 L 320 220 L 100 220 Z" 
+                                  fill="rgba(245, 158, 11, 0.1)" stroke="#F59E0B" stroke-width="4" stroke-linejoin="round" />
+                            
+                            <!-- 左上直角 -->
+                            <rect x="100" y="80" width="20" height="20" fill="white" stroke="#333" stroke-width="1.5" />
+                            <!-- 左下直角 -->
+                            <rect x="100" y="200" width="20" height="20" fill="white" stroke="#333" stroke-width="1.5" />
+
+                            <!-- 標示文字 -->
+                            <text x="150" y="70" class="text-sm font-bold fill-slate-500">上底</text>
+                            <text x="200" y="245" class="text-sm font-bold fill-slate-500">下底</text>
+                            <text x="50" y="155" class="text-sm font-bold fill-slate-500">腰 (高)</text>
+                            <text x="280" y="155" class="text-sm font-bold fill-slate-400">斜邊</text>
+                        </svg>
+                    </div>
+                `;
+
+            case 'clockVisual':
+                return `
+                    <div class="w-full bg-white rounded-2xl border-2 border-slate-200 p-4 mb-4 relative overflow-hidden shadow-inner flex justify-center">
+                         <svg viewBox="0 0 300 300" class="w-60 h-60">
+                            <!-- 鐘面 -->
+                            <circle cx="150" cy="150" r="130" fill="white" stroke="#334155" stroke-width="8" />
+                            <circle cx="150" cy="150" r="130" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5,5" />
+                            
+                            <!-- 刻度 12, 3, 6, 9 -->
+                            <text x="150" y="55" text-anchor="middle" class="text-2xl font-bold fill-slate-700">12</text>
+                            <text x="255" y="158" text-anchor="middle" class="text-2xl font-bold fill-slate-700">3</text>
+                            <text x="150" y="265" text-anchor="middle" class="text-2xl font-bold fill-slate-700">6</text>
+                            <text x="45" y="158" text-anchor="middle" class="text-2xl font-bold fill-slate-700">9</text>
+
+                            <!-- 時針 (指向9) -->
+                            <line x1="150" y1="150" x2="85" y2="150" stroke="#EF4444" stroke-width="8" stroke-linecap="round" />
+                            
+                            <!-- 分針 (指向12) -->
+                            <line x1="150" y1="150" x2="150" y2="55" stroke="#3B82F6" stroke-width="6" stroke-linecap="round" />
+                            
+                            <!-- 中心點 -->
+                            <circle cx="150" cy="150" r="8" fill="#1E293B" />
+
+                            <!-- 直角標示 -->
+                            <path d="M 120 150 L 120 120 L 150 120" fill="none" stroke="#F59E0B" stroke-width="3" />
+                         </svg>
+                    </div>
+                `;
+
+            case 'gridMap':
+                return `
+                    <div class="w-full bg-white rounded-2xl border-2 border-slate-200 p-4 mb-4 relative overflow-hidden shadow-inner flex justify-center">
+                        <svg viewBox="0 0 400 300" class="w-full max-w-sm h-auto">
+                            <rect width="100%" height="100%" fill="#ECFEFF" />
+                            
+                            <!-- 直線 C (橫向) -->
+                            <line x1="20" y1="220" x2="380" y2="220" stroke="#64748B" stroke-width="12" stroke-linecap="round"/>
+                            <text x="310" y="255" class="text-base font-bold fill-slate-600">直線 C</text>
+
+                            <!-- 直線 A (縱向) -->
+                            <line x1="120" y1="40" x2="120" y2="220" stroke="#8B5CF6" stroke-width="12" stroke-linecap="round"/>
+                            <text x="110" y="30" class="text-base font-bold fill-slate-600">直線 A</text>
+
+                            <!-- 直線 B (縱向) -->
+                            <line x1="260" y1="40" x2="260" y2="220" stroke="#EC4899" stroke-width="12" stroke-linecap="round"/>
+                            <text x="250" y="30" class="text-base font-bold fill-slate-600">直線 B</text>
+
+                            <!-- 直角標記 A-C -->
+                            <rect x="126" y="194" width="20" height="20" fill="white" stroke="#333" stroke-width="1" />
+                            
+                            <!-- 直角標記 B-C -->
+                            <rect x="234" y="194" width="20" height="20" fill="white" stroke="#333" stroke-width="1" />
+                        </svg>
+                    </div>
+                `;
+
+            case 'shapesComparison':
+                return `
+                    <div class="w-full bg-white rounded-2xl border-2 border-slate-200 p-4 mb-4 relative overflow-hidden shadow-inner flex justify-center">
+                         <svg viewBox="0 0 400 200" class="w-full max-w-sm h-auto">
+                            <!-- 1. 長方形 -->
+                            <g transform="translate(10, 30)">
+                                <rect x="0" y="0" width="80" height="100" fill="#DBEAFE" stroke="#2563EB" stroke-width="3" />
+                                <rect x="0" y="85" width="15" height="15" fill="none" stroke="#2563EB" stroke-width="1"/>
+                                <text x="40" y="130" text-anchor="middle" class="text-xs font-bold fill-slate-600">長方形</text>
+                            </g>
+
+                            <!-- 2. 平行四邊形 -->
+                            <g transform="translate(130, 30)">
+                                <path d="M 30 0 L 110 0 L 80 100 L 0 100 Z" fill="#DCFCE7" stroke="#16A34A" stroke-width="3" />
+                                <text x="55" y="130" text-anchor="middle" class="text-xs font-bold fill-slate-600">平行四邊形</text>
+                                <path d="M 20 100 A 20 20 0 0 1 12 85" fill="none" stroke="#16A34A" stroke-width="1" stroke-dasharray="2,2" />
+                            </g>
+
+                            <!-- 3. 菱形 -->
+                            <g transform="translate(285, 30)">
+                                <path d="M 40 0 L 80 50 L 40 100 L 0 50 Z" fill="#FAE8FF" stroke="#C026D3" stroke-width="3" />
+                                <text x="40" y="130" text-anchor="middle" class="text-xs font-bold fill-slate-600">菱形</text>
+                            </g>
+                         </svg>
+                    </div>
+                `;
+
+            case 'intersectingLines':
+                return `
+                    <div class="w-full bg-white rounded-2xl border-2 border-slate-200 p-4 mb-4 relative overflow-hidden shadow-inner flex justify-center">
+                      <svg viewBox="0 0 400 300" class="w-full max-w-sm h-auto">
+                        <defs>
+                          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f2f2f2" stroke-width="1"/>
+                          </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid)" />
+                        
+                        <line x1="50" y1="100" x2="350" y2="100" stroke="#FF6B6B" stroke-width="3" />
+                        <text x="30" y="105" class="text-sm font-bold fill-slate-600">甲</text>
+                        
+                        <line x1="50" y1="200" x2="350" y2="200" stroke="#FF6B6B" stroke-width="3" />
+                        <text x="30" y="205" class="text-sm font-bold fill-slate-600">丁</text>
+                        
+                        <line x1="120" y1="50" x2="120" y2="250" stroke="#4ECDC4" stroke-width="3" />
+                        <text x="115" y="40" class="text-sm font-bold fill-slate-600">乙</text>
+                        
+                        <line x1="200" y1="50" x2="200" y2="250" stroke="#4ECDC4" stroke-width="3" />
+                        <text x="195" y="40" class="text-sm font-bold fill-slate-600">丙</text>
+                        
+                        <line x1="80" y1="280" x2="320" y2="40" stroke="#FFE66D" stroke-width="3" />
+                        <text x="70" y="290" class="text-sm font-bold fill-slate-600">戊</text>
+                        
+                        <line x1="250" y1="280" x2="350" y2="150" stroke="#1A535C" stroke-width="3" />
+                        <text x="240" y="295" class="text-sm font-bold fill-slate-600">己</text>
+                        
+                        <!-- 直角記號 -->
+                        <rect x="120" y="100" width="15" height="15" fill="none" stroke="#333" stroke-width="1.2" />
+                        <rect x="200" y="100" width="15" height="15" fill="none" stroke="#333" stroke-width="1.2" />
+                        <rect x="120" y="185" width="15" height="15" fill="none" stroke="#333" stroke-width="1.2" />
+                        <rect x="200" y="185" width="15" height="15" fill="#ddd" stroke="#333" stroke-width="1.2" />
+                        
+                        <g transform="translate(259, 100) rotate(45)">
+                            <rect x="0" y="0" width="12" height="12" fill="none" stroke="#333" stroke-width="1.2" />
+                        </g>
+                      </svg>
+                    </div>
+                `;
+
+            case 'triangles':
+                return `
+                    <div class="w-full bg-white rounded-2xl border-2 border-slate-200 p-4 mb-4 relative overflow-hidden shadow-inner flex justify-center">
+                      <svg viewBox="0 0 400 300" class="w-full max-w-sm h-auto">
+                        <defs>
+                          <pattern id="grid2" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f2f2f2" stroke-width="1"/>
+                          </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid2)" />
+                        
+                        <!-- 三角形甲 -->
+                        <path d="M 60 250 L 240 250 L 140 100 Z" fill="rgba(255, 107, 107, 0.08)" stroke="#FF6B6B" stroke-width="3" />
+                        <text x="120" y="200" class="text-lg font-bold fill-slate-500">甲</text>
+                        
+                        <!-- 三角形乙 -->
+                        <path d="M 220 80 L 100 160 L 300 200 Z" fill="rgba(78, 205, 196, 0.15)" stroke="#4ECDC4" stroke-width="3" />
+                        <text x="210" y="150" class="text-lg font-bold fill-slate-500">乙</text>
+                        
+                        <!-- 乙自己的直角 -->
+                        <g transform="translate(220, 80) rotate(56.3)">
+                            <rect x="-15" y="0" width="15" height="15" fill="rgba(255,255,255,0.85)" stroke="#333" stroke-width="1.2"/>
+                        </g>
+                        
+                        <!-- 接壤處直角 -->
+                        <g transform="translate(155, 122) rotate(56.3)">
+                            <rect x="0" y="0" width="12" height="12" fill="#FFD93D" stroke="#333" stroke-width="1.2"/>
+                        </g>
+                        
+                        <line x1="140" y1="100" x2="240" y2="250" stroke="#FF6B6B" stroke-width="1" stroke-dasharray="4,4" />
+                        <line x1="220" y1="80" x2="300" y2="200" stroke="#4ECDC4" stroke-width="1" stroke-dasharray="4,4" />
+                        <text x="10" y="285" class="text-[10px] fill-slate-500 font-bold">觀察黃色與白色的直角方塊，以及平行的虛線邊</text>
+                      </svg>
+                    </div>
+                `;
+
+            default:
+                return "";
+        }
+    }
+
+    // --- HTML 畫面生成核心 ---
+    function render() {
+        const app = document.getElementById('app');
+
+        if (state.currentScreen === 'welcome') {
+            app.innerHTML = `
+                <div class="min-h-[75vh] flex flex-col items-center justify-center p-2 font-sans w-full max-w-md mx-auto">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl w-full border-b-8 border-amber-200 text-center animate-fade-in">
+                      <div class="flex justify-center mb-6">
+                        <div class="bg-amber-100 p-4 rounded-full animate-bounce">
+                          <i class="fa-solid fa-arrows-spin text-amber-500 text-5xl"></i>
+                        </div>
+                      </div>
+                      <h1 class="text-3xl font-black text-slate-800 mb-2">平行與垂直大挑戰</h1>
+                      <p class="text-slate-500 mb-8 font-medium">準備好你的幾何觀察力，找出隱藏在圖形裡的線條秘密了嗎？</p>
+                      
+                      <div class="space-y-4">
+                        <div class="flex items-center bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                          <span class="w-8 h-8 flex items-center justify-center bg-blue-500 text-white rounded-full font-bold mr-3">1</span>
+                          <p class="text-left text-sm text-slate-700 font-bold">觀察線條是否有像鐵軌一樣<b>互相平行</b></p>
+                        </div>
+                        <div class="flex items-center bg-green-50/50 p-4 rounded-2xl border border-green-100">
+                          <span class="w-8 h-8 flex items-center justify-center bg-green-500 text-white rounded-full font-bold mr-3">2</span>
+                          <p class="text-left text-sm text-slate-700 font-bold">尋找正方形記號代表的<b>互相垂直</b></p>
+                        </div>
+                      </div>
+
+                      <button 
+                        onclick="state.currentScreen = 'game'; render();"
+                        class="mt-8 w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xl font-bold py-4 rounded-2xl shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2 border-b-4 border-indigo-800"
+                      >
+                        開始挑戰 <i class="fa-solid fa-play"></i>
+                      </button>
+                    </div>
+                </div>
+
+                <!-- 設計者頁尾 -->
+                <div class="w-full text-center py-4 text-slate-400 text-xs font-bold pointer-events-none mt-auto">
+                    設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+                </div>
+            `;
+            return;
+        }
+
+        if (state.currentScreen === 'result') {
+            app.innerHTML = `
+                <div class="min-h-[75vh] flex flex-col items-center justify-center p-2 font-sans w-full max-w-md mx-auto">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl w-full border-b-8 border-indigo-200 text-center animate-fade-in">
+                      <div class="text-yellow-400 text-7xl mb-4 animate-bounce">
+                        <i class="fa-solid fa-trophy"></i>
+                      </div>
+                      <h2 class="text-3xl font-black text-slate-800 mb-2">挑戰完成！</h2>
+                      <p class="text-slate-500 mb-6 font-bold">你真是幾何小偵探！</p>
+                      
+                      <div class="text-6xl font-black text-indigo-600 mb-2">${state.score}</div>
+                      <div class="text-xs text-slate-400 mb-8 uppercase tracking-widest font-black">總分</div>
+
+                      <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-8 text-left space-y-2">
+                        <h3 class="font-bold text-slate-700 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-book"></i> 老師的小叮嚀：</h3>
+                        <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside font-semibold">
+                          <li><b>互相平行</b>：兩條直線延長後永遠不會相交。</li>
+                          <li><b>互相垂直</b>：兩條直線相交成 90 度直角。</li>
+                          <li><b>生活例子</b>：時鐘9點是垂直、梯子直桿是平行。</li>
+                        </ul>
+                        
+                        <!-- AI Graduation story -->
+                        <div id="ai-story-box" class="pt-4 border-t border-slate-100 flex flex-col gap-2">
+                            <button 
+                                onclick="generateAiStory()" 
+                                class="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-black rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 border-b-4 border-indigo-700"
+                            >
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> 生成專屬幾何結案故事
+                            </button>
+                        </div>
+                      </div>
+
+                      <button 
+                        onclick="restartGame()"
+                        class="w-full bg-amber-500 hover:bg-amber-600 text-white text-lg font-bold py-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 border-b-4 border-amber-700 active:scale-95"
+                      >
+                        <i class="fa-solid fa-arrow-rotate-right"></i> 再玩一次
+                      </button>
+                    </div>
+                </div>
+
+                <!-- 設計者頁尾 -->
+                <div class="w-full text-center py-4 text-slate-400 text-xs font-bold pointer-events-none mt-auto">
+                    設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+                </div>
+            `;
+            return;
+        }
+
+        // 遊戲主畫面渲染
+        const currentQ = questions[state.currentQuestionIndex];
+
+        // 頂部進度條
+        const progressDots = questions.map((q, idx) => {
+            const isActive = state.currentQuestionIndex >= idx;
+            const wClass = isActive ? "w-6" : "w-2";
+            const bgClass = isActive ? "bg-amber-400" : "bg-amber-100/50";
+            return `<div class="h-2 rounded-full transition-all duration-500 ${wClass} ${bgClass}"></div>`;
+        }).join('');
+
+        // 選項區 HTML
+        let optionsHTML = "";
+        currentQ.options.forEach((opt) => {
+            let btnClass = "w-full p-4 rounded-2xl border-2 text-left transition-all duration-200 relative flex items-center active:scale-98 ";
+            let textClass = "font-bold text-slate-700";
+            let spanClass = "bg-slate-200 text-slate-600";
+            let iconHTML = "";
+
+            if (state.showFeedback) {
+                if (opt.id === state.selectedOption?.id) {
+                    // 使用者點選的
+                    if (opt.correct) {
+                        btnClass += "bg-green-100 border-green-500 text-green-800 shadow-sm";
+                        spanClass = "bg-green-500 text-white animate-pulse";
+                        iconHTML = `<div class="absolute right-4 text-green-600 text-xl"><i class="fa-solid fa-circle-check"></i></div>`;
+                    } else {
+                        btnClass += "bg-red-100 border-red-500 text-red-800";
+                        spanClass = "bg-red-500 text-white";
+                        iconHTML = `<div class="absolute right-4 text-red-600 text-xl"><i class="fa-solid fa-circle-xmark"></i></div>`;
+                    }
+                } else if (opt.correct) {
+                    // 正確答案但使用者沒選
+                    btnClass += "bg-green-50 border-green-300 text-green-700 opacity-80";
+                    spanClass = "bg-green-400 text-white";
+                } else {
+                    btnClass += "bg-slate-50 border-slate-200 opacity-40";
+                }
+            } else {
+                // 尚未提交
+                if (state.selectedOption?.id === opt.id) {
+                    btnClass += "bg-indigo-50 border-indigo-500 ring-2 ring-indigo-200 shadow-md";
+                    spanClass = "bg-indigo-500 text-white";
+                } else {
+                    btnClass += "bg-white border-slate-200 hover:border-indigo-300 hover:bg-slate-50/50";
+                }
+            }
+
+            optionsHTML += `
+                <button
+                    onclick="handleOptionClick(${JSON.stringify(opt).replace(/"/g, '&quot;')})"
+                    ${state.showFeedback ? 'disabled' : ''}
+                    class="${btnClass}"
+                >
+                    <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3 shrink-0 ${spanClass}">
+                        ${opt.id}
+                    </span>
+                    <span class="${textClass} text-base">${opt.text}</span>
+                    ${iconHTML}
+                </button>
+            `;
+        });
+
+        // 提示卡片
+        let hintHTML = "";
+        if (state.showHint) {
+            let formattedLocalHint = currentQ.hint.replace(/\n/g, '<br>');
+            hintHTML = `
+                <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 animate-fade-in relative text-left my-3">
+                    <button onclick="toggleLocalHint()" class="absolute top-2 right-2 text-yellow-600 hover:text-yellow-800">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <p class="text-sm text-yellow-800 font-bold mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-lightbulb"></i> 老師的提示：
+                    </p>
+                    <p class="text-sm text-slate-700 leading-relaxed font-semibold">
+                        ${formattedLocalHint}
+                    </p>
+                    <!-- 呼叫 AI 探長助教 -->
+                    <div class="mt-3 pt-3 border-t border-yellow-200/50 flex justify-end">
+                        <button 
+                            onclick="handleAskAI()"
+                            class="text-xs font-bold flex items-center gap-1.5 text-purple-700 bg-purple-100 hover:bg-purple-200 px-3 py-1.5 rounded-full transition active:scale-95"
+                        >
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> 召喚 AI 探長助教
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else {
+            hintHTML = `
+                <button 
+                    onclick="toggleLocalHint()" 
+                    class="flex items-center text-sm font-bold text-indigo-500 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-full transition active:scale-95 self-start my-2"
+                >
+                    <i class="fa-solid fa-lightbulb mr-1.5"></i> 需要點線索嗎？
+                </button>
+            `;
+        }
+
+        // 底部控制按鈕
+        let controlBtnHTML = "";
+        if (!state.showFeedback) {
+            const isClickable = state.selectedOption !== null;
+            const btnBg = isClickable 
+                ? 'bg-indigo-600 text-white hover:bg-indigo-700 border-b-4 border-indigo-800' 
+                : 'bg-slate-200 text-slate-400 cursor-not-allowed';
+            
+            controlBtnHTML = `
+                <button
+                    onclick="handleSubmit()"
+                    ${!isClickable ? 'disabled' : ''}
+                    class="w-full py-4 rounded-2xl font-black text-lg transition active:scale-95 shadow-md flex items-center justify-center gap-2 ${btnBg}"
+                >
+                    確定答案
+                </button>
+            `;
+        } else {
+            controlBtnHTML = `
+                <div class="animate-fade-in">
+                    <div class="p-4 rounded-2xl mb-4 text-left border ${state.isCorrect ? 'bg-green-50 border-green-200 text-green-800' : 'bg-amber-50 border-amber-200 text-amber-800'}">
+                        <h4 class="font-black text-lg mb-1 flex items-center gap-1.5">
+                            ${state.isCorrect ? '<i class="fa-solid fa-circle-check text-green-600"></i> 答對了！好棒！' : '<i class="fa-solid fa-circle-exclamation text-amber-600"></i> 哎呀，差一點點！'}
+                        </h4>
+                        <p class="text-sm text-slate-600 font-semibold leading-relaxed whitespace-pre-line">${currentQ.explanation}</p>
+                    </div>
+                    <button
+                        onclick="nextQuestion()"
+                        class="w-full bg-slate-800 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:bg-slate-900 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                    >
+                        ${state.currentQuestionIndex < questions.length - 1 ? '下一題' : '看成績'} <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        app.innerHTML = `
+            <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-fade-in">
+                
+                <!-- 頂部資訊與進度條 -->
+                <div class="bg-slate-800 p-4 flex flex-col gap-3 text-white">
+                  <div class="flex justify-between items-center w-full">
+                    <div class="flex items-center space-x-2">
+                      <span class="bg-slate-700 px-3 py-1 rounded-full text-xs font-bold tracking-wide">
+                        Level ${state.currentQuestionIndex + 1}/${questions.length}
+                      </span>
+                      <span class="font-black text-lg text-amber-400 truncate w-36 sm:w-auto">${currentQ.title}</span>
+                    </div>
+                    <div class="font-mono text-xl font-bold text-amber-300">${state.score} 分</div>
+                  </div>
+                  <!-- 進度條點 -->
+                  <div class="flex space-x-1.5 justify-center items-center">
+                    ${progressDots}
+                  </div>
+                </div>
+
+                <!-- 內容區 -->
+                <div class="p-6 flex flex-col gap-2">
+                  <p class="text-slate-700 font-bold mb-2 text-base leading-relaxed text-left">
+                    ${currentQ.description}
+                  </p>
+
+                  <!-- 老師提示按鈕 -->
+                  ${hintHTML}
+
+                  <!-- 視覺化幾何 SVG -->
+                  ${getVisualHTML(currentQ.visualType)}
+
+                  <!-- 選項區 -->
+                  <div class="space-y-3 mt-2">
+                    ${optionsHTML}
+                  </div>
+
+                  <!-- 底部控制按鈕 -->
+                  <div class="mt-4">
+                    ${controlBtnHTML}
+                  </div>
+
+                </div>
+            </div>
+
+            <!-- 設計者頁尾 (置底) -->
+            <div class="w-full text-center py-4 text-slate-400 text-xs font-bold pointer-events-none mt-auto">
+                設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+            </div>
+        `;
+    }
+
+    // 初始化頁面
+    document.addEventListener('DOMContentLoaded', () => {
+        render();
+    });
+</script>
+</body>
+</html>

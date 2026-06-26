@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>成語猜猜樂：我說你猜大挑戰</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Canvas Confetti 碎紙花 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- 設定字體與動畫 -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* 避免手機點擊閃爍 */
+        button { -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 via-rose-50 to-indigo-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- 主要應用程式容器 -->
+    <div id="app" class="flex flex-col items-center justify-start flex-grow p-4 z-10 relative w-full"></div>
+
+    <!-- API Key 設定彈窗 -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 animate-fade-in-up text-left">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-slate-500"></i> 設定 Gemini API Key
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-slate-500 text-sm mb-4 leading-relaxed font-medium">
+                「成語大師助教」功能需要使用 Gemini API。金鑰將儲存於您的瀏覽器中，不會上傳至其他伺服器。
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="貼上您的 API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 font-mono text-sm" />
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveApiKey()" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 rounded-xl shadow-md transition">
+                        儲存設定
+                    </button>
+                    <button onclick="clearApiKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl transition">
+                        清除金鑰
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 text-center">
+                    沒有金鑰？可至 Google AI Studio 免費申請。
+                </p>
+            </div>
+        </div>
+    </div>
+
+<script>
+// --- 成語資料庫 ---
+const idiomDatabase = {
+  animalsPlants: {
+    title: "動物植物篇",
+    color: "bg-emerald-400",
+    borderColor: "border-emerald-600",
+    shadowColor: "shadow-emerald-800",
+    textColor: "text-emerald-900",
+    icon: "🐶",
+    items: [
+      { word: "守株待兔", desc: "比喻拘泥守成，不知道要變通，或妄想不勞而獲。" },
+      { word: "畫蛇添足", desc: "比喻多做多餘的事，反而把事情弄壞了。" },
+      { word: "狐假虎威", desc: "比喻藉著別人的勢力來嚇唬人。" },
+      { word: "井底之蛙", desc: "比喻見識淺薄的人。" },
+      { word: "一石二鳥", desc: "做一件事可以同時得到兩種好處。" },
+      { word: "雞飛狗跳", desc: "形容非常混亂的樣子。" },
+      { word: "如魚得水", desc: "好像魚得到水一樣。比喻遇到很投合的人，或環境很適合自己。" },
+      { word: "對牛彈琴", desc: "比喻對不懂道理的人講道理，白費力氣。" },
+      { word: "盲人摸象", desc: "比喻對事情只了解一部分，就亂下結論。" },
+      { word: "膽小如鼠", desc: "形容膽子非常小，像老鼠一樣。" },
+      { word: "車水馬龍", desc: "形容車馬往來繁多，非常熱鬧。" },
+      { word: "指鹿為馬", desc: "比喻明明知道是錯的，卻故意顛倒黑白，混淆是非。" },
+      { word: "鶴立雞群", desc: "比喻人的才能或儀表出眾，在人群中很顯眼。" },
+      { word: "狼吞虎嚥", desc: "形容吃東西又猛又急的樣子。" },
+      { word: "鴉雀無聲", desc: "形容非常安靜，一點聲音都沒有。" },
+      { word: "鳥語花香", desc: "形容春天的景色很美好。" },
+      { word: "打草驚蛇", desc: "比喻行事不密，使對方有所察決而預作防備。" },
+      { word: "亡羊補牢", desc: "比喻犯錯後及時更正，還來得及補救。" },
+      { word: "杯弓蛇影", desc: "比喻因無中生有的疑慮，而把自己嚇壞了。" },
+      { word: "生龍活虎", desc: "形容活潑矯健，充滿生氣。" },
+      { word: "笨鳥先飛", desc: "比喻能力差的人，為了怕落後，比別人先行動。" }
+    ]
+  },
+  numbers: {
+    title: "數字成語篇",
+    color: "bg-amber-400",
+    borderColor: "border-amber-600",
+    shadowColor: "shadow-amber-800",
+    textColor: "text-amber-900",
+    icon: "🔢",
+    items: [
+      { word: "一心一意", desc: "形容心思專一，沒有別的想法。" },
+      { word: "三心二意", desc: "形容猶豫不決，拿不定主意。" },
+      { word: "五花八門", desc: "比喻花樣繁多，變化多端。" },
+      { word: "七上八下", desc: "形容心裡慌亂不安，無所適從。" },
+      { word: "九牛一毛", desc: "比喻在極大的數量中，只佔極微小的部分。" },
+      { word: "十全十美", desc: "形容事物非常完美，沒有一點缺點。" },
+      { word: "一乾二淨", desc: "形容非常乾淨，或一點也不剩。" },
+      { word: "四面八方", desc: "泛指周圍各地或各個方面。" },
+      { word: "千方百計", desc: "費盡心機，想盡一切辦法、計謀。" },
+      { word: "一模一樣", desc: "形容外表或內容完全相同。" },
+      { word: "三更半夜", desc: "形容深夜。" },
+      { word: "一舉兩得", desc: "做一件事同時得到兩方面的好處。" },
+      { word: "百發百中", desc: "形容射箭技術高超，或做事有絕對把握。" },
+      { word: "獨一無二", desc: "只有這一個，沒有第二個。形容最特殊，沒有可以相比的。" },
+      { word: "五體投地", desc: "比喻非常佩服。" },
+      { word: "亂七八糟", desc: "形容毫無條理，非常混亂。" },
+      { word: "一目十行", desc: "形容閱讀速度很快。" },
+      { word: "三言兩語", desc: "形容言語簡短，幾句話就說完了。" },
+      { word: "千奇百怪", desc: "形容十分稀奇古怪。" },
+      { word: "萬眾一心", desc: "千萬人的心意合而為一。形容團結一致。" },
+      { word: "接二連三", desc: "形容連續不斷。" }
+    ]
+  },
+  nature: {
+    title: "自然景象篇",
+    color: "bg-blue-400",
+    borderColor: "border-blue-600",
+    shadowColor: "shadow-blue-800",
+    textColor: "text-blue-900",
+    icon: "🌤️",
+    items: [
+      { word: "風和日麗", desc: "形容天氣晴朗美好。" },
+      { word: "山明水秀", desc: "形容山水景色秀麗。" },
+      { word: "排山倒海", desc: "形容力量巨大，氣勢壯闊。" },
+      { word: "乘風破浪", desc: "比喻志向遠大，不畏艱難，奮勇前進。" },
+      { word: "雨後春筍", desc: "比喻事物在某個時期大量湧現，迅速發展。" },
+      { word: "風吹草動", desc: "比喻輕微的動靜或變故。" },
+      { word: "水落石出", desc: "比喻事情真相大白。" },
+      { word: "星火燎原", desc: "比喻小事如果不注意，最後會變成大禍。" },
+      { word: "海闊天空", desc: "形容天地遼闊，或者心胸開闊、無拘無束。" },
+      { word: "風平浪靜", desc: "形容水面平靜，也比喻局勢平穩，沒有風波。" },
+      { word: "晴天霹靂", desc: "比喻突發的驚人事件。" },
+      { word: "頂天立地", desc: "形容氣概豪邁，光明正大。" },
+      { word: "滴水穿石", desc: "比喻只要有恆心，不斷努力，事情一定會成功。" },
+      { word: "春暖花開", desc: "形容春天的氣候溫和，景物美好。" },
+      { word: "狂風暴雨", desc: "形容大風大雨，也比喻處境險惡。" },
+      { word: "柳暗花明", desc: "比喻在絕望中產生轉機，看到希望。" },
+      { word: "翻山越嶺", desc: "形容長途跋涉，旅途辛苦。" },
+      { word: "鏡花水月", desc: "比喻虛幻不實在的景象。" },
+      { word: "大風大浪", desc: "比喻社會上複雜、激烈的鬥爭或變故。" },
+      { word: "行雲流水", desc: "形容文章自然流暢，不受拘束。" },
+      { word: "雲淡風輕", desc: "形容天氣晴好。也形容對事情看得很開，不放在心上。" }
+    ]
+  },
+  history: {
+    title: "歷史故事篇",
+    color: "bg-rose-400",
+    borderColor: "border-rose-600",
+    shadowColor: "shadow-rose-800",
+    textColor: "text-rose-900",
+    icon: "📜",
+    items: [
+      { word: "臥薪嘗膽", desc: "比喻刻苦自勵，發憤圖強。" },
+      { word: "三顧茅廬", desc: "比喻對賢才真心誠意的邀請、拜訪。" },
+      { word: "負荊請罪", desc: "形容主動向人認錯賠罪。" },
+      { word: "完璧歸趙", desc: "比喻物歸原主，完好無缺。" },
+      { word: "望梅止渴", desc: "比喻用空想來安慰自己。" },
+      { word: "草木皆兵", desc: "形容極度驚恐時，發生的錯覺。" },
+      { word: "聞雞起舞", desc: "比喻把握時機，及時奮起行動。" },
+      { word: "紙上談兵", desc: "比喻不切實際的空談。" },
+      { word: "四面楚歌", desc: "比喻四面受敵，孤立無援。" },
+      { word: "破釜沉舟", desc: "比喻做事果決，義無反顧。" },
+      { word: "一鳴驚人", desc: "比喻平時默默無聞，一旦展現才華，就讓人驚訝。" },
+      { word: "樂不思蜀", desc: "比喻人快樂得忘了家鄉或本分。" },
+      { word: "指鹿為馬", desc: "比喻故意顛倒黑白，混淆是非。" },
+      { word: "東施效顰", desc: "比喻胡亂模仿，結果反而變醜。" },
+      { word: "名落孫山", desc: "指考試或選拔沒有被錄取。" },
+      { word: "入木三分", desc: "形容書法筆力強勁。也比喻見解深刻。" },
+      { word: "胸有成竹", desc: "比喻處事有定見，早已準備好了。" },
+      { word: "邯鄲學步", desc: "比喻模仿不成，反而失去自我。" },
+      { word: "退避三舍", desc: "比喻主動退讓，不與人爭。" },
+      { word: "奇貨可居", desc: "比喻利用某種專長或條件來謀利。" }
+    ]
+  },
+  fables: {
+    title: "寓言故事篇",
+    color: "bg-purple-400",
+    borderColor: "border-purple-600",
+    shadowColor: "shadow-purple-800",
+    textColor: "text-purple-900",
+    icon: "📖",
+    items: [
+      { word: "守株待兔", desc: "比喻拘泥守成，不知變通。" },
+      { word: "刻舟求劍", desc: "比喻拘泥固執，不知道要變通。" },
+      { word: "掩耳盜鈴", desc: "比喻自己欺騙自己。" },
+      { word: "揠苗助長", desc: "比喻為求速成而未循序漸進，結果不但無益，反而有害。" },
+      { word: "畫蛇添足", desc: "比喻多做多餘的事，反而壞了事。" },
+      { word: "井底之蛙", desc: "比喻見識淺薄的人。" },
+      { word: "自相矛盾", desc: "比喻言語或行事前後不一致。" },
+      { word: "朝三暮四", desc: "比喻心意不定，反覆無常。" },
+      { word: "杞人憂天", desc: "比喻缺乏根據且不必要的憂慮。" },
+      { word: "杯弓蛇影", desc: "比喻疑神鬼，自己嚇自己。" },
+      { word: "塞翁失馬", desc: "比喻暫時受到損失，也許反而因此得到好處。" },
+      { word: "狐假虎威", desc: "比喻藉著別人的勢力來嚇唬人。" },
+      { word: "鷸蚌相爭", desc: "比喻雙方爭執不相上下，結果讓第三者得利。" },
+      { word: "愚公移山", desc: "比喻努力不懈，不畏艱難。" },
+      { word: "濫竽充數", desc: "比喻沒有真才實學的人，混在行家裡面充數。" },
+      { word: "買櫝還珠", desc: "比喻捨本逐末，取捨失當。" },
+      { word: "熟能生巧", desc: "做事熟練了，自然能領悟出其中的竅門。" },
+      { word: "葉公好龍", desc: "比喻表面上愛好某事物，實際上並不是真的愛好。" },
+      { word: "鄭人買履", desc: "形容只相信教條，不顧實際情況的人。" },
+      { word: "對牛彈琴", desc: "比喻對不懂道理的人講道理，白費力氣。" }
+    ]
+  },
+  others: {
+    title: "綜合挑戰篇",
+    color: "bg-orange-400",
+    borderColor: "border-orange-600",
+    shadowColor: "shadow-orange-800",
+    textColor: "text-orange-900",
+    icon: "🌟",
+    items: [
+      { word: "半途而廢", desc: "事情沒做成功就停止了。" },
+      { word: "同甘共苦", desc: "共同享受安樂，共同承擔艱苦。" },
+      { word: "不可思議", desc: "形容事物無法想像，難以理解。" },
+      { word: "自以為是", desc: "自己認為自己是對的，形容很主觀，不虛心。" },
+      { word: "理直氣壯", desc: "理由正當充分，所以膽氣壯盛。" },
+      { word: "迫不及待", desc: "急迫得不能等待。形容心情急切。" },
+      { word: "興高采烈", desc: "形容興致勃勃，情緒熱烈的樣子。" },
+      { word: "津津有味", desc: "形容很有滋味或很有興趣。" },
+      { word: "目瞪口呆", desc: "形容受驚或受窘而發愣的樣子。" },
+      { word: "手忙腳亂", desc: "形容做事慌亂，沒有條理。" },
+      { word: "心花怒放", desc: "形容心情極其快活。" },
+      { word: "垂頭喪氣", desc: "形容失意沮喪的樣子。" },
+      { word: "恍然大悟", desc: "忽然完全明白。" },
+      { word: "莫名其妙", desc: "形容事情奇怪，不合常理。" },
+      { word: "腳踏實地", desc: "比喻做事切實穩健。" },
+      { word: "聚精會神", desc: "集中精神，專心一意。" },
+      { word: "精益求精", desc: "好還要更好。" },
+      { word: "隨機應變", desc: "隨著時機或情況的變化，靈活應付。" },
+      { word: "全力以赴", desc: "投入全部的心力去完成。" },
+      { word: "自力更生", desc: "用自己的力量經營生計。" }
+    ]
+  }
+};
+
+// 洗牌函式
+function shuffleArray(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+
+// 狀態管理
+let state = {
+    stage: 'menu', // 'menu', 'playing', 'finished'
+    currentCategory: null,
+    currentCategoryKey: '',
+    gameQueue: [],
+    currentIndex: 0,
+    score: 0,
+    timeLeft: 60,
+    results: [] // 儲存 {word, desc, correct: boolean}
+};
+
+let timerInterval = null;
+
+// AI 助教狀態
+let aiExplanation = null;
+let aiLoading = false;
+let isSpeaking = false;
+let currentUtterance = null;
+
+// --- API Key 管理 ---
+function getApiKey() {
+    return localStorage.getItem('gemini_api_key') || '';
+}
+
+function toggleSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    const input = document.getElementById('api-key-input');
+    input.value = getApiKey();
+    modal.classList.toggle('hidden');
+}
+
+function saveApiKey() {
+    const input = document.getElementById('api-key-input');
+    const key = input.value.trim();
+    if (key) {
+        localStorage.setItem('gemini_api_key', key);
+        alert('API Key 儲存成功！');
+    } else {
+        localStorage.removeItem('gemini_api_key');
+        alert('已清除 API Key。');
+    }
+    toggleSettingsModal();
+    render();
+}
+
+function clearApiKey() {
+    localStorage.removeItem('gemini_api_key');
+    const input = document.getElementById('api-key-input');
+    input.value = '';
+    alert('已清除 API Key。');
+    toggleSettingsModal();
+    render();
+}
+
+// --- AI Tutor API 呼叫 ---
+async function callGeminiAPI(prompt, apiKey, retries = 3, delay = 1000) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，成語大師現在有點忙，請稍後再試。";
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+        }
+    }
+}
+
+async function handleAskAI() {
+    const key = getApiKey();
+    if (!key) {
+        alert('請先設定 Gemini API Key，即可使用成語大師助教提供線索提示！');
+        toggleSettingsModal();
+        return;
+    }
+
+    aiLoading = true;
+    aiExplanation = null;
+    render();
+
+    const currentItem = state.gameQueue[state.currentIndex];
+    
+    // 嚴格指示不能透露成語本身的字
+    const forbiddenChars = currentItem.word.split('').join('、');
+    const prompt = `你現在是一位非常擅長用趣味方式引導學生的「國小成語大師」助教。
+    正在進行「成語猜猜樂（我說你猜）」的遊戲，說題者（看著畫面的孩子）目前不知道要怎麼描述這個成語，需要你的暗示。
+    
+    【任務成語】
+    - 成語名稱：${currentItem.word}
+    - 成語釋義：${currentItem.desc}
+    
+    【限制條件 - 極度重要】
+    1. 你的回答「絕對不能」包含成語中的任何一個字（禁用字：${forbiddenChars}）。也不要使用同音異義字，否則遊戲就會破功！
+    2. 請用簡單有趣、適合國小三年級或四年級學生（9-10歲）聽得懂的話來引導。
+    
+    【回答格式】
+    請提供以下三個部分，並使用活潑的語氣：
+    ✨ **比手畫腳小秘笈**：教說題者怎麼用動作、或是生活中的小比喻（例如：「你可以比出一個...」、「想像你正在...」）來引導對方，不能直接說出字喔！
+    💡 **成語大搜查 (不含答案字)**：把這個成語的意思，包裝成一個生活中的趣味情境（例如：「當你的好朋友明明做錯事卻不承認，還...」）。
+    📝 **生活造句 (不含答案字)**：用這個成語造一個句子，但把成語的地方用「____」或「這個成語」代替，讓大家去填空。
+    
+    請使用繁體中文回答，排版保持精美且多用 emoji！`;
+
+    try {
+        const result = await callGeminiAPI(prompt, key);
+        aiExplanation = result;
+    } catch (error) {
+        aiExplanation = "報告！與成語大師的通訊中斷，請檢查網路或金鑰設定。";
+    } finally {
+        aiLoading = false;
+        render();
+    }
+}
+
+function handleSpeak() {
+    if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        render();
+    } else {
+        if (!aiExplanation) return;
+        const cleanText = aiExplanation.replace(/[\*#_`~]/g, '');
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'zh-TW';
+        utterance.rate = 0.95;
+        utterance.onend = () => {
+            isSpeaking = false;
+            render();
+        };
+        utterance.onerror = () => {
+            isSpeaking = false;
+            render();
+        };
+        window.speechSynthesis.speak(utterance);
+        isSpeaking = true;
+        currentUtterance = utterance;
+        render();
+    }
+}
+
+// 遊戲控制
+function goHome() {
+    clearInterval(timerInterval);
+    state.stage = 'menu';
+    resetAI();
+    render();
+}
+
+function resetAI() {
+    aiExplanation = null;
+    aiLoading = false;
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+}
+
+function startGame(categoryKey) {
+    const category = idiomDatabase[categoryKey];
+    state.stage = 'playing';
+    state.currentCategory = category;
+    state.currentCategoryKey = categoryKey;
+    state.gameQueue = shuffleArray([...category.items]);
+    state.currentIndex = 0;
+    state.score = 0;
+    state.timeLeft = 60;
+    state.results = [];
+    
+    resetAI();
+    
+    // 開始計時
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (state.timeLeft > 0) {
+            state.timeLeft--;
+            const timerLabel = document.getElementById('timer-label');
+            if (timerLabel) {
+                timerLabel.textContent = `${state.timeLeft}s`;
+                if (state.timeLeft <= 10) {
+                    timerLabel.classList.add('text-red-500', 'animate-pulse', 'text-3xl');
+                }
+            }
+        } else {
+            endGame();
+        }
+    }, 1000);
+    
+    render();
+}
+
+function handleAnswer(isCorrect) {
+    const currentItem = state.gameQueue[state.currentIndex];
+    state.results.push({ ...currentItem, correct: isCorrect });
+    
+    if (isCorrect) {
+        state.score++;
+        // 答對時噴灑碎紙花
+        confetti({
+            particleCount: 80,
+            spread: 60,
+            origin: { y: 0.8 }
+        });
+    }
+    
+    resetAI();
+    
+    if (state.currentIndex < state.gameQueue.length - 1) {
+        state.currentIndex++;
+        render();
+    } else {
+        endGame();
+    }
+}
+
+function endGame() {
+    clearInterval(timerInterval);
+    state.stage = 'finished';
+    resetAI();
+    render();
+}
+
+// 渲染函式
+function render() {
+    const app = document.getElementById('app');
+    
+    if (state.stage === 'menu') {
+        let categoriesHTML = '';
+        Object.entries(idiomDatabase).map(([key, cat]) => {
+            categoriesHTML += `
+                <button onclick="startGame('${key}')" class="${cat.color} group relative w-full h-32 md:h-40 rounded-3xl border-4 ${cat.borderColor} shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all duration-150 flex flex-col items-center justify-center overflow-hidden">
+                    <span class="text-4xl mb-1 filter drop-shadow-md group-hover:scale-110 transition-transform">${cat.icon}</span>
+                    <span class="text-xl md:text-2xl font-black text-slate-900 tracking-wider">
+                        ${cat.title}
+                    </span>
+                    <div class="absolute top-2 right-2 opacity-10 rotate-12 group-hover:rotate-45 transition-transform">
+                       <i class="fa-solid fa-book-open text-5xl text-white"></i>
+                    </div>
+                </button>
+            `;
+        });
+
+        app.innerHTML = `
+            <div class="max-w-4xl w-full text-center py-6 px-4 animate-fade-in-up">
+                <!-- 設定按鈕 -->
+                <button onclick="toggleSettingsModal()" class="absolute top-4 right-4 bg-white p-3 rounded-full text-slate-500 hover:text-slate-700 shadow-md border border-slate-100 transition hover:rotate-45 duration-300 z-50" title="API 設定">
+                    <i class="fa-solid fa-gear text-xl"></i>
+                </button>
+
+                <header class="mb-8 mt-4 text-center">
+                    <h1 class="text-4xl md:text-6xl font-black text-pink-500 mb-2 drop-shadow-sm tracking-wide flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-comments text-pink-400"></i> 成語猜猜樂
+                    </h1>
+                    <p class="text-slate-500 text-lg font-bold">我說你猜！選一個分類開始挑戰吧</p>
+                </header>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl px-2">
+                    ${categoriesHTML}
+                </div>
+                
+                <!-- 遊戲說明與規則卡 -->
+                <div class="mt-12 p-6 bg-white rounded-3xl border-4 border-slate-800 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] max-w-2xl mx-auto text-left">
+                    <h3 class="font-black text-xl text-slate-800 mb-3 flex items-center gap-2">
+                       <i class="fa-solid fa-trophy text-yellow-500"></i> 遊戲規則與玩法
+                    </h3>
+                    <ul class="list-disc list-inside text-slate-600 space-y-2 font-medium leading-relaxed">
+                        <li><strong>雙人合作</strong>：兩人一組，一人拿 iPad 當「說題者」（背對猜題者），一人當「猜題者」。</li>
+                        <li><strong>限時挑戰</strong>：每關限時 <span class="text-pink-500 font-bold">60 秒</span>，比比看誰能答對最多題！</li>
+                        <li><strong>說題技巧</strong>：說題者看解釋與題目，可用動作或言語描述，但「絕對不能」說出成語中的任何一個字。</li>
+                        <li><strong>操作方式</strong>：猜對按 <span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> 答對了</span>，不會按 <span class="text-amber-500 font-bold"><i class="fa-solid fa-circle-arrow-right"></i> 跳過</span>。</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 設計者頁尾 -->
+            <footer class="mt-12 text-center text-xs text-slate-400 w-full">
+                設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+            </footer>
+        `;
+    } 
+    else if (state.stage === 'playing') {
+        const currentItem = state.gameQueue[state.currentIndex];
+        
+        let aiTutorHTML = '';
+        if (!aiExplanation && !aiLoading) {
+            aiTutorHTML = `
+                <button onclick="handleAskAI()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transform active:scale-95 transition-all flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i>
+                  <span>✨ 呼叫成語大師助教</span>
+                </button>
+            `;
+        } else if (aiLoading) {
+            aiTutorHTML = `
+                <div class="w-full bg-white p-4 rounded-2xl shadow-sm border border-purple-100 flex items-center justify-center space-x-3 animate-pulse">
+                  <div class="w-3 h-3 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                  <div class="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                  <div class="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                  <span class="text-purple-500 font-black">成語大師正在調研典故...</span>
+                </div>
+            `;
+        } else if (aiExplanation) {
+            aiTutorHTML = `
+                <div class="w-full bg-white p-6 rounded-3xl shadow-lg border-l-8 border-purple-500 animate-fade-in-up relative text-left">
+                  <div class="flex justify-between items-start mb-2">
+                     <h4 class="font-black text-purple-600 flex items-center gap-2 text-lg">
+                       <i class="fa-solid fa-wand-magic-sparkles"></i> 成語大師的暗示
+                     </h4>
+                     <button onclick="handleSpeak()" class="text-slate-400 hover:text-purple-500 transition-colors" title="朗讀線索">
+                       ${isSpeaking ? '<i class="fa-solid fa-circle-stop text-2xl text-red-500"></i>' : '<i class="fa-solid fa-volume-high text-xl"></i>'}
+                     </button>
+                  </div>
+                  <p class="text-slate-600 leading-relaxed whitespace-pre-wrap font-medium">
+                    ${aiExplanation}
+                  </p>
+                </div>
+            `;
+        }
+
+        app.innerHTML = `
+            <!-- 頂部資訊列 -->
+            <div class="w-full max-w-4xl flex justify-between items-center mb-6 px-2">
+                <button onclick="goHome()" class="text-slate-600 hover:text-slate-900 bg-white/80 hover:bg-white px-4 py-2 rounded-xl shadow-sm font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> 回首頁
+                </button>
+                <div class="flex items-center gap-4 bg-white px-5 py-2.5 rounded-2xl shadow-md border border-slate-100">
+                    <div class="flex items-center gap-2 text-slate-700 font-bold">
+                        <i class="fa-solid fa-clock text-pink-500 text-lg"></i>
+                        <span id="timer-label" class="text-2xl font-black">${state.timeLeft}s</span>
+                    </div>
+                    <div class="h-6 w-[2px] bg-slate-200"></div>
+                    <div class="flex items-center gap-2 text-slate-700 font-bold">
+                        <i class="fa-solid fa-trophy text-yellow-500 text-lg"></i>
+                        <span class="text-2xl font-black">${state.score} 分</span>
+                    </div>
+                    <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600 ml-2" title="API 設定">
+                       <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 雙欄排版 -->
+            <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                
+                <!-- 左欄：成語卡片與 AI 助教 -->
+                <div class="md:col-span-8 space-y-6">
+                    <div class="bg-white w-full rounded-[2rem] border-4 border-slate-800 shadow-[10px_10px_0px_0px_rgba(30,41,59,1)] flex flex-col items-center justify-start px-6 pb-8 pt-10 text-center relative overflow-hidden">
+                        
+                        <!-- 類裝飾 -->
+                        <div class="absolute top-0 left-0 w-full h-3 bg-slate-100 flex gap-1.5 px-4 items-center">
+                            <div class="w-2 h-2 rounded-full bg-red-400"></div>
+                            <div class="w-2 h-2 rounded-full bg-yellow-400"></div>
+                            <div class="w-2 h-2 rounded-full bg-green-400"></div>
+                        </div>
+
+                        <span class="text-xs font-black text-slate-400 tracking-widest uppercase mb-3">
+                          第 ${state.currentIndex + 1} 題 / ${state.gameQueue.length} 題
+                        </span>
+
+                        <!-- 大字成語 -->
+                        <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-slate-800 mb-6 tracking-widest">
+                          ${currentItem.word}
+                        </h2>
+
+                        <!-- 解釋 -->
+                        <div class="bg-yellow-50/80 border-2 border-yellow-200 rounded-2xl px-6 py-4 w-full text-left">
+                          <h4 class="font-black text-yellow-800 text-sm mb-1">
+                             <i class="fa-solid fa-book-open"></i> 成語釋義：
+                          </h4>
+                          <p class="text-lg text-slate-700 font-bold leading-relaxed">
+                            ${currentItem.desc}
+                          </p>
+                        </div>
+                    </div>
+
+                    <!-- AI 助教 -->
+                    <div class="w-full">
+                        ${aiTutorHTML}
+                    </div>
+                </div>
+
+                <!-- 右欄：操作與作答 -->
+                <div class="md:col-span-4 w-full space-y-4">
+                    <div class="bg-white rounded-3xl p-6 shadow-lg border-4 border-slate-800 flex flex-col justify-center">
+                       <h3 class="text-lg font-black text-slate-700 mb-6 text-center">請回答與操作</h3>
+                       
+                       <div class="grid grid-cols-1 gap-4 w-full">
+                           <!-- 答對按鈕 -->
+                           <button onclick="handleAnswer(true)" class="h-24 bg-emerald-500 hover:bg-emerald-600 rounded-2xl border-b-8 border-emerald-700 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center justify-center gap-1 group shadow-md text-white">
+                             <i class="fa-solid fa-circle-check text-3xl group-active:scale-90 transition-transform"></i>
+                             <span class="font-black text-xl tracking-wider">答對了！</span>
+                           </button>
+
+                           <!-- 跳過按鈕 -->
+                           <button onclick="handleAnswer(false)" class="h-24 bg-amber-400 hover:bg-amber-500 rounded-2xl border-b-8 border-amber-600 active:border-b-0 active:translate-y-2 transition-all flex flex-col items-center justify-center gap-1 group shadow-md text-white">
+                             <i class="fa-solid fa-circle-arrow-right text-3xl group-active:scale-90 transition-transform"></i>
+                             <span class="font-black text-xl tracking-wider">跳過 Pass</span>
+                           </button>
+                       </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 設計者頁尾 -->
+            <footer class="mt-12 text-center text-xs text-slate-400 w-full">
+                設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+            </footer>
+        `;
+    } 
+    else if (state.stage === 'finished') {
+        const correctCount = state.results.filter(r => r.correct).length;
+        const skippedCount = state.results.filter(r => !r.correct).length;
+
+        let correctBadgesHTML = '';
+        state.results.filter(r => r.correct).forEach(item => {
+            correctBadgesHTML += `
+                <span class="px-3 py-1.5 bg-white border-2 border-emerald-200 rounded-xl text-emerald-800 font-bold shadow-sm text-sm">
+                    ${item.word}
+                </span>
+            `;
+        });
+        if (correctCount === 0) {
+            correctBadgesHTML = `<span class="text-slate-400 text-sm font-medium">還沒有答對，再接再厲！</span>`;
+        }
+
+        let skippedBadgesHTML = '';
+        state.results.filter(r => !r.correct).forEach(item => {
+            skippedBadgesHTML += `
+                <span class="px-3 py-1.5 bg-white border-2 border-slate-200 rounded-xl text-slate-500 font-bold shadow-sm text-sm">
+                    ${item.word}
+                </span>
+            `;
+        });
+        if (skippedCount === 0) {
+            skippedBadgesHTML = `<span class="text-slate-400 text-sm font-medium">太厲害了，全部答對！</span>`;
+        }
+
+        app.innerHTML = `
+            <div class="max-w-3xl w-full bg-white rounded-[2.5rem] border-4 border-slate-800 shadow-[10px_10px_0px_0px_rgba(30,41,59,1)] overflow-hidden mt-8 animate-fade-in-up text-center">
+                <div class="bg-gradient-to-tr from-slate-800 to-slate-900 p-8 text-white relative">
+                    <h2 class="text-3xl font-black mb-2 flex items-center justify-center gap-2">
+                       <i class="fa-solid fa-circle-check text-emerald-400"></i> 挑戰結束！
+                    </h2>
+                    <div class="text-7xl font-black text-yellow-400 mb-2 tracking-wide">${state.score} <span class="text-3xl text-white">分</span></div>
+                    <p class="opacity-80 font-bold">太棒了！來看看你們練習了哪些成語</p>
+                </div>
+
+                <div class="p-6 text-left">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       <!-- 答對列表 -->
+                       <div class="bg-emerald-50/50 p-5 rounded-2xl border-2 border-emerald-100">
+                          <h3 class="font-black text-emerald-800 mb-3 flex items-center gap-2 text-lg">
+                            <i class="fa-solid fa-circle-check"></i> 答對 (${correctCount})
+                          </h3>
+                          <div class="flex flex-wrap gap-2">
+                             ${correctBadgesHTML}
+                          </div>
+                       </div>
+
+                       <!-- 跳過列表 -->
+                       <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-100">
+                          <h3 class="font-black text-slate-600 mb-3 flex items-center gap-2 text-lg">
+                            <i class="fa-solid fa-circle-arrow-right"></i> 跳過 / 練習 (${skippedCount})
+                          </h3>
+                          <div class="flex flex-wrap gap-2">
+                             ${skippedBadgesHTML}
+                          </div>
+                       </div>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-slate-50 flex justify-center gap-4 border-t border-slate-100">
+                    <button onclick="startGame('${state.currentCategoryKey}')" class="flex items-center gap-2 px-8 py-4 bg-pink-500 hover:bg-pink-600 text-white rounded-2xl font-black text-xl shadow-[0_6px_0_rgb(190,24,93)] active:shadow-none active:translate-y-1.5 transition-all">
+                      <i class="fa-solid fa-rotate-left"></i> 再玩一次
+                    </button>
+                    <button onclick="goHome()" class="flex items-center gap-2 px-8 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-black text-xl shadow-[0_6px_0_rgb(148,163,184)] active:shadow-none active:translate-y-1.5 transition-all">
+                      <i class="fa-solid fa-house"></i> 回大廳
+                    </button>
+                </div>
+            </div>
+
+            <!-- 設計者頁尾 -->
+            <footer class="mt-12 text-center text-xs text-slate-400 w-full">
+                設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+            </footer>
+        `;
+    }
+}
+
+// 初始渲染
+render();
+</script>
+
+</body>
+</html>

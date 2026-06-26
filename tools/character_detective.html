@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>情緒性格偵探社 | 五卡合一互動學習</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts (圓體字較適合小學生) -->
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Canvas Confetti 碎紙花 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background-color: #FFF8E1; /* 柔和的米黃色底 */
+            touch-action: manipulation; /* 優化觸控 */
+        }
+
+        /* 卡片通用樣式 */
+        .card-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .card-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* 隱藏捲軸但保留功能 */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 彈跳動畫 */
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-amber-50 via-orange-50 to-indigo-50 min-h-screen text-gray-800 pb-20 flex flex-col justify-between">
+
+    <div>
+        <!-- 頂部導航 -->
+        <header class="bg-white shadow-md relative z-40 rounded-b-3xl">
+            <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-3xl">🕵️‍♂️</span>
+                    <div>
+                        <h1 class="text-2xl font-black text-indigo-600 tracking-wider">情緒性格偵探社</h1>
+                        <p class="text-xs text-slate-400 font-bold">溫美玉老師五卡教學法鷹架工具</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-base font-black shadow-inner">
+                        <i class="fa-solid fa-star text-yellow-500 mr-1 animate-pulse"></i>
+                        <span id="scoreDisplay">星星: 0</span>
+                    </div>
+                    <button onclick="toggleSettingsModal()" class="bg-slate-100 p-2.5 rounded-full text-slate-500 hover:text-slate-700 border border-slate-200 transition hover:rotate-45 duration-300 shadow-sm" title="API 設定">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 選單 Tab -->
+            <div class="flex justify-center gap-2 pb-4 mt-2 px-2 overflow-x-auto hide-scrollbar">
+                <button onclick="switchTab('library')" class="tab-btn px-5 py-2.5 rounded-2xl bg-indigo-600 text-white font-black text-sm md:text-base shadow-md whitespace-nowrap transition" id="btn-library">
+                    <i class="fa-solid fa-book-open mr-1"></i> 卡牌圖鑑
+                </button>
+                <button onclick="switchTab('quiz')" class="tab-btn px-5 py-2.5 rounded-2xl bg-white text-gray-500 font-black text-sm md:text-base shadow-sm border border-slate-100 whitespace-nowrap transition" id="btn-quiz">
+                    <i class="fa-solid fa-gamepad mr-1"></i> 情境挑戰
+                </button>
+                <button onclick="switchTab('maker')" class="tab-btn px-5 py-2.5 rounded-2xl bg-white text-gray-500 font-black text-sm md:text-base shadow-sm border border-slate-100 whitespace-nowrap transition" id="btn-maker">
+                    <i class="fa-solid fa-pen-nib mr-1"></i> 五卡寫作產生器
+                </button>
+            </div>
+        </header>
+
+        <!-- 主要內容區 -->
+        <main class="max-w-4xl mx-auto p-4 relative z-10">
+
+            <!-- 區域 1: 卡牌圖鑑 (資料庫) -->
+            <section id="view-library" class="space-y-6 animate-fade-in-up">
+                <div class="bg-white p-6 rounded-3xl shadow-xl border-4 border-slate-800">
+                    <h2 class="text-lg font-black text-center mb-5 text-slate-700 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-indigo-500"></i> 點擊分類查看詞彙，再點擊詞彙獲取 AI 解析
+                    </h2>
+                    
+                    <!-- 分類按鈕 -->
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+                        <button onclick="showCategory('emotion')" class="p-3.5 rounded-2xl bg-red-100 text-red-600 font-black text-base md:text-lg hover:bg-red-200 transition shadow-sm border-2 border-red-200">❤️ 情緒卡</button>
+                        <button onclick="showCategory('personality')" class="p-3.5 rounded-2xl bg-teal-100 text-teal-600 font-black text-base md:text-lg hover:bg-teal-200 transition shadow-sm border-2 border-teal-200">🧠 性格卡</button>
+                        <button onclick="showCategory('action')" class="p-3.5 rounded-2xl bg-yellow-100 text-yellow-700 font-black text-base md:text-lg hover:bg-yellow-200 transition shadow-sm border-2 border-yellow-200">🏃 行動卡</button>
+                        <button onclick="showCategory('viewpoint')" class="p-3.5 rounded-2xl bg-indigo-100 text-indigo-600 font-black text-base md:text-lg hover:bg-indigo-200 transition shadow-sm border-2 border-indigo-200">👁️ 觀點卡</button>
+                        <button onclick="showCategory('writing')" class="p-3.5 rounded-2xl bg-purple-100 text-purple-600 font-black text-base md:text-lg hover:bg-purple-200 transition shadow-sm border-2 border-purple-200 col-span-2 md:col-span-1">✍️ 寫作卡</button>
+                    </div>
+
+                    <!-- 詞彙顯示區 -->
+                    <div id="vocab-display" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 min-h-[200px] content-start">
+                        <div class="col-span-full text-center text-gray-400 py-10 font-bold">請選擇上方分類</div>
+                    </div>
+                </div>
+
+                <!-- 詞彙 AI 解說區 -->
+                <div id="vocab-explain-box" class="hidden bg-white p-6 rounded-3xl shadow-xl border-l-8 border-indigo-500 animate-fade-in-up relative text-left">
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-black text-indigo-600 flex items-center gap-2 text-lg">
+                           <i class="fa-solid fa-wand-magic-sparkles"></i> 偵探學長助教解析：<span id="explain-word-title" class="text-xl text-slate-800"></span>
+                        </h4>
+                        <button onclick="handleSpeak()" class="text-slate-400 hover:text-indigo-500 transition-colors" title="朗讀解析">
+                           <span id="speak-icon"><i class="fa-solid fa-volume-high text-xl"></i></span>
+                        </button>
+                    </div>
+                    <div id="explain-content" class="text-slate-600 leading-relaxed font-bold text-sm md:text-base whitespace-pre-wrap">
+                        <!-- 動態填充 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 區域 2: 情境挑戰 (互動測驗) -->
+            <section id="view-quiz" class="hidden space-y-4 animate-fade-in-up">
+                <!-- 進度與計分 -->
+                <div class="w-full bg-gray-200 rounded-full h-3.5 overflow-hidden shadow-inner flex">
+                    <div id="progress-bar" class="bg-indigo-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <!-- 題目卡 -->
+                <div class="bg-white p-6 rounded-3xl shadow-xl border-4 border-slate-800 relative overflow-hidden text-left">
+                    <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 px-4 py-1.5 rounded-bl-2xl text-xs font-black">情境謎題</div>
+                    <div class="text-4xl mb-3 text-center">📜</div>
+                    <h3 id="quiz-question" class="text-xl font-black text-slate-800 leading-relaxed mb-6">
+                        載入中...
+                    </h3>
+                    
+                    <div class="text-slate-500 font-bold mb-3 flex justify-between items-center text-sm border-b pb-2">
+                        <span>請找出最適合的：<span id="quiz-type-label" class="font-black text-indigo-600 text-base">卡片</span></span>
+                        <span id="quiz-number-label" class="text-slate-400">第 1 題 / 共 10 題</span>
+                    </div>
+                    
+                    <!-- 選項區 -->
+                    <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- JS 動態填入 -->
+                    </div>
+
+                    <!-- 反饋區 -->
+                    <div id="feedback-area" class="mt-4 hidden p-4 rounded-2xl text-center font-black animate-pop border-2"></div>
+                    
+                    <!-- AI 助教按鈕 -->
+                    <div id="quiz-ai-tutor" class="mt-4">
+                        <!-- 動態生成 AI 助教 -->
+                    </div>
+
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-2xl font-black shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+                        下一題 ➜
+                    </button>
+                </div>
+            </section>
+
+            <!-- 區域 3: 寫作產生器 (填空練習) -->
+            <section id="view-maker" class="hidden space-y-6 animate-fade-in-up">
+                <div class="bg-white p-6 rounded-3xl shadow-xl border-4 border-slate-800">
+                    <div class="text-center mb-6">
+                        <span class="text-4xl">✍️</span>
+                        <h2 class="text-2xl font-black text-indigo-600 mt-1">五卡讀寫產生器</h2>
+                        <p class="text-sm text-slate-400 font-bold">配合溫美玉老師五卡心法，輕鬆寫出六星級小短文</p>
+                    </div>
+
+                    <div class="space-y-5 text-left">
+                        <!-- 步驟 1: 描述事件 -->
+                        <div>
+                            <label class="block text-sm font-black text-slate-700 mb-1.5">1. 事件經過 (Event)</label>
+                            <textarea id="maker-event" oninput="updateParagraphPreview()" placeholder="寫下發生了什麼事？例如：今天數學考卷發回來，我只拿到了60分..." class="w-full p-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none h-20 text-slate-700 font-bold text-sm md:text-base shadow-inner bg-slate-50/50"></textarea>
+                        </div>
+
+                        <!-- 雙欄選擇 -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- 步驟 2: 情緒感受 -->
+                            <div>
+                                <label class="block text-sm font-black text-slate-700 mb-1.5">2. 情緒感受 (Emotion)</label>
+                                <select id="maker-emotion" onchange="updateParagraphPreview()" class="w-full p-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none text-slate-700 font-bold bg-white text-sm">
+                                    <option value="">請選擇情緒詞...</option>
+                                    <option value="難過">❤️ 難過</option>
+                                    <option value="抓狂">❤️ 抓狂</option>
+                                    <option value="焦慮">❤️ 焦慮</option>
+                                    <option value="失望">❤️ 失望</option>
+                                    <option value="感動">❤️ 感動</option>
+                                    <option value="幸福">❤️ 幸福</option>
+                                    <option value="無奈">❤️ 無奈</option>
+                                    <option value="緊張">❤️ 緊張</option>
+                                    <option value="得意">❤️ 得意</option>
+                                    <option value="興奮">❤️ 興奮</option>
+                                </select>
+                            </div>
+
+                            <!-- 步驟 3: 性格特質 -->
+                            <div>
+                                <label class="block text-sm font-black text-slate-700 mb-1.5">3. 性格特質 (Personality)</label>
+                                <select id="maker-personality" onchange="updateParagraphPreview()" class="w-full p-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none text-slate-700 font-bold bg-white text-sm">
+                                    <option value="">請選擇性格特質...</option>
+                                    <option value="樂觀">🧠 樂觀</option>
+                                    <option value="認真努力">🧠 認真努力</option>
+                                    <option value="堅持到底">🧠 堅持到底</option>
+                                    <option value="主動">🧠 主動</option>
+                                    <option value="膽小">🧠 膽小</option>
+                                    <option value="體貼">🧠 體貼</option>
+                                    <option value="靈活機智">🧠 靈活機智</option>
+                                    <option value="負責可靠">🧠 負責可靠</option>
+                                    <option value="被動">🧠 被動</option>
+                                    <option value="固執">🧠 固執</option>
+                                </select>
+                            </div>
+
+                            <!-- 步驟 4: 採取行動 -->
+                            <div>
+                                <label class="block text-sm font-black text-slate-700 mb-1.5">4. 採取行動 (Action)</label>
+                                <select id="maker-action" onchange="updateParagraphPreview()" class="w-full p-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none text-slate-700 font-bold bg-white text-sm">
+                                    <option value="">請選擇行動卡...</option>
+                                    <option value="面對">🏃 面對</option>
+                                    <option value="挑戰">🏃 挑戰</option>
+                                    <option value="求助">🏃 求助</option>
+                                    <option value="省思">🏃 省思</option>
+                                    <option value="宣洩">🏃 宣洩</option>
+                                    <option value="妥協">🏃 妥協</option>
+                                    <option value="逃避">🏃 逃避</option>
+                                    <option value="休息">🏃 休息</option>
+                                    <option value="等待">🏃 等待</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 步驟 5: 我的觀點 -->
+                        <div class="bg-indigo-50/50 p-4 rounded-2xl border-2 border-indigo-100">
+                            <label class="block text-sm font-black text-indigo-800 mb-2">5. 發表個人觀點 (Viewpoint)</label>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                                <div class="md:col-span-4">
+                                    <select id="maker-viewpoint-starter" onchange="updateParagraphPreview()" class="w-full p-3 rounded-2xl border-2 border-indigo-200 focus:border-indigo-400 focus:outline-none text-indigo-700 font-black bg-white text-sm">
+                                        <option value="我認為...">👁️ 我認為...</option>
+                                        <option value="我推斷...">👁️ 我推斷...</option>
+                                        <option value="我不同意...">👁️ 我不同意...</option>
+                                        <option value="我相信...">👁️ 我 believe...</option>
+                                        <option value="我質疑...">👁️ 我質疑...</option>
+                                        <option value="我覺得...">👁️ 我覺得...</option>
+                                        <option value="我的結論是...">👁️ 我的結論是...</option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-8">
+                                    <input type="text" id="maker-viewpoint-idea" oninput="updateParagraphPreview()" placeholder="填寫你的觀點想法...例如：這次沒考好不代表我不聰明" class="w-full p-3 rounded-2xl border-2 border-indigo-200 focus:border-indigo-400 focus:outline-none text-slate-700 font-bold text-sm shadow-inner">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 mt-3">
+                                <span class="font-black text-indigo-800 text-sm shrink-0">因為：</span>
+                                <input type="text" id="maker-viewpoint-reason" oninput="updateParagraphPreview()" placeholder="輸入支持觀點的原因...例如：只要找出不會的題目弄懂，下次就能進步" class="flex-1 p-3 rounded-2xl border-2 border-indigo-200 focus:border-indigo-400 focus:outline-none text-slate-700 font-bold text-sm shadow-inner">
+                            </div>
+                        </div>
+
+                        <!-- 步驟 6: 六星寫作修飾 -->
+                        <div class="bg-purple-50/50 p-4 rounded-2xl border-2 border-purple-100">
+                            <label class="block text-sm font-black text-purple-800 mb-1.5">6. 六星寫作修飾：加入對話、動作或想像 (Six-Star Decorator)</label>
+                            <textarea id="maker-writing-decor" oninput="updateParagraphPreview()" placeholder="加上動作、表情或人物對話，讓故事更精彩！例如：我對著自己大喊：『我一定要弄懂！』接著深吸一口氣，開始重新算題目。" class="w-full p-3 rounded-2xl border-2 border-purple-200 focus:border-purple-400 focus:outline-none h-20 text-slate-700 font-bold text-sm shadow-inner bg-white"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 預覽編譯區 -->
+                    <div class="bg-amber-100 p-5 rounded-3xl relative mt-8 border-2 border-dashed border-amber-300">
+                        <div class="absolute -top-3 left-6 bg-amber-500 text-white px-3 py-1 text-xs rounded-full font-black shadow-md">
+                           <i class="fa-solid fa-square-poll-horizontal"></i> 五卡短文即時預覽
+                        </div>
+                        <p id="final-paragraph" class="text-base md:text-lg font-bold text-slate-800 leading-relaxed text-left min-h-[4rem] pt-2">
+                            請開始填寫上方欄位，系統將為你生成結構完整的段落...
+                        </p>
+                    </div>
+                    
+                    <div class="mt-5 flex justify-center">
+                         <button onclick="copyParagraph()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full shadow-lg font-black active:scale-95 transition flex items-center gap-2 text-base md:text-lg">
+                            <i class="fa-solid fa-copy"></i> 複製短文段落
+                         </button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- 設計者頁尾 -->
+    <footer class="mt-8 mb-6 text-center text-xs text-slate-400 w-full z-10 relative">
+        設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師
+    </footer>
+
+    <!-- API Key 設定彈窗 -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 animate-fade-in-up text-left">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-slate-500"></i> 設定 Gemini API Key
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-slate-500 text-sm mb-4 leading-relaxed font-medium">
+                「偵探助教」與「詞彙分析」功能需要使用 Gemini API。金鑰將儲存於您的瀏覽器中，不會上傳至其他伺服器。
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="貼上您的 API Key (AIzaSy...)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono text-sm" />
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveApiKey()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md transition">
+                        儲存設定
+                    </button>
+                    <button onclick="clearApiKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl transition">
+                        清除金鑰
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 text-center">
+                    沒有金鑰？可至 Google AI Studio 免費申請。
+                </p>
+            </div>
+        </div>
+    </div>
+
+<script>
+// --- 1. 五卡資料庫 ---
+const db = {
+    emotion: [
+        "無力", "空虛", "煩悶", "羨慕", "無奈", "貼心", "恐懼", "勇敢",
+        "興奮", "狂喜", "絕望", "抓狂", "滿足", "焦慮", "緊張", "痛苦",
+        "沾沾自喜", "驚喜", "幸福", "感動", "悲傷", "自卑", "舒服", "丟臉",
+        "孤單", "解脫", "委屈", "歉疚", "疲憊", "喜悅", "感激", "放鬆",
+        "快樂", "自負", "愉快", "難過", "忌妒", "懷疑", "自信", "愚蠢",
+        "震驚", "期待", "安心", "希望", "痛快", "生氣", "失望", "沮喪",
+        "害怕", "憤怒", "矛盾", "得意", "驕傲", "受傷", "安全", "不耐煩"
+    ],
+    personality: [
+        "樂觀", "溫柔", "主動", "膽大", "謹慎小心", "穩重", "熱情", "活潑開朗",
+        "悲觀消極", "粗魯", "被動", "膽小", "粗心大意", "輕浮", "冷漠", "文靜內斂",
+        "自信", "堅持到底", "獨立", "自卑", "半途而廢", "依賴",
+        "有好奇心", "順從", "親切善良", "好動", "靈活機智", "懶惰", "害羞", "浮躁",
+        "和藹可親", "富同情心", "體貼", "負責可靠", "調皮搗蛋", "隨便", "自私自利", "暴躁",
+        "認真努力", "有主見", "勇敢無畏", "驕傲自大", "沉穩鎮定", "散漫", "固執", "冷酷",
+        "單純", "率真", "伶俐", "吹毛求疵", "慈悲", "自負", "任性無理", "剛強",
+        "機伶", "樸實", "熱心", "保守", "忘東忘西", "武斷", "專注", "謙虛", "恆心毅力", "冷靜"
+    ],
+    action: [
+        "哭泣", "宣洩", "放棄", "抱怨", "攻擊", "逃避",
+        "隨緣", "無怨", "等待", "妥協", "放空", "休息",
+        "挑戰", "省思", "征服", "洞察", "面對", "求助"
+    ],
+    viewpoint: [
+        "我喜歡...", "我推斷...", "我不同意...", "我相信...", "我認為...",
+        "我質疑...", "我同意...", "我預測...", "我期待...", "我覺得...", "我的結論是..."
+    ],
+    writing: [
+        { word: "標題", desc: "段落要旨、文章核心。用精確簡短的文字擬定段落的重點名稱。" },
+        { word: "現象", desc: "客觀事實的描寫。包含人、事、時、地、物等事實情境描寫。" },
+        { word: "想像", desc: "文學與修辭的潤飾。加入擬人、比喻、誇飾等想像力手法描寫。" },
+        { word: "動作", desc: "具體的肢體動作、眼神、表情描寫。替代抽象敘述，讓讀者看到畫面。" },
+        { word: "對話", desc: "人物之間的言語交流或心裡自我獨白。推動情節，讓角色性格更立體。" },
+        { word: "情緒", desc: "心情感受與主觀省思。表達主角的內在心靈變化與立場觀點。" }
+    ]
+};
+
+// --- 2. 情境題目資料庫 (共10題) ---
+const quizQuestions = [
+    {
+        text: "小明花了很久時間組裝的樂高積木，被弟弟不小心推倒摔壞了，碎片碎了一地。",
+        type: "emotion",
+        label: "情緒",
+        correct: ["生氣", "憤怒", "難過", "失望", "抓狂", "受傷"],
+        options: ["生氣", "興奮", "得意", "滿足"] 
+    },
+    {
+        text: "明天就是期待已久的班級校外教學了，小華躺在床上興奮得翻來覆去睡不著。",
+        type: "emotion",
+        label: "情緒",
+        correct: ["興奮", "期待", "緊張", "愉快"],
+        options: ["興奮", "悲傷", "絕望", "無聊"]
+    },
+    {
+        text: "大雄看到同班的小琪在操場上摔倒流血，立刻主動跑去保健室找護士阿姨幫忙，並拿衛生紙幫她壓住傷口。",
+        type: "personality",
+        label: "性格",
+        correct: ["熱心", "主動", "富同情心", "機伶", "體貼", "親切善良", "負責可靠"],
+        options: ["熱心", "冷漠", "被動", "自私自利"]
+    },
+    {
+        text: "小美這次數學考了55分，她雖然很沮喪，但還是擦乾眼淚，拿出課本把錯的題目重新算三遍，決定下次一定要考好。",
+        type: "personality",
+        label: "性格",
+        correct: ["認真努力", "堅持到底", "樂觀", "有主見", "恆心毅力"],
+        options: ["認真努力", "懶惰", "自負", "半途而廢"]
+    },
+    {
+        text: "走在路上的小剛撿到了一個鼓鼓的皮夾，裡面有一大疊千元大鈔。他沒有私吞，而是立刻送去旁邊的警察局。",
+        type: "personality",
+        label: "性格",
+        correct: ["負責可靠", "單純", "樸實", "溫柔", "穩重"],
+        options: ["負責可靠", "忘東忘西", "粗心大意", "自私自利"]
+    },
+    {
+        text: "面對非常困難且看不懂的數學壓軸題，想了很久都解不出來，頭快炸了，這時你決定採取什麼行動？",
+        type: "action",
+        label: "行動",
+        correct: ["挑戰", "求助", "省思", "休息"],
+        options: ["挑戰", "攻擊", "放棄", "逃避"]
+    },
+    {
+        text: "面對好朋友在背後說你的壞話，你感到非常受傷與難過。這時最成熟的行動是什麼？",
+        type: "action",
+        label: "行動", 
+        correct: ["面對", "求助", "省思", "宣洩", "洞察"],
+        options: ["面對", "逃避", "攻擊", "放棄"]
+    },
+    {
+        text: "班會課要選一個同學當班長，小明平時總是搶著做事情，這次也第一個舉手說「我願意為大家服務！」。",
+        type: "personality",
+        label: "性格",
+        correct: ["主動", "熱情", "負責可靠", "活潑開朗", "熱心"],
+        options: ["主動", "被動", "害羞", "懶惰"]
+    },
+    {
+        text: "小珍看到隔壁桌的同學買了最新款的精美鉛筆盒，心裡酸酸的，總覺得對方是在炫耀，甚至想對著那個鉛筆盒畫畫。",
+        type: "emotion",
+        label: "情緒",
+        correct: ["羨慕", "忌妒", "不耐煩", "難過", "自卑"],
+        options: ["羨慕", "滿足", "幸福", "貼心"]
+    },
+    {
+        text: "拔河比賽時，班上已經落後了，繩子快要被對方拉過去，但小強和隊友們緊咬牙關、雙腳死死踩住地面，大喊「一二、煞！」絕不鬆手。",
+        type: "personality",
+        label: "性格",
+        correct: ["堅持到底", "剛強", "沉穩鎮定", "勇敢無畏", "恆心毅力", "負責可靠"],
+        options: ["堅持到底", "散漫", "半途而廢", "粗心大意"]
+    }
+];
+
+// 應用程式狀態
+let activeTab = 'library';
+let score = 0;
+let currentQIndex = 0;
+let selectedCategory = '';
+
+// AI 助教與語音狀態
+let aiExplanation = null;
+let aiLoading = false;
+let isSpeaking = false;
+let currentUtterance = null;
+
+// --- API Key 管理 ---
+function getApiKey() {
+    return localStorage.getItem('gemini_api_key') || '';
+}
+
+function toggleSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    const input = document.getElementById('api-key-input');
+    input.value = getApiKey();
+    modal.classList.toggle('hidden');
+}
+
+function saveApiKey() {
+    const input = document.getElementById('api-key-input');
+    const key = input.value.trim();
+    if (key) {
+        localStorage.setItem('gemini_api_key', key);
+        alert('API Key 儲存成功！');
+    } else {
+        localStorage.removeItem('gemini_api_key');
+        alert('已清除 API Key。');
+    }
+    toggleSettingsModal();
+    render();
+}
+
+function clearApiKey() {
+    localStorage.removeItem('gemini_api_key');
+    const input = document.getElementById('api-key-input');
+    input.value = '';
+    alert('已清除 API Key。');
+    toggleSettingsModal();
+    render();
+}
+
+// --- AI Tutor API 呼叫 ---
+async function callGeminiAPI(prompt, apiKey, retries = 3, delay = 1000) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，偵探學長現在有點忙，請稍後再試。";
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+        }
+    }
+}
+
+// 詢問 AI 解釋詞彙 (圖鑑)
+async function handleExplainWord(word, category) {
+    const key = getApiKey();
+    if (!key) {
+        alert('請先點擊右上角齒輪設定 Gemini API Key，即可讓偵探助教進行詞彙與案例解說！');
+        toggleSettingsModal();
+        return;
+    }
+
+    aiLoading = true;
+    aiExplanation = null;
+    document.getElementById('vocab-explain-box').classList.remove('hidden');
+    document.getElementById('explain-word-title').textContent = `「${word}」`;
+    document.getElementById('explain-content').innerHTML = `
+        <div class="flex items-center gap-2 text-indigo-500 animate-pulse">
+            <i class="fa-solid fa-spinner fa-spin"></i> <span>偵探學長正在幫你調查這個詞彙...</span>
+        </div>
+    `;
+    
+    // 如果點擊了詞彙，則將頁面捲動到解說區
+    document.getElementById('vocab-explain-box').scrollIntoView({ behavior: 'smooth' });
+
+    let categoryText = '';
+    if (category === 'emotion') categoryText = '情緒卡（形容當下的心情與感受）';
+    else if (category === 'personality') categoryText = '性格卡（形容長期的性格特質或態度）';
+    else if (category === 'action') categoryText = '行動卡（形容人面對狀況採取的動作與應對）';
+    else if (category === 'viewpoint') categoryText = '觀點卡（形容看待事情的思考句型）';
+    else if (category === 'writing') categoryText = '六星寫作卡（用來豐富作文結構的寫作維度）';
+
+    const prompt = `你現在是一位充滿親和力的「國小情緒性格偵探社」的偵探助教。
+    請向一個國小三年級或四年級（9-10歲）的學生，生動、趣味地說明這個詞彙：
+    - 詞彙名稱：${word}
+    - 詞彙分類：${categoryText}
+
+    【說明要求】
+    1. 用簡單易懂、富有生活感的情境或小故事來解釋這個詞的意義（不要講大道理，多舉生活例子）。
+    2. 給出一個貼近學生校園或家庭生活（例如：考試、玩積木、與朋友吵架、做家事）的例句。
+    3. 如果是寫作卡，說明這個元素在寫作文時有什麼魔法，並提供兩組寫作好句示範。
+    4. 語氣要活潑、溫馨，帶有偵探解謎的趣味感。使用繁體中文回答，包含 emoji，排版清晰。`;
+
+    try {
+        const result = await callGeminiAPI(prompt, key);
+        aiExplanation = result;
+        document.getElementById('explain-content').textContent = aiExplanation;
+    } catch (error) {
+        aiExplanation = "報告！查閱詞彙字典時遭受電磁波干擾，請檢查金鑰或稍後再試。";
+        document.getElementById('explain-content').textContent = aiExplanation;
+    } finally {
+        aiLoading = false;
+    }
+}
+
+// 詢問 AI 情境線索 (測驗)
+async function handleQuizHint() {
+    const key = getApiKey();
+    if (!key) {
+        alert('請先點擊右上角齒輪設定 Gemini API Key，即可讓偵探助教提供破案線索！');
+        toggleSettingsModal();
+        return;
+    }
+
+    const aiBox = document.getElementById('quiz-ai-tutor');
+    aiBox.innerHTML = `
+        <div class="bg-indigo-50 border-2 border-indigo-100 p-4 rounded-2xl text-left font-medium animate-pulse text-indigo-600">
+           <i class="fa-solid fa-spinner fa-spin mr-1"></i> 偵探學長正在拿出放大鏡分析案情...
+        </div>
+    `;
+
+    const q = quizQuestions[currentQIndex];
+    const prompt = `你現在是「情緒性格偵探社」的偵探學長。正帶領一位剛加入的實習偵探隊員。
+    隊員在以下這道「情境題」上遇到了瓶頸，請給他一些分析線索（但是絕對不要直接透露或說出答案選項中包含的正確字詞）：
+    
+    【題目情境】
+    - 情景說明：${q.text}
+    - 任務：找出最適配角色的【${q.label}】卡牌字詞。
+    
+    【您的指引任務】
+    1. 不要透露正確答案！
+    2. 請分析情境中主角遇到了什麼事？他的動作反映了什麼樣的心情（如果是情緒）、特質（如果是性格）、或是他接下來這樣做代表了什麼（如果是行動）？
+    3. 用溫和、有趣的引導方式，多用「哈囉新進偵探隊員！」等稱呼。
+    4. 請用繁體中文回答。`;
+
+    try {
+        const result = await callGeminiAPI(prompt, key);
+        aiExplanation = result;
+        
+        aiBox.innerHTML = `
+            <div class="bg-white p-5 rounded-2xl shadow-md border-l-4 border-indigo-500 text-left relative mt-4">
+              <div class="flex justify-between items-center mb-2">
+                 <h4 class="font-black text-indigo-600 flex items-center gap-1.5">
+                   <i class="fa-solid fa-wand-magic-sparkles"></i> 偵探學長的線索 hints
+                 </h4>
+                 <button onclick="handleSpeak()" class="text-slate-400 hover:text-indigo-500 transition-colors" title="朗讀解析">
+                   ${isSpeaking ? '<i class="fa-solid fa-circle-stop text-2xl text-red-500"></i>' : '<i class="fa-solid fa-volume-high text-xl"></i>'}
+                 </button>
+              </div>
+              <p class="text-slate-600 leading-relaxed font-bold text-sm md:text-base whitespace-pre-wrap">
+                 ${aiExplanation}
+              </p>
+            </div>
+        `;
+    } catch (error) {
+        aiBox.innerHTML = `
+            <div class="bg-red-50 border border-red-200 p-4 rounded-2xl text-left text-red-600 font-bold">
+               ⚠️ 通訊線路受阻，無法獲取線索，請檢查金鑰設定。
+            </div>
+        `;
+    }
+}
+
+// 語音朗讀
+function handleSpeak() {
+    if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        updateSpeakIcon();
+    } else {
+        if (!aiExplanation) return;
+        const cleanText = aiExplanation.replace(/[\*#_`~]/g, '');
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'zh-TW';
+        utterance.rate = 0.95;
+        utterance.onend = () => {
+            isSpeaking = false;
+            updateSpeakIcon();
+        };
+        utterance.onerror = () => {
+            isSpeaking = false;
+            updateSpeakIcon();
+        };
+        window.speechSynthesis.speak(utterance);
+        isSpeaking = true;
+        currentUtterance = utterance;
+        updateSpeakIcon();
+    }
+}
+
+function updateSpeakIcon() {
+    const iconBtn = document.getElementById('speak-icon');
+    if (iconBtn) {
+        iconBtn.innerHTML = isSpeaking 
+            ? '<i class="fa-solid fa-circle-stop text-xl text-red-500 animate-pulse"></i>' 
+            : '<i class="fa-solid fa-volume-high text-xl"></i>';
+    }
+}
+
+// --- 介面導航 ---
+function switchTab(tabId) {
+    activeTab = tabId;
+    
+    // 隱藏所有
+    document.getElementById('view-library').classList.add('hidden');
+    document.getElementById('view-quiz').classList.add('hidden');
+    document.getElementById('view-maker').classList.add('hidden');
+
+    // 移除所有 Tab 啟動狀態
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = "tab-btn px-5 py-2.5 rounded-2xl bg-white text-gray-500 font-black text-sm md:text-base shadow-sm border border-slate-100 whitespace-nowrap transition";
+    });
+
+    // 顯示目標與高亮按鈕
+    document.getElementById(`view-${tabId}`).classList.remove('hidden');
+    const activeBtn = document.getElementById(`btn-${tabId}`);
+    activeBtn.className = "tab-btn px-5 py-2.5 rounded-2xl bg-indigo-600 text-white font-black text-sm md:text-base shadow-md whitespace-nowrap transition";
+
+    // 重設語音
+    resetAI();
+
+    if (tabId === 'quiz') {
+        startQuiz();
+    }
+}
+
+function resetAI() {
+    aiExplanation = null;
+    aiLoading = false;
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    updateSpeakIcon();
+}
+
+// --- 1. 卡牌圖鑑邏輯 ---
+function showCategory(category) {
+    selectedCategory = category;
+    const display = document.getElementById('vocab-display');
+    display.innerHTML = '';
+    
+    // 隱藏解說區
+    document.getElementById('vocab-explain-box').classList.add('hidden');
+
+    const colors = {
+        'emotion': 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100',
+        'personality': 'bg-teal-50 text-teal-600 border-teal-200 hover:bg-teal-100',
+        'action': 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
+        'viewpoint': 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100',
+        'writing': 'bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100'
+    };
+
+    db[category].forEach(item => {
+        const div = document.createElement('button');
+        const word = typeof item === 'object' ? item.word : item;
+        div.className = `${colors[category]} border-2 rounded-2xl p-4 text-center font-black text-lg md:text-xl shadow-sm animate-pop flex items-center justify-center min-h-[64px] cursor-pointer hover:scale-105 transition-all card-btn`;
+        div.textContent = word;
+        div.onclick = () => {
+            if (typeof item === 'object') {
+                // 寫作卡直接顯示說明
+                document.getElementById('vocab-explain-box').classList.remove('hidden');
+                document.getElementById('explain-word-title').textContent = `「六星寫作法：${item.word}」`;
+                document.getElementById('explain-content').innerHTML = `
+                    <div class="space-y-2">
+                       <p class="text-base text-purple-800"><i class="fa-solid fa-star text-yellow-500"></i> <strong>寫作定義：</strong>${item.desc}</p>
+                       <p class="text-base text-slate-700"><i class="fa-solid fa-pen-nib text-indigo-500"></i> <strong>寫作句型/範例：</strong>${item.example}</p>
+                       <button onclick="handleExplainWord('${item.word}', 'writing')" class="mt-3 bg-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs hover:bg-purple-600 flex items-center gap-1">
+                          <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i> 讓 AI 偵探學長補充寫作魔法與句型
+                       </button>
+                    </div>
+                `;
+            } else {
+                handleExplainWord(word, category);
+            }
+        };
+        display.appendChild(div);
+    });
+}
+
+// --- 2. 情境挑戰測驗邏輯 ---
+function startQuiz() {
+    currentQIndex = 0;
+    score = 0;
+    updateScoreUI();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    if (currentQIndex >= quizQuestions.length) {
+        finishQuiz();
+        return;
+    }
+
+    const q = quizQuestions[currentQIndex];
+    document.getElementById('quiz-question').textContent = q.text;
+    document.getElementById('quiz-type-label').textContent = q.label;
+    document.getElementById('quiz-number-label').textContent = `第 ${currentQIndex + 1} 題 / 共 ${quizQuestions.length} 題`;
+    document.getElementById('progress-bar').style.width = `${((currentQIndex) / quizQuestions.length) * 100}%`;
+    
+    const optionsDiv = document.getElementById('quiz-options');
+    optionsDiv.innerHTML = '';
+    
+    document.getElementById('feedback-area').classList.add('hidden');
+    document.getElementById('next-btn').classList.add('hidden');
+
+    // 動態生成 AI 助教按鈕
+    const aiBox = document.getElementById('quiz-ai-tutor');
+    aiBox.innerHTML = `
+        <button onclick="handleQuizHint()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-black py-3 rounded-2xl shadow-md hover:shadow-lg active:scale-95 transition flex items-center justify-center gap-2 text-sm">
+           <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i> 呼叫偵探學長提供「不透露答案」的破案線索
+        </button>
+    `;
+
+    // 隨機打亂選項
+    const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+
+    shuffledOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full p-4 rounded-2xl bg-white border-2 border-slate-200 shadow-sm font-black text-lg text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 active:scale-95 transition text-left relative cursor-pointer flex items-center gap-2';
+        btn.innerHTML = `<i class="fa-solid fa-circle-question text-indigo-400"></i> ${opt}`;
+        btn.onclick = () => checkQuizAnswer(opt, q.correct, btn);
+        optionsDiv.appendChild(btn);
+    });
+}
+
+function checkQuizAnswer(selected, correctAnswers, btnElement) {
+    const allBtns = document.getElementById('quiz-options').children;
+    for (let btn of allBtns) {
+        btn.disabled = true;
+        btn.onclick = null;
+    }
+
+    const feedback = document.getElementById('feedback-area');
+    feedback.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300', 'bg-red-100', 'text-red-700', 'border-red-300');
+
+    if (correctAnswers.includes(selected)) {
+        btnElement.className = 'w-full p-4 rounded-2xl bg-green-100 border-2 border-green-500 shadow-sm font-black text-lg text-green-700 active:scale-95 transition text-left flex items-center gap-2';
+        btnElement.innerHTML = `<i class="fa-solid fa-circle-check text-green-500"></i> ${selected}`;
+        
+        feedback.className = 'mt-4 p-4 rounded-2xl text-center font-black animate-pop bg-green-100 text-green-700 border-2 border-green-300';
+        feedback.innerHTML = `🎉 答對了！這時候確實符合「${selected}」。`;
+        
+        score += 10;
+        
+        // 噴發碎紙花
+        confetti({
+            particleCount: 50,
+            spread: 45,
+            origin: { y: 0.85 }
+        });
+    } else {
+        btnElement.className = 'w-full p-4 rounded-2xl bg-red-100 border-2 border-red-500 shadow-sm font-black text-lg text-red-700 active:scale-95 transition text-left flex items-center gap-2';
+        btnElement.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-500"></i> ${selected}`;
+        
+        feedback.className = 'mt-4 p-4 rounded-2xl text-center font-black animate-pop bg-red-100 text-red-700 border-2 border-red-300';
+        feedback.innerHTML = `🔍 偵探隊員再想想！在這個情況下，「${selected}」不太合適。<br/>建議尋找像「${correctAnswers[0]}」這樣的卡片。`;
+    }
+
+    updateScoreUI();
+    document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+    currentQIndex++;
+    resetAI();
+    loadQuestion();
+}
+
+function finishQuiz() {
+    document.getElementById('progress-bar').style.width = '100%';
+    const quizDiv = document.getElementById('view-quiz');
+    
+    // 結算畫面
+    confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 }
+    });
+
+    quizDiv.innerHTML = `
+        <div class="text-center bg-white p-8 rounded-3xl shadow-xl border-4 border-slate-800 animate-pop">
+            <div class="text-7xl mb-4">🏆</div>
+            <h2 class="text-3xl font-black text-indigo-600 mb-2">挑戰完成！</h2>
+            <p class="text-slate-500 font-bold mb-6">你真是一位出色的小小情緒偵探！</p>
+            <div class="text-5xl font-black text-yellow-500 mb-8">${score} 分</div>
+            <button onclick="switchTab('quiz')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-full font-black shadow-lg active:scale-95 transition cursor-pointer">
+                <i class="fa-solid fa-rotate-left"></i> 再戰一次
+            </button>
+        </div>
+    `;
+}
+
+function updateScoreUI() {
+    document.getElementById('scoreDisplay').textContent = `星星: ${score}`;
+}
+
+// --- 3. 五卡讀寫產生器邏輯 ---
+function updateParagraphPreview() {
+    const event = document.getElementById('maker-event').value.trim();
+    const emotion = document.getElementById('maker-emotion').value;
+    const personality = document.getElementById('maker-personality').value;
+    const action = document.getElementById('maker-action').value;
+    const viewpointStarter = document.getElementById('maker-viewpoint-starter').value;
+    const viewpointIdea = document.getElementById('maker-viewpoint-idea').value.trim();
+    const viewpointReason = document.getElementById('maker-viewpoint-reason').value.trim();
+    const writingDecor = document.getElementById('maker-writing-decor').value.trim();
+
+    const preview = document.getElementById('final-paragraph');
+
+    if (!event && !emotion && !personality && !action && !viewpointIdea && !viewpointReason && !writingDecor) {
+        preview.textContent = "請開始填寫上方欄位，系統將為你生成結構完整的段落...";
+        return;
+    }
+
+    let paragraphHTML = "";
+    
+    // 組合段落，高亮標註不同的卡片元素
+    if (event) {
+        paragraphHTML += `今天，<span class="text-slate-800 font-black">${event}</span>。`;
+    }
+    if (emotion) {
+        paragraphHTML += `當下，我的內心感到十分【<span class="text-red-500 font-black">${emotion}</span>】。`;
+    }
+    if (personality && action) {
+        paragraphHTML += `不過，因為我是一個【<span class="text-teal-600 font-black">${personality}</span>】的人，所以我決定採取【<span class="text-yellow-600 font-black">${action}</span>】的態度來面對。`;
+    } else if (personality) {
+        paragraphHTML += `不過，因為我平時是個【<span class="text-teal-600 font-black">${personality}</span>】的人。`;
+    } else if (action) {
+        paragraphHTML += `這時我採取了【<span class="text-yellow-600 font-black">${action}</span>】的作法。`;
+    }
+    
+    if (viewpointIdea) {
+        const starterClean = viewpointStarter.replace('...', '');
+        paragraphHTML += `關於這件事，<span class="text-indigo-600 font-black">${starterClean}${viewpointIdea}</span>`;
+        if (viewpointReason) {
+            paragraphHTML += `，因為<span class="text-rose-500 font-black">${viewpointReason}</span>。`;
+        } else {
+            paragraphHTML += `。`;
+        }
+    } else if (viewpointReason) {
+        paragraphHTML += `這是因為<span class="text-rose-500 font-black">${viewpointReason}</span>。`;
+    }
+
+    if (writingDecor) {
+        paragraphHTML += ` <span class="text-purple-600 font-black">（六星寫作潤飾：${writingDecor}）</span>`;
+    }
+
+    preview.innerHTML = paragraphHTML;
+}
+
+function copyParagraph() {
+    const event = document.getElementById('maker-event').value.trim();
+    const emotion = document.getElementById('maker-emotion').value;
+    const personality = document.getElementById('maker-personality').value;
+    const action = document.getElementById('maker-action').value;
+    const viewpointStarter = document.getElementById('maker-viewpoint-starter').value;
+    const viewpointIdea = document.getElementById('maker-viewpoint-idea').value.trim();
+    const viewpointReason = document.getElementById('maker-viewpoint-reason').value.trim();
+    const writingDecor = document.getElementById('maker-writing-decor').value.trim();
+
+    if (!event) {
+        alert("請至少填寫第一個事件經過，才能複製文章唷！");
+        return;
+    }
+
+    let fullText = `今天，${event}。`;
+    if (emotion) fullText += `當下，我的內心感到十分【${emotion}】。`;
+    if (personality && action) {
+        fullText += `不過，因為我是一個【${personality}】的人，所以我決定採取【${action}】的態度來面對。`;
+    } else if (personality) {
+        fullText += `不過，因為我平時是個【${personality}】的人。`;
+    } else if (action) {
+        fullText += `這時我採取了【${action}】的作法。`;
+    }
+
+    if (viewpointIdea) {
+        const starterClean = viewpointStarter.replace('...', '');
+        fullText += `關於這件事，${starterClean}${viewpointIdea}`;
+        if (viewpointReason) {
+            fullText += `，因為${viewpointReason}。`;
+        } else {
+            fullText += `。`;
+        }
+    }
+
+    if (writingDecor) {
+        fullText += ` ${writingDecor}`;
+    }
+
+    try {
+        const el = document.createElement('textarea');
+        el.value = fullText;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert(`✅ 複製成功！短文內容：\n「${fullText}」\n可以去學習單貼上分享囉！`);
+    } catch (err) {
+        alert(`⚠️ 安全限制：請手動複製下方文字：\n\n「${fullText}」`);
+    }
+}
+
+// 預設初始化
+function init() {
+    showCategory('emotion');
+}
+
+init();
+</script>
+</body>
+</html>
