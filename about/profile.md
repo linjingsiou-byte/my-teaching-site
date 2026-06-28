@@ -1,14 +1,13 @@
 ---
 name: "林敬修 老師"
 title: "國小教師 / Apple Learning Coach / 夢N講師"
-email: "jingxiulin@example.com"
+email: "jingsioulin@nehs.ptc.edu.tw"
 avatar: "about/講師自我介紹.png"
-github: "https://github.com/your-username"
 ---
 
 # 關於我 (About Me)
 
-你好！我是**林敬修 老師**。目前服務於**國立屏科實驗高級中等學校國小部**。我擁有超過 20 年的教育現場與教學研習經驗。
+你好！我是**林敬修 老師**。目前服務於**國立屏科實驗高級中等學校國小部**。我擁有超過 20 年的教育現場與教學經驗。
 
 我深信**「全人教育」**與**「因材施教」**的理念，尊重每個學生的獨特性和差異性。在我的課堂中，我鼓勵學生勇於嘗試與犯錯，因為**「錯誤是學習的最佳契機」**。
 

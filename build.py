@@ -136,8 +136,7 @@ INDEX_TEMPLATE = """<!DOCTYPE html>
             <div class="list-container" style="padding: 30px;">
                 {about_content}
                 <div style="margin-top: 20px; font-size: 14px; color: var(--text-secondary);">
-                    <span>📧 Email: <a href="mailto:{email}">{email}</a></span>
-                    <span style="margin-left: 20px;">🌐 GitHub: <a href="{github}" target="_blank">點此前往</a></span>
+                    {contact_info}
                 </div>
             </div>
         </section>
@@ -426,6 +425,10 @@ def main():
     title = about_meta.get('title', '程式啟蒙導師')
     email = about_meta.get('email', '')
     github = about_meta.get('github', '')
+    
+    contact_info = f'<span>📧 Email: <a href="mailto:{email}">{email}</a></span>'
+    if github:
+        contact_info += f'<span style="margin-left: 20px;">🌐 GitHub: <a href="{github}" target="_blank">點此前往</a></span>'
 
     # 2. 讀取並解析精選作品 (projects/*.md)
     projects_dir = os.path.join(base_dir, 'projects')
@@ -604,6 +607,7 @@ def main():
         title=title,
         email=email,
         github=github,
+        contact_info=contact_info,
         about_content=about_html,
         project_cards=project_cards_html,
         lesson_list=lesson_list_html,
