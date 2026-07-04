@@ -82,7 +82,7 @@ INDEX_TEMPLATE = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{site_name} | 個人教學網站</title>
-    <link rel="stylesheet" href="assets/css/style.css?v=1.0.1">
+    <link rel="stylesheet" href="assets/css/style.css?v=1.1">
 </head>
 <body>
 
@@ -529,6 +529,15 @@ def main():
 
         # 生成 HTML 檔（無論是否重複，每個子資料夾的 HTML 都要生成）
         content_html = markdown.markdown(l_body, extensions=['extra', 'nl2br'])
+
+        # 將多圖段落轉為自定義的 post-image-grid class 區塊 (免除對 :has 選擇器的依賴)
+        img_grid_pattern = re.compile(r'<p>\s*(<img[^>]+>(?:\s*<br\s*/?>\s*|\s*)*<img[^>]+>.*?)</p>', re.DOTALL)
+        def replace_with_grid(match):
+            inner = match.group(1)
+            cleaned = re.sub(r'<br\s*/?>', '', inner)
+            return f'<div class="post-image-grid">{cleaned}</div>'
+        content_html = img_grid_pattern.sub(replace_with_grid, content_html)
+
         html_filename = filename.replace('.md', '.html')
         html_filepath = os.path.join(os.path.dirname(full_path), html_filename)
         rel_html = os.path.relpath(html_filepath, base_dir).replace('\\', '/')
@@ -539,7 +548,7 @@ def main():
             post_date=l_date,
             post_category=l_category,
             post_content=content_html,
-            css_path=f"{up}assets/css/style.css",
+            css_path=f"{up}assets/css/style.css?v=1.1",
             home_path=f"{up}index.html",
         )
         with open(html_filepath, 'w', encoding='utf-8') as f:

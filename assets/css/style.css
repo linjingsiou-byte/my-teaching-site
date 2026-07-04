@@ -467,6 +467,39 @@ a:hover {
   }
 }
 
+/* 圖片與圖卡響應式樣式優化 */
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 24px auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-content img:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* 雙欄或多欄圖片並排（透過 Python 編譯將多圖段落轉為 post-image-grid，不依賴 :has()） */
+.post-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: start;
+  justify-items: center;
+  margin: 24px 0;
+}
+
+/* 在 Grid 佈局中，讓圖片填滿網格單元，並清除原本的 auto margin */
+.post-image-grid img {
+  margin: 0;
+  width: 100%;
+}
+
 /* 頁尾 (Footer) */
 .footer {
   background-color: var(--card-bg);
