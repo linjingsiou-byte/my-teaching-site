@@ -587,7 +587,7 @@ def main():
             parenting_item_html = f"""
                     <div class="list-item" data-categories="{cats_str}">
                         <div class="list-item-content">
-                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">{l_category} (網路資源整理)</span>
+                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">{l_category} (圖卡轉載自天才領袖等資源)</span>
                             <a href="{rel_html}" class="list-item-title" style="font-weight: 600; font-size: 17px; margin-top: 4px;">{l_title}</a>
                             <span class="list-item-date">📅 {l_date}</span>
                         </div>

@@ -138,3 +138,7 @@ function copyContractText() {
   });
 }
 </script>
+
+> [!NOTE]
+> 📌 **圖卡版權與來源說明**：
+> 本文整理之親職教養圖卡，多數版權歸屬 **[天才領袖](https://www.leaderkid.com.tw/)** 所有（圖卡上均有原作者標記）。本網頁僅作教育推廣與公益分享整理，非商業用途。
