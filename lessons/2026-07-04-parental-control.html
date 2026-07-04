@@ -135,25 +135,55 @@
 <hr />
 <h2>📌 五、契約篇：第一支手機使用約定範本</h2>
 <p>與其用冰冷的 App 強制鎖定，不如與孩子在開機的第一天就共同簽訂「手機使用合約」。這份合約旨在建立規範，讓孩子明白：擁有手機是一項「責任與權利」，而非理所當然。</p>
-<blockquote>
-<h3>📄 親子手機使用承諾書</h3>
-<p>我們同意，手機是為了方便聯絡與學習而準備的工具。為了健康與安全，我們共同遵守以下約定：</p>
-<p><strong>一、使用時間約定：</strong><br />
-1. 每天可使用的總時間為：週一至週五 <strong><em>_</em> 分鐘，假日 </strong><strong><em> 分鐘。<br />
-2. 晚上 </em></strong>__ 點後，手機自動進入就寢鎖定，並統一放置在客廳充電，不帶入臥室。<br />
-3. 吃飯時間、寫功課時間不看手機。</p>
-<p><strong>二、安全與隱私約定：</strong><br />
-1. 下載 any App（不論是否免費）都需要經過爸爸媽媽的同意與審核。<br />
-2. 不在網路上透露自己的真名、電話、學校、地址或個人照片給不認識的人。<br />
-3. 不隨便點擊來路不明的連結或中獎通知。</p>
-<p><strong>三、友善數位約定：</strong><br />
-1. 在網路上打字說話，要和在學校一樣有禮貌，不說傷人的話、不參與網路霸凌。<br />
-2. 如果在網路上看到讓人不舒服、害怕的內容或收到奇怪的訊息，我會立刻告訴爸爸媽媽，我不用擔心被罵。</p>
-<p><strong>四、違反約定的處理：</strong><br />
-若有違反上述約定，同意將手機交由家長保管 _____ 天。</p>
-<p>孩子簽名：<strong><em>_</em></strong><strong><em>_</em></strong><em>       家長簽名：<strong><em>_</em></strong><strong><em>_</em></strong></em><br />
-日期：民國 <strong><em>_</em> 年 </strong><strong><em> 月 </em></strong>__ 日</p>
-</blockquote>
+<div style="background-color: #fbf5f0; border-left: 4px solid #d99b78; padding: 24px; border-radius: 12px; margin: 24px 0; border: 1px solid rgba(217, 155, 120, 0.15);">
+  <h3 style="color: #d99b78; margin-top: 0; display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 600;">📄 親子手機使用承諾書</h3>
+  <pre id="contract-text" style="background: white; padding: 18px; border-radius: 8px; border: 1px solid rgba(217, 155, 120, 0.2); white-space: pre-wrap; font-family: inherit; font-size: 14.5px; line-height: 1.6; color: #4a4a46; margin: 15px 0;">
+【第一支手機使用約定承諾書】
+
+我們同意，手機是為了方便聯絡與學習而準備的工具。為了健康與安全，我們共同遵守以下約定：
+
+一、使用時間約定：
+1. 每天可使用的總時間為：週一至週五 _____ 分鐘，假日 _____ 分鐘。
+2. 晚上 _____ 點後，手機自動進入就寢鎖定，並統一放置在客廳充電，不帶入臥室。
+3. 吃飯時間、寫功課時間不看手機。
+
+二、安全與隱私約定：
+1. 下載 any App（不論是否免費）都需要經過爸爸媽媽的同意與審核。
+2. 不在網路上透露自己的真名、電話、學校、地址或個人照片給不認識的人。
+3. 不隨便點擊來路不明的連結或中獎通知。
+
+三、友善數位約定：
+1. 在網路上打字說話，要和在學校一樣有禮貌，不說傷人的話、不參與網路霸凌。
+2. 如果在網路上看到讓人不舒服、害怕的內容或收到奇怪的訊息，我會立刻告訴爸爸媽媽，我不用擔心被罵。
+
+四、違反約定的處理：
+若有違反上述約定，同意將手機交由家長保管 _____ 天。
+
+孩子簽名：_______________       家長簽名：_______________
+日期：民國 _____ 年 _____ 月 _____ 日</pre>
+  <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px;">
+    <button onclick="copyContractText()" id="copy-btn" style="background-color: #d99b78; color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s ease;">📋 複製承諾書範本</button>
+    <a href="../assets/files/親子手機使用承諾書.docx" download style="background-color: #0071e3; color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; transition: all 0.2s ease;">📥 下載 Word 檔 (.docx)</a>
+  </div>
+</div>
+
+<script>
+function copyContractText() {
+  const text = document.getElementById('contract-text').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    const originalText = btn.innerText;
+    btn.innerText = '✅ 複製成功！';
+    btn.style.backgroundColor = '#5c7f67';
+    setTimeout(() => {
+      btn.innerText = originalText;
+      btn.style.backgroundColor = '#d99b78';
+    }, 2000);
+  }).catch(() => {
+    alert('複製失敗，請手動複製文字。');
+  });
+}
+</script>
             </div>
             
             <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
