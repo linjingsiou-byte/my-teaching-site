@@ -82,7 +82,7 @@ INDEX_TEMPLATE = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{site_name} | 個人教學網站</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=1.0.1">
 </head>
 <body>
 
@@ -311,7 +311,7 @@ POST_TEMPLATE = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{post_title} | {site_name}</title>
-    <link rel="stylesheet" href="{css_path}">
+    <link rel="stylesheet" href="{css_path}?v=1.0.1">
 </head>
 <body>
 
