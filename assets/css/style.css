@@ -417,6 +417,56 @@ a:hover {
   padding: 0;
 }
 
+/* 表格樣式美化 (解決擠在一起的問題) */
+.post-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 28px 0;
+  font-size: 15px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.post-content th {
+  background-color: #f5f5f7; /* 淺灰背景 */
+  color: var(--text-color);
+  font-weight: 600;
+  padding: 14px 18px;
+  border-bottom: 2px solid var(--border-color);
+  font-size: 15px;
+}
+
+.post-content td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  background-color: var(--card-bg);
+  line-height: 1.6;
+}
+
+.post-content tr:last-child td {
+  border-bottom: none;
+}
+
+.post-content tr:nth-child(even) td {
+  background-color: #fafafc; /* 斑馬紋 */
+}
+
+.post-content tr:hover td {
+  background-color: rgba(0, 113, 227, 0.02); /* 滑鼠懸停高亮 */
+}
+
+@media (max-width: 768px) {
+  .post-content table {
+    display: block;
+    overflow-x: auto; /* 手機端自動橫向滾動 */
+    white-space: nowrap;
+  }
+}
+
 /* 頁尾 (Footer) */
 .footer {
   background-color: var(--card-bg);
