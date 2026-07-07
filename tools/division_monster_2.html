@@ -822,8 +822,17 @@
         async function generateHint() {
             if (currentPhase === 'done') return;
 
+            // 從 localStorage 讀取共用 API Key
+            const activeApiKey = localStorage.getItem('gemini_api_key') || "";
+
             const hintBtn = document.getElementById('ai-hint-btn');
             const hintDisplay = document.getElementById('ai-hint-display');
+
+            if (!activeApiKey) {
+                hintDisplay.classList.remove('hidden');
+                hintDisplay.innerHTML = `⚠️ 需要設定 Gemini API 金鑰才能使用 AI 老師求救功能喔！請到任一工具頁面，找到右上角的「🔑 設定 API Key」按鈕輸入一次即可。`;
+                return;
+            }
             
             hintBtn.disabled = true;
             hintBtn.innerHTML = '⏳ 思考中...';
@@ -849,7 +858,7 @@
             };
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${activeApiKey}`;
                 const result = await fetchWithBackoff(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

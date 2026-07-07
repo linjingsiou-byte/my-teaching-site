@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【親職教育】AI 時代的教養心法：如何陪伴孩子安全探索 AI 世界 | 林敬修 老師</title>
+    <link rel="stylesheet" href="../assets/css/style.css?v=1.1?v=1.0.1">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../index.html">返回首頁</a></li>
+                <li><a href="../index.html#projects">精選作品</a></li>
+                <li><a href="../index.html#lessons">教學文章</a></li>
+                <li><a href="../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">【親職教育】AI 時代的教養心法：如何陪伴孩子安全探索 AI 世界</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 2026-07-07</span>
+                    <span>🏷️ 分類: 親職教育</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>AI 時代的教養心法：如何陪伴孩子安全探索 AI 世界</h1>
+<p>生成式 AI 工具（如 ChatGPT、繪圖 AI 等）已經成為孩子學習與創作的新夥伴。身為家長，除了擔心孩子過度依賴或接觸不當資訊外，更重要的是建立健康的互動觀念。</p>
+<p>本文整理了精美的教養指引圖卡，從<strong>心態建立</strong>、<strong>安全界線</strong>與<strong>親子對話</strong>三個面向，陪伴家長一同面對 AI 時代的教養挑戰。</p>
+<hr />
+<h2>📌 一、核心教養觀念</h2>
+<ol>
+<li><strong>正向面對，理解先行：</strong> 避免一味禁止孩子使用 AI。與其防堵，不如與孩子一起探索 AI 能做什麼，引導孩子發現 AI 的便利與局限。</li>
+<li><strong>思辨能力（Critical Thinking）的養成：</strong> 告訴孩子 AI 生成的內容不一定百分之百正確，需要保持懷疑、進行查證，這正是培養獨立思考的絕佳機會。</li>
+<li><strong>科技的溫度與身教：</strong> 在享受科技便利的同時，家長應多與孩子進行實體互動，安排戶外活動，並以身教示範健康的手機與電腦使用習慣。</li>
+</ol>
+<hr />
+<h2>📌 二、日常教養圖卡指引</h2>
+<p>本站已將圖卡進行響應式設計優化，無論使用手機、平板或桌上型電腦，均能完美適配顯示。</p>
+<p><img alt="AI 時代親職教養圖卡" src="../assets/images/parenting/parenting_tips_ai.webp" /></p>
+<hr />
+<h2>📌 三、親子溝通的三個問題</h2>
+<p>家長可以在日常生活中，透過以下三個簡單的問題，與孩子聊聊 AI：</p>
+<ul>
+<li><strong>「你最近用了什麼 AI 工具？它幫你解決了什麼問題？」</strong> ➔ 建立開放的分享氛圍，避免孩子因為害怕被責備而隱瞞使用。</li>
+<li><strong>「你覺得 AI 給你的答案，裡面有沒有寫錯的地方？你是怎麼發現的？」</strong> ➔ 引導孩子進行事實查核，培養數位思辨力。</li>
+<li><strong>「如果我們要用 AI 來寫故事或畫畫，怎樣才算是有自己的創意，而不是完全抄襲？」</strong> ➔ 討論數位倫理與著作權概念，讓孩子學會尊重原創。</li>
+</ul>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+        <p>設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師</p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>

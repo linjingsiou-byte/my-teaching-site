@@ -879,19 +879,8 @@
         async function generateHint() {
             if (currentPhase === 'done') return;
 
-            // Try to get API key from localStorage if the hardcoded one is empty
-            let activeApiKey = apiKey;
-            if (!activeApiKey) {
-                activeApiKey = localStorage.getItem('gemini_api_key') || "";
-                if (!activeApiKey) {
-                    const userKey = prompt("💡 本機備份版提示：\n若要使用「AI老師求救」功能，請在下方輸入您的 Gemini API 金鑰（API Key）：");
-                    if (userKey) {
-                        const trimmed = userKey.trim();
-                        localStorage.setItem('gemini_api_key', trimmed);
-                        activeApiKey = trimmed;
-                    }
-                }
-            }
+            // 從 localStorage 讀取共用 API Key
+            let activeApiKey = localStorage.getItem('gemini_api_key') || "";
 
             const hintDisplay = document.getElementById('ai-hint-display');
             if (!activeApiKey) {
