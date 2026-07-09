@@ -483,7 +483,7 @@ def main():
                 # 判斷是否為 tools 目錄下的自製工具
                 if href.startswith('tools/'):
                     if 'division_monster_' in href:
-                        badge = ' <span class="badge-recommended">協作推薦 🤝</span>'
+                        badge = ' <span class="badge-recommended">大力推薦 👍</span>'
                     else:
                         badge = ' <span class="badge-self-made">敬修老師自製 ⭐</span>'
                 else:
