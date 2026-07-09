@@ -14,6 +14,9 @@ avatar: "about/講師自我介紹.png"
 <div style="text-align: center; margin: 24px 0;">
   <img src="about/課堂學習約定.png" alt="敬修老師的課堂學習約定" style="max-width: 100%; max-height: 400px; border-radius: 12px; box-shadow: var(--shadow-md);">
   <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; font-style: italic;">✨ 敬修老師的課堂學習約定（引導孩子尊重、勇敢嘗試與小組合作學習）</p>
+  <div style="margin-top: 10px;">
+    <a href="about/課堂學習約定.png" download class="btn-download">⬇️ 下載約定圖檔</a>
+  </div>
 </div>
 
 作為 **夢的N次方** 國小數學共備團隊的講師，我長期深耕數學教學，落實「說數學」教學法，並結合 **Apple Teacher**、**Apple Learning Coach** 與 **Google 教育家 (Level 1 & 2)** 的數位認證，引導孩子以科技輔助學習，培養解決問題的素養與美學敏銳度。
@@ -90,18 +93,27 @@ avatar: "about/講師自我介紹.png"
     <img class="about-gallery-img gallery-trigger" src="about/敬修老師使用說明書(學生版).png" alt="敬修老師使用說明書 (學生版)">
     <div class="about-gallery-info">
       <div class="about-gallery-title">敬修老師使用說明書 (學生版)</div>
+      <div class="btn-download-container">
+        <a href="about/敬修老師使用說明書(學生版).png" download class="btn-download">⬇️ 下載圖檔</a>
+      </div>
     </div>
   </div>
   <div class="about-gallery-card">
     <img class="about-gallery-img gallery-trigger" src="about/敬修老師使用說明書(家長版).png" alt="敬修老師使用說明書 (家長版)">
     <div class="about-gallery-info">
       <div class="about-gallery-title">敬修老師使用說明書 (家長版)</div>
+      <div class="btn-download-container">
+        <a href="about/敬修老師使用說明書(家長版).png" download class="btn-download">⬇️ 下載圖檔</a>
+      </div>
     </div>
   </div>
   <div class="about-gallery-card">
     <img class="about-gallery-img gallery-trigger" src="about/講師自我介紹.png" alt="講師自我介紹">
     <div class="about-gallery-info">
       <div class="about-gallery-title">講師自我介紹</div>
+      <div class="btn-download-container">
+        <a href="about/講師自我介紹.png" download class="btn-download">⬇️ 下載圖檔</a>
+      </div>
     </div>
   </div>
 </div>

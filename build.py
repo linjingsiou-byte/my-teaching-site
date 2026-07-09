@@ -323,6 +323,7 @@ POST_TEMPLATE = """<!DOCTYPE html>
                 <li><a href="{home_path}">返回首頁</a></li>
                 <li><a href="{home_path}#projects">精選作品</a></li>
                 <li><a href="{home_path}#lessons">教學文章</a></li>
+                <li><a href="{home_path}#parenting">親職教養資源</a></li>
                 <li><a href="{home_path}#resources">學習資源</a></li>
             </ul>
         </div>
@@ -343,7 +344,7 @@ POST_TEMPLATE = """<!DOCTYPE html>
             </div>
             
             <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-                <a href="{home_path}#lessons" class="btn btn-primary">← 返回文章列表</a>
+                <a href="{home_path}{back_anchor}" class="btn btn-primary">← 返回文章列表</a>
             </div>
         </article>
     </div>
@@ -474,6 +475,23 @@ def main():
         with open(resources_path, 'r', encoding='utf-8') as f:
             res_meta, res_body = parse_front_matter(f.read())
             resources_html = markdown.markdown(res_body)
+            # 讓學習資源區的所有連結都在新分頁開啟，且加上自製與推薦標籤
+            def process_resource_link(match):
+                href = match.group(1)
+                text = match.group(2)
+                
+                # 判斷是否為 tools 目錄下的自製工具
+                if href.startswith('tools/'):
+                    if 'division_monster_' in href:
+                        badge = ' <span class="badge-recommended">協作推薦 🤝</span>'
+                    else:
+                        badge = ' <span class="badge-self-made">敬修老師自製 ⭐</span>'
+                else:
+                    badge = ''
+                
+                return f'<a href="{href}" target="_blank" rel="noopener noreferrer">{text}</a>{badge}'
+            
+            resources_html = re.sub(r'<a href="([^"]+)">([\s\S]*?)</a>', process_resource_link, resources_html)
     else:
         resources_html = "<p>目前尚無推薦資源。</p>"
 
@@ -550,6 +568,7 @@ def main():
             post_content=content_html,
             css_path=f"{up}assets/css/style.css?v=1.1",
             home_path=f"{up}index.html",
+            back_anchor='#parenting' if l_category == '親職教育' else '#lessons',
         )
         with open(html_filepath, 'w', encoding='utf-8') as f:
             f.write(rendered_post)
@@ -587,7 +606,7 @@ def main():
             parenting_item_html = f"""
                     <div class="list-item" data-categories="{cats_str}">
                         <div class="list-item-content">
-                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">{l_category} (圖卡轉載自天才領袖等資源)</span>
+                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">{l_category} (圖卡內容修編自「中小學生生成式AI之學習應用手冊」)</span>
                             <a href="{rel_html}" class="list-item-title" style="font-weight: 600; font-size: 17px; margin-top: 4px;">{l_title}</a>
                             <span class="list-item-date">📅 {l_date}</span>
                         </div>

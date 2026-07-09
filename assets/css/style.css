@@ -846,4 +846,59 @@ a:hover {
   margin-bottom: 4px;
 }
 
+/* 自製教具與推薦標籤樣式 */
+.badge-self-made {
+  display: inline-block;
+  font-size: 10px;
+  color: #b45309; /* 溫暖的深琥珀色 */
+  font-weight: 600;
+  padding: 1px 6px;
+  background-color: #fef3c7; /* 琥珀色背景 */
+  border: 1px solid #fcd34d;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.badge-recommended {
+  display: inline-block;
+  font-size: 10px;
+  color: #047857; /* 綠色 */
+  font-weight: 600;
+  padding: 1px 6px;
+  background-color: #d1fae5;
+  border: 1px solid #a7f3d0;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* 說明書下載與範本按鈕樣式 */
+.btn-download-container {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.btn-download {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-download:hover {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border-color: var(--primary-color);
+}
+
+
 
