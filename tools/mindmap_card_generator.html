@@ -219,6 +219,9 @@
         .btn-secondary:hover {
             background: #e2e8f0;
         }
+        .btn-full {
+            grid-column: 1 / -1;
+        }
 
         /* 即時預覽區 */
         .preview-container {
@@ -382,6 +385,21 @@
             </div>
             <textarea id="outline-input" placeholder="請輸入心智圖內容..."></textarea>
             
+            <!-- AI 圖片分析 -->
+            <div class="panel-title" style="margin-top: 10px;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> 📸 AI 圖片分析自動生成
+            </div>
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 24px;">
+                <p style="font-size: 16px; color: var(--text-muted); margin-bottom: 12px;">上傳教用版心智圖截圖，自動識別出大綱文字</p>
+                <button class="btn btn-secondary" onclick="triggerImageUpload()" id="upload-btn" style="width: 100%;">
+                    <i class="fa-solid fa-upload"></i> 上傳心智圖圖檔
+                </button>
+                <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                <div id="upload-loading" style="display: none; margin-top: 12px; font-size: 16px; color: var(--primary); font-weight: bold;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> AI 正在分析心智圖結構...
+                </div>
+            </div>
+
             <div class="panel-title">
                 <i class="fa-solid fa-palette"></i> 各階層卡牌顏色設定
             </div>
@@ -422,6 +440,9 @@
                 </button>
                 <button class="btn btn-secondary" onclick="loadDefaultTemplate()">
                     <i class="fa-solid fa-rotate-left"></i> 重設為預約定範例
+                </button>
+                <button class="btn btn-primary btn-full" onclick="openInteractiveCanvas()" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25);">
+                    <i class="fa-solid fa-palette"></i> 🎨 開啟線上互動教學畫布
                 </button>
             </div>
         </div>
@@ -793,6 +814,110 @@
             .catch(err => {
                 alert('匯出簡報時發生錯誤：' + err);
             });
+    }
+
+    // --- AI 圖片上傳解析邏輯 ---
+    function triggerImageUpload() {
+        document.getElementById('image-upload').click();
+    }
+
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Data = e.target.result.split(',')[1];
+            const mimeType = file.type;
+            analyzeMindmapImage(base64Data, mimeType);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function analyzeMindmapImage(base64Data, mimeType) {
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) {
+            alert('請點擊網頁下方的「🔑 Gemini API Key 設定助手」設定您的 API Key，即可使用 AI 圖片分析自動生成功能！');
+            return;
+        }
+
+        const uploadBtn = document.getElementById('upload-btn');
+        const loadingDiv = document.getElementById('upload-loading');
+
+        uploadBtn.disabled = true;
+        loadingDiv.style.display = 'block';
+
+        // 呼叫正式版 gemini-2.5-flash 模型
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const payload = {
+            contents: [{
+                parts: [
+                    { text: "你是一個專業的繁體中文 OCR 與心智圖結構解析專家。請分析這張心智圖圖片，提取其中所有的語詞，並根據連接線分析階層關係，輸出為 Markdown 大綱格式。使用 # 代表主題、## 代表主幹、### 代表分枝、- 代表細節。請只輸出大綱文字，不要包含任何 markdown 代碼塊標記（如 ```markdown ）或說明文字。" },
+                    {
+                        inlineData: {
+                            mimeType: mimeType,
+                            data: base64Data
+                        }
+                    }
+                ]
+            }]
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                let parsedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                // 移除 markdown 包裝
+                parsedText = parsedText.replace(/```markdown/gi, '').replace(/```/g, '').trim();
+
+                if (parsedText) {
+                    document.getElementById('outline-input').value = parsedText;
+                    renderPreview();
+                    alert('🎉 AI 心智圖解析成功！已自動填入大綱並生成詞磚預覽。');
+                } else {
+                    alert('未能成功解析文字，請上傳解析度更高或更清晰的心智圖圖片。');
+                }
+            } else {
+                const errorMsg = data.error?.message || `HTTP ${response.status}`;
+                alert(`AI 解析失敗：${errorMsg}\n\n請檢查您的金鑰是否儲存正常或有效。`);
+            }
+        } catch (error) {
+            alert(`網路連線異常：${error.message}`);
+        } finally {
+            uploadBtn.disabled = false;
+            loadingDiv.style.display = 'none';
+            document.getElementById('image-upload').value = '';
+        }
+    }
+
+    // --- 跳轉線上互動畫布 ---
+    function openInteractiveCanvas() {
+        if (parsedCards.length === 0) {
+            alert('請先輸入或上傳心智圖大綱以產生詞磚！');
+            return;
+        }
+
+        const colors = [
+            document.getElementById('color-l0').value,
+            document.getElementById('color-l1').value,
+            document.getElementById('color-l2').value,
+            document.getElementById('color-l3').value
+        ];
+
+        const canvasData = {
+            cards: parsedCards,
+            colors: colors
+        };
+
+        sessionStorage.setItem('mindmap_canvas_data', JSON.stringify(canvasData));
+        window.open('mindmap_canvas.html', '_blank');
     }
 </script>
 
