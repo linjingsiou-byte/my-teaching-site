@@ -75,10 +75,14 @@
             pointer-events: none; /* 預設交由卡片或畫布平移 */
         }
         
-        /* 當啟用繪圖模式時，手寫層攔截事件 */
+        /* 當啟用繪圖或雷射筆模式時，手寫層攔截事件 */
         .draw-mode #drawing-canvas {
             pointer-events: auto;
             cursor: crosshair;
+        }
+        .laser-mode #drawing-canvas {
+            pointer-events: auto;
+            cursor: none; /* 隱藏預設指標，讓雷射點作為聚焦點 */
         }
 
         /* 卡牌樣式 */
@@ -264,15 +268,25 @@
         <button class="tb-btn" id="btn-erase" title="擦除筆跡" onclick="setMode('erase')">
             <i class="fa-solid fa-eraser"></i>
         </button>
+        <button class="tb-btn" id="btn-laser" title="雷射簡報筆" onclick="setMode('laser')">
+            <i class="fa-solid fa-bullseye" style="color: #ef4444;"></i>
+        </button>
     </div>
 
     <!-- 筆顏色選擇 (僅在畫筆模式下作用) -->
-    <div class="toolbar-group" id="color-group">
+    <div class="toolbar-group" id="color-group" style="display: none;">
         <div class="color-dot active" style="background-color: #000000;" onclick="setPenColor('#000000', this)"></div>
         <div class="color-dot" style="background-color: #ef4444;" onclick="setPenColor('#ef4444', this)"></div>
         <div class="color-dot" style="background-color: #3b82f6;" onclick="setPenColor('#3b82f6', this)"></div>
+        <div class="color-dot" style="background-color: #22c55e;" onclick="setPenColor('#22c55e', this)"></div>
+        <div class="color-dot" style="background-color: #a855f7;" onclick="setPenColor('#a855f7', this)"></div>
         <!-- 螢光黃 (半透明) -->
         <div class="color-dot" style="background-color: rgba(234, 179, 8, 0.4); outline: 1px solid #e2e8f0;" onclick="setPenColor('rgba(234, 179, 8, 0.4)', this)"></div>
+        <!-- 自訂調色盤 -->
+        <div style="display: flex; align-items: center; gap: 4px; padding-left: 4px;" title="自訂顏色">
+            <i class="fa-solid fa-palette" style="font-size: 14px; color: #64748b;"></i>
+            <input type="color" id="custom-pen-color" value="#4f46e5" onchange="setCustomPenColor(this.value)" style="width: 24px; height: 24px; border: none; border-radius: 50%; cursor: pointer; background: none;">
+        </div>
     </div>
 
     <!-- 畫布縮放組 -->
@@ -320,11 +334,16 @@
     let scale = 1.0;
     let panX = 100;
     let panY = 100;
-    let mode = 'pan'; // 'pan', 'draw', 'erase'
+    let mode = 'pan'; // 'pan', 'draw', 'erase', 'laser'
     let penColor = '#000000';
     let penWidth = 4;
     let isDrawing = false;
     let isPanning = false;
+    
+    // 雷射筆簡報相關
+    let laserPoints = [];
+    let laserActive = false;
+    let laserAnimationId = null;
     
     // 拖拉相關
     let activeCard = null;
@@ -557,8 +576,19 @@
         });
 
         drawingCanvas.addEventListener('pointermove', (e) => {
-            if (!isDrawing) return;
             const pt = getCanvasCoords(e);
+            
+            if (mode === 'laser') {
+                // 雷射簡報筆：記錄點與時間，並啟動動畫
+                laserPoints.push({ x: pt.x, y: pt.y, time: Date.now() });
+                if (!laserAnimationId) {
+                    laserActive = true;
+                    animateLaser();
+                }
+                return;
+            }
+
+            if (!isDrawing) return;
             
             if (mode === 'draw') {
                 points.push(pt);
@@ -590,6 +620,13 @@
                     });
                 }
                 points = [];
+            }
+        });
+
+        // 當雷射筆滑出畫布時清空點
+        drawingCanvas.addEventListener('pointerleave', (e) => {
+            if (mode === 'laser') {
+                laserPoints = [];
             }
         });
 
@@ -650,6 +687,63 @@
         document.getElementById('zoom-badge').textContent = `${Math.round(scale * 100)}%`;
     }
 
+    // 雷射簡報筆動畫循環
+    function animateLaser() {
+        if (mode !== 'laser' && laserPoints.length === 0) {
+            cancelAnimationFrame(laserAnimationId);
+            laserAnimationId = null;
+            laserActive = false;
+            if (typeof redrawCanvas === 'function') redrawCanvas();
+            return;
+        }
+
+        if (typeof redrawCanvas === 'function') redrawCanvas();
+
+        const now = Date.now();
+        // 僅保留 600 毫秒內的雷射點，以形成漸隱軌跡
+        laserPoints = laserPoints.filter(p => now - p.time < 600);
+
+        if (laserPoints.length > 0) {
+            // 1. 繪製漸隱的發光紅色軌跡
+            ctx.beginPath();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            for (let i = 0; i < laserPoints.length; i++) {
+                const p = laserPoints[i];
+                const age = now - p.time;
+                const alpha = Math.max(0, 1 - age / 600);
+                
+                ctx.strokeStyle = `rgba(239, 68, 68, ${alpha * 0.85})`;
+                ctx.lineWidth = 14 * alpha;
+                
+                if (i === 0) {
+                    ctx.moveTo(p.x, p.y);
+                } else {
+                    ctx.lineTo(p.x, p.y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                }
+            }
+
+            // 2. 繪製最前端的亮紅鐳射聚焦點 (帶有放射狀發光漸層)
+            const tip = laserPoints[laserPoints.length - 1];
+            const grad = ctx.createRadialGradient(tip.x, tip.y, 2, tip.x, tip.y, 20);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.15, '#ff3b30');
+            grad.addColorStop(0.55, 'rgba(255, 59, 48, 0.45)');
+            grad.addColorStop(1, 'rgba(255, 59, 48, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(tip.x, tip.y, 20, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        laserAnimationId = requestAnimationFrame(animateLaser);
+    }
+
     // 工具列功能切換
     function setMode(newMode) {
         mode = newMode;
@@ -658,12 +752,30 @@
         document.getElementById('btn-pan').classList.toggle('active', mode === 'pan');
         document.getElementById('btn-draw').classList.toggle('active', mode === 'draw');
         document.getElementById('btn-erase').classList.toggle('active', mode === 'erase');
+        document.getElementById('btn-laser').classList.toggle('active', mode === 'laser');
         
         // 畫布樣式切換
-        document.body.className = mode === 'draw' || mode === 'erase' ? 'draw-mode' : '';
+        document.body.className = '';
+        if (mode === 'draw' || mode === 'erase') {
+            document.body.className = 'draw-mode';
+        } else if (mode === 'laser') {
+            document.body.className = 'laser-mode';
+            laserActive = true;
+        }
         
         // 顏色選擇器顯示隱藏
         document.getElementById('color-group').style.display = mode === 'draw' ? 'flex' : 'none';
+
+        // 離開雷射模式時重設與清理
+        if (mode !== 'laser') {
+            laserActive = false;
+            laserPoints = [];
+            if (laserAnimationId) {
+                cancelAnimationFrame(laserAnimationId);
+                laserAnimationId = null;
+            }
+            if (typeof redrawCanvas === 'function') redrawCanvas();
+        }
     }
 
     function setPenColor(color, el) {
@@ -673,7 +785,12 @@
         
         const dots = document.querySelectorAll('.color-dot');
         dots.forEach(d => d.classList.remove('active'));
-        el.classList.add('active');
+        if (el) el.classList.add('active');
+    }
+
+    function setCustomPenColor(val) {
+        // 更新當前手寫筆顏色為自訂色
+        setPenColor(val, null);
     }
 
     // 縮放操作
