@@ -3,171 +3,562 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔑 API Key 設定 — 林靜思數學教學</title>
+    <title>🔑 Gemini API Key 設定助手 — 林靜思數學教學</title>
+    <!-- Google Fonts: Outfit & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Outfit', 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .card {
-            background: white;
-            border-radius: 24px;
-            padding: 48px 40px;
-            max-width: 480px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
-        }
-        .icon { font-size: 64px; margin-bottom: 20px; }
-        h1 { font-size: 24px; color: #1e1b4b; margin-bottom: 8px; }
-        .subtitle { color: #6b7280; font-size: 15px; margin-bottom: 32px; line-height: 1.6; }
-        .status-box {
-            border-radius: 16px;
             padding: 20px;
-            margin-bottom: 24px;
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 16px; /* 符合 12pt 最低標準 */
             line-height: 1.6;
         }
-        .status-box.success {
-            background: #f0fdf4;
-            border: 2px solid #86efac;
-            color: #16a34a;
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            perspective: 1000px;
         }
-        .status-box.error {
-            background: #fef2f2;
-            border: 2px solid #fca5a5;
-            color: #dc2626;
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .key-display {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 12px 16px;
-            font-family: monospace;
-            font-size: 13px;
-            color: #475569;
-            margin: 16px 0;
-            word-break: break-all;
-            text-align: left;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .btn {
-            display: inline-block;
-            padding: 14px 28px;
-            border-radius: 14px;
-            font-size: 15px;
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .icon-wrapper {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px auto;
+            font-size: 32px;
+            box-shadow: 0 10px 25px rgba(129, 140, 248, 0.3);
+        }
+
+        h1 {
+            font-size: 26px; /* 符合 14pt 以上標準 */
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 30%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* 狀態列 */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 600;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 100%;
+            justify-content: center;
+        }
+        .status-badge.success {
+            color: #34d399;
+            background: rgba(52, 211, 153, 0.1);
+            border-color: rgba(52, 211, 153, 0.2);
+        }
+        .status-badge.warning {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+            border-color: rgba(251, 191, 36, 0.2);
+        }
+
+        /* 警告與說明區塊 */
+        .alert-box {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 28px;
+            color: #fca5a5;
+        }
+        .alert-box h4 {
+            font-size: 18px; /* 符合 13pt 以上標準 */
             font-weight: 700;
-            text-decoration: none;
-            transition: transform 0.15s, opacity 0.15s;
-            cursor: pointer;
-            border: none;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            width: 100%;
-            margin-bottom: 12px;
+        .alert-box p {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            line-height: 1.6;
         }
-        .btn-secondary {
-            background: #f1f5f9;
-            color: #475569;
-            width: 100%;
-        }
-        .note {
-            margin-top: 24px;
-            font-size: 13px;
-            color: #9ca3af;
-            line-height: 1.7;
-        }
-        .tool-list {
+
+        /* 輸入框組合 */
+        .input-group {
+            margin-bottom: 24px;
             text-align: left;
-            margin: 16px 0;
+        }
+
+        label {
+            display: block;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 14px 48px 14px 16px;
+            color: var(--text-main);
+            font-family: monospace;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .eye-btn {
+            position: absolute;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            transition: color 0.2s;
+        }
+
+        .eye-btn:hover {
+            color: var(--text-main);
+        }
+
+        /* 按鈕群組 */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        @media (min-width: 480px) {
+            .btn-grid {
+                grid-template-columns: 1.2fr 1fr;
+            }
+            .btn-full {
+                grid-column: span 2;
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #fca5a5;
+        }
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 測試結果說明 */
+        .test-result {
+            margin-top: -12px;
+            margin-bottom: 24px;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 500;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        .test-result.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+        .test-result.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        /* 支援工具清單 */
+        .tools-section {
+            border-top: 1px solid var(--card-border);
+            padding-top: 28px;
+            text-align: left;
+        }
+
+        .tools-title {
+            font-size: 18px; /* 符合 13pt 以上標準 */
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #f1f5f9;
+        }
+
+        .tools-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            font-size: 13px;
-            color: #4b5563;
+            gap: 10px;
         }
-        .tool-list span::before { content: "✅ "; }
+
+        .tool-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-item::before {
+            content: "\f058";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: #818cf8;
+        }
+
+        footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: #cbd5e1;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-<div class="card">
-    <div class="icon" id="main-icon">⚙️</div>
-    <h1 id="main-title">正在設定 API Key…</h1>
-    <p class="subtitle" id="main-subtitle">請稍候，正在將金鑰儲存至您的瀏覽器…</p>
 
-    <div class="status-box" id="status-box" style="display:none"></div>
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-key"></i>
+            </div>
+            <h1>Gemini API Key 設定助手</h1>
+            <p class="subtitle">設定一次，自動啟用全站所有 AI 助教服務</p>
+        </div>
 
-    <div id="actions" style="display:none">
-        <button class="btn btn-secondary" onclick="clearKey()">🗑️ 清除金鑰</button>
+        <!-- 目前狀態 -->
+        <div id="status-badge" class="status-badge warning">
+            <i class="fa-solid fa-circle-question"></i> 正在偵測瀏覽器金鑰狀態...
+        </div>
+
+        <!-- 洩漏警告安全宣導 -->
+        <div class="alert-box">
+            <h4><i class="fa-solid fa-triangle-exclamation"></i> ⚠️ 安全保護宣告</h4>
+            <p>
+                為了您的資料安全與避免額外帳單，**請勿將您的實際金鑰寫在 HTML 程式碼中上傳至 GitHub**！否則會因安全洩漏偵測被自動註銷。請在此安全貼上，金鑰將**僅儲存於您當前的瀏覽器本機**，絕不上傳伺服器。
+            </p>
+        </div>
+
+        <!-- 金鑰輸入框 -->
+        <div class="input-group">
+            <label for="api-key-input">Gemini API Key (通常以 AIzaSy 開頭)</label>
+            <div class="input-wrapper">
+                <input type="password" id="api-key-input" placeholder="貼上您的 API Key (AIzaSy...)" autocomplete="off">
+                <button type="button" class="eye-btn" onclick="togglePasswordVisibility()">
+                    <i id="eye-icon" class="fa-solid fa-eye"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 測試結果呈現 -->
+        <div id="test-result-box" class="test-result"></div>
+
+        <!-- 控制按鈕組 -->
+        <div class="btn-grid">
+            <button class="btn btn-secondary" onclick="runApiKeyTest()" id="test-btn">
+                <i class="fa-solid fa-network-wired"></i> 測試此金鑰
+            </button>
+            <button class="btn btn-success" onclick="saveApiKey()">
+                <i class="fa-solid fa-floppy-disk"></i> 儲存設定
+            </button>
+            <button class="btn btn-danger btn-full" onclick="clearApiKey()">
+                <i class="fa-solid fa-trash-can"></i> 清除已存金鑰
+            </button>
+        </div>
+
+        <!-- 支援工具 -->
+        <div class="tools-section">
+            <h3 class="tools-title">✨ 已連線且支援的 AI 數學工具</h3>
+            <div class="tools-grid">
+                <div class="tool-item">情緒性格偵探社</div>
+                <div class="tool-item">分數量挑戰</div>
+                <div class="tool-item">時鐘冒險</div>
+                <div class="tool-item">時鐘角度偵探</div>
+                <div class="tool-item">小數偵探</div>
+                <div class="tool-item">幾何偵探</div>
+                <div class="tool-item">成語比手畫腳</div>
+                <div class="tool-item">數線糖果</div>
+                <div class="tool-item">平行垂直挑戰</div>
+                <div class="tool-item">餘數偵探</div>
+                <div class="tool-item">線段圖冒險</div>
+                <div class="tool-item">除法直式怪獸組</div>
+            </div>
+        </div>
     </div>
 
-    <p class="note">⚠️ 此金鑰儲存於您的瀏覽器本機，不會上傳至任何伺服器。<br>此頁面下次再開啟時會自動套用已儲存的金鑰。</p>
+    <footer>
+        <p><a href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回網站首頁</a></p>
+    </footer>
 </div>
 
 <script>
-    const API_KEY = 'AIzaSyATHUB5KZzUvwqI93x_0tzk-Afl2tAwoQY';
     const STORAGE_KEY = 'gemini_api_key';
 
-    const TOOLS = [
-        '情緒性格偵探社', '時鐘冒險', '時鐘角度偵探', '小數偵探',
-        '分數量挑戰', '幾何偵探', '成語比手畫腳', '數線糖果',
-        '平行垂直挑戰', '餘數偵探', '線段圖冒險',
-        '除法怪獸1', '除法怪獸2', '除法怪獸3',
-        '除法怪獸4', '除法怪獸5', '除法怪獸6'
-    ];
-
-    function showSuccess() {
-        document.getElementById('main-icon').textContent = '🎉';
-        document.getElementById('main-title').textContent = 'API Key 設定成功！';
-        document.getElementById('main-subtitle').textContent = '以下所有工具頁面已可使用 AI 功能：';
-
-        const toolsHtml = TOOLS.map(t => `<span>${t}</span>`).join('');
-        const box = document.getElementById('status-box');
-        box.className = 'status-box success';
-        box.innerHTML = `✅ 金鑰已成功儲存至瀏覽器！<div class="tool-list">${toolsHtml}</div>`;
-        box.style.display = 'block';
-        document.getElementById('actions').style.display = 'block';
+    // 取得並初始化介面狀態
+    function getStoredKey() {
+        return localStorage.getItem(STORAGE_KEY) || '';
     }
 
-    function showError(msg) {
-        document.getElementById('main-icon').textContent = '❌';
-        document.getElementById('main-title').textContent = '設定失敗';
-        document.getElementById('main-subtitle').textContent = '發生以下錯誤：';
-        const box = document.getElementById('status-box');
-        box.className = 'status-box error';
-        box.innerHTML = msg;
-        box.style.display = 'block';
-    }
-
-    function clearKey() {
-        localStorage.removeItem(STORAGE_KEY);
-        document.getElementById('main-icon').textContent = '🗑️';
-        document.getElementById('main-title').textContent = '金鑰已清除';
-        document.getElementById('main-subtitle').textContent = '所有工具頁面的 AI 功能已停用。';
-        document.getElementById('status-box').style.display = 'none';
-        document.getElementById('actions').style.display = 'none';
-    }
-
-    // 自動執行設定
-    try {
-        localStorage.setItem(STORAGE_KEY, API_KEY);
-        const verify = localStorage.getItem(STORAGE_KEY);
-        if (verify === API_KEY) {
-            showSuccess();
+    function updateStatusUI() {
+        const key = getStoredKey();
+        const badge = document.getElementById('status-badge');
+        const input = document.getElementById('api-key-input');
+        
+        if (key) {
+            const masked = key.substring(0, 8) + '...' + key.substring(key.length - 4);
+            badge.className = 'status-badge success';
+            badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> 本機已儲存金鑰 (${masked})`;
+            if (!input.value) {
+                input.value = key;
+            }
         } else {
-            showError('金鑰儲存後驗證失敗，請重新整理頁面再試。');
+            badge.className = 'status-badge warning';
+            badge.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> 尚未設定本機金鑰（AI 助教功能暫停中）`;
         }
-    } catch (e) {
-        showError(`localStorage 無法存取：${e.message}<br><br>可能原因：瀏覽器設定禁止本機儲存，請檢查隱私設定。`);
     }
+
+    // 密碼顯示/隱藏切換
+    function togglePasswordVisibility() {
+        const input = document.getElementById('api-key-input');
+        const icon = document.getElementById('eye-icon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fa-solid fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fa-solid fa-eye';
+        }
+    }
+
+    // 儲存金鑰邏輯
+    function saveApiKey() {
+        const input = document.getElementById('api-key-input');
+        const key = input.value.trim();
+        
+        if (!key) {
+            alert('請先輸入金鑰！');
+            return;
+        }
+
+        try {
+            localStorage.setItem(STORAGE_KEY, key);
+            updateStatusUI();
+            alert('🎉 金鑰儲存成功！現在您可以在此瀏覽器中順暢使用全站所有的 AI 助教囉！');
+        } catch (e) {
+            alert('儲存失敗：' + e.message + '，請確認瀏覽器隱私設定是否禁用了本機儲存區。');
+        }
+    }
+
+    // 清除金鑰邏輯
+    function clearApiKey() {
+        if (confirm('確定要清除儲存在瀏覽器中的金鑰嗎？清除後 AI 助教功能將需要重新輸入。')) {
+            localStorage.removeItem(STORAGE_KEY);
+            document.getElementById('api-key-input').value = '';
+            document.getElementById('test-result-box').style.display = 'none';
+            updateStatusUI();
+            alert('🗑️ 已成功清除本機儲存的金鑰。');
+        }
+    }
+
+    // 金鑰測試 API 呼叫驗證
+    async function runApiKeyTest() {
+        const input = document.getElementById('api-key-input');
+        const key = input.value.trim();
+        const resultBox = document.getElementById('test-result-box');
+        const testBtn = document.getElementById('test-btn');
+
+        if (!key) {
+            alert('請先輸入或貼上要測試的 API Key！');
+            return;
+        }
+
+        // 基本格式檢查
+        if (!key.startsWith('AIzaSy')) {
+            resultBox.className = 'test-result error';
+            resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> 格式警告：標準的 Google Gemini API Key 通常以 <b>AIzaSy</b> 開頭，請再次檢查。`;
+            resultBox.style.display = 'block';
+            return;
+        }
+
+        // 鎖定按鈕，顯示 Loading
+        testBtn.disabled = true;
+        const originalText = testBtn.innerHTML;
+        testBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> 測試中...`;
+        resultBox.style.display = 'none';
+
+        // 使用較新的 gemini-2.5-flash 作為標準呼叫端點來驗證
+        const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+        const testPayload = {
+            contents: [{ parts: [{ text: "Say 'OK' if you can read this." }] }]
+        };
+
+        try {
+            const response = await fetch(testUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(testPayload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                resultBox.className = 'test-result success';
+                resultBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <b>連線測試成功！</b>金鑰非常健康且有效，Google API 回覆響應正常。`;
+            } else {
+                // 回傳 HTTP 錯誤代碼 (如 403 洩漏註銷)
+                const errorMsg = data.error?.message || `錯誤代碼 ${response.status}`;
+                resultBox.className = 'test-result error';
+                resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> <b>連線測試失敗</b><br>API 錯誤回報：${errorMsg}`;
+            }
+        } catch (error) {
+            resultBox.className = 'test-result error';
+            resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> <b>網路異常，連線超時</b><br>錯誤說明：${error.message}`;
+        } finally {
+            // 解鎖按鈕
+            testBtn.disabled = false;
+            testBtn.innerHTML = originalText;
+            resultBox.style.display = 'block';
+        }
+    }
+
+    // 初始化加載
+    document.addEventListener('DOMContentLoaded', () => {
+        updateStatusUI();
+    });
 </script>
+
 </body>
 </html>

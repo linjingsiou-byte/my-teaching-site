@@ -199,7 +199,7 @@ INDEX_TEMPLATE = """<!DOCTYPE html>
     <!-- 頁尾 -->
     <footer class="footer">
         <p>© 2026 {name}. All rights reserved.</p>
-        <p>設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師</p>
+        <p>設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師 | 🔑 <a href="tools/setup_api_key.html" style="color: #cbd5e1; text-decoration: underline;">Gemini API Key 設定助手</a></p>
         <p>Powered by Python Automatic Builder & GitHub Pages.</p>
     </footer>
 
@@ -352,7 +352,7 @@ POST_TEMPLATE = """<!DOCTYPE html>
     <!-- 頁尾 -->
     <footer class="footer">
         <p>© 2026 {site_name}. All rights reserved.</p>
-        <p>設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師</p>
+        <p>設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師 | 🔑 <a href="{setup_api_key_path}" style="color: #cbd5e1; text-decoration: underline;">Gemini API Key 設定助手</a></p>
     </footer>
 
     <!-- 圖片燈箱 JavaScript -->
@@ -568,6 +568,7 @@ def main():
             post_content=content_html,
             css_path=f"{up}assets/css/style.css?v=1.1",
             home_path=f"{up}index.html",
+            setup_api_key_path=f"{up}tools/setup_api_key.html",
             back_anchor='#parenting' if l_category == '親職教育' else '#lessons',
         )
         with open(html_filepath, 'w', encoding='utf-8') as f:
