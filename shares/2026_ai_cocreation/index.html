@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026_教師與 AI 共創教案平台實戰分享簡報</title>
+    <!-- Google Fonts: Outfit & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #f5c242;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 投影片容器 */
+        .presentation-container {
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            max-height: 750px;
+            padding: 40px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 投影片單頁 */
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            animation: slideFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes slideFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 封面投影片樣式 */
+        .slide-cover {
+            text-align: center;
+        }
+        .slide-cover h1 {
+            font-size: 40px; /* 大於 18pt */
+            font-weight: 900;
+            line-height: 1.3;
+            background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+        }
+        .slide-cover h2 {
+            font-size: 20px; /* 大於 13pt */
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+        .slide-cover .meta-info {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        /* 標準投影片樣式 */
+        .slide-header {
+            font-size: 28px; /* 大於 14pt */
+            font-weight: 800;
+            border-left: 6px solid var(--primary);
+            padding-left: 16px;
+            margin-bottom: 30px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slide-content {
+            font-size: 18px; /* 符合 12pt 最低標準 */
+            line-height: 1.6;
+            color: #e2e8f0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* 卡牌格線 (分欄排版) */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .presentation-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .presentation-card h3 {
+            font-size: 18px; /* 大於 13pt */
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .presentation-card p {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            color: var(--text-muted);
+        }
+
+        .highlight-text {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        ul {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+        li {
+            margin-bottom: 8px;
+            font-size: 18px; /* 符合 12pt 最低標準 */
+        }
+
+        /* 導覽列與進度 */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+        }
+
+        .progress-bar-container {
+            flex-grow: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            margin: 0 40px;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .nav-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .nav-btn:active {
+            transform: scale(0.9);
+        }
+
+        .slide-counter {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* 鍵盤操作提示 */
+        .keyboard-tip {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            color: var(--text-muted);
+            opacity: 0.6;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+    <!-- Slide 1: Cover -->
+    <div class="slide slide-cover active">
+        <h1>從教學痛點到課堂教具平台</h1>
+        <h2>國小教師與 AI Agent 的課堂數位化共創歷程分享</h2>
+        <div class="meta-info">
+            <p><i class="fa-solid fa-graduation-cap"></i> 屏科實中國小部 林敬修 老師 & AI Agent (Antigravity)</p>
+            <p style="margin-top: 8px; opacity: 0.8;"><i class="fa-solid fa-calendar-days"></i> 2026 年研習與社群分享專用</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Pain Point -->
+    <div class="slide">
+        <div class="slide-header">
+            <i class="fa-solid fa-circle-exclamation" style="color: var(--danger);"></i> 課堂數位化痛點：手工字框的代價
+        </div>
+        <div class="slide-content">
+            <div class="grid-2">
+                <div class="presentation-card">
+                    <h3><i class="fa-solid fa-tablet-screen-button"></i> 理想的教學鷹架</h3>
+                    <p>利用 iPad <span class="highlight-text">「無邊記 (Freeform)」</span> 進行分組教學，讓三年級學生拖拉彩色詞磚重構心智圖，建立概念層級。</p>
+                </div>
+                <div class="presentation-card" style="border-color: rgba(239, 68, 68, 0.3);">
+                    <h3><i class="fa-solid fa-hourglass-half" style="color: var(--danger);"></i> 繁瑣的備課勞動</h3>
+                    <p>課前必須手動建立 30 個以上文字框、逐一改顏色（L0~L3）、調整字體與大小。備課花費高達 30-40 分鐘，影響推廣意願。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Evolution Phase 1 -->
+    <div class="slide">
+        <div class="slide-header">
+            <i class="fa-solid fa-fire" style="color: var(--accent);"></i> 階段 1：即時救火方案 (自動生成 PPTX)
+        </div>
+        <div class="slide-content">
+            <ul>
+                <li><strong>素材導入</strong>：教師提供課文心智圖大綱 PDF。</li>
+                <li><strong>AI 自動化生成</strong>：AI 利用程式碼在背景解析大綱，直接自動產生對應顏色的 PPTX 詞磚簡報檔。</li>
+                <li><strong>工作流對接</strong>：教師將簡報傳送至 iPad Keynote 開啟，全選拷貝後一秒貼入無邊記。</li>
+                <li><strong>核心成果</strong>：<span class="highlight-text">解決當下這一課的迫切備課需求</span>，省去所有手動排版時間。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 4: Evolution Phase 2 -->
+    <div class="slide">
+        <div class="slide-header">
+            <i class="fa-solid fa-toolbox"></i> 階段 2：工具化上線 (線上卡牌產生器)
+        </div>
+        <div class="slide-content">
+            <div class="grid-2">
+                <div class="presentation-card">
+                    <h3><i class="fa-solid fa-code"></i> 將方案「工具化」</h3>
+                    <p>將 Python 解析邏輯移植為線上網頁。教師貼上 Markdown 大綱（用 # 或縮排區隔），設定四階層顏色，網頁會即時預覽卡牌樣式。</p>
+                </div>
+                <div class="presentation-card">
+                    <h3><i class="fa-solid fa-download"></i> 網頁直接下載 PPTX</h3>
+                    <p>利用 pptxgenjs 函式庫，完全在瀏覽器端生成內含「原生可編輯圓角矩形」的 PPTX 檔，免去向 AI 索取檔案的程序。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Evolution Phase 3 -->
+    <div class="slide">
+        <div class="slide-header">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary-light);"></i> 階段 3：課堂教學賦能 (AI 圖片與教學畫布)
+        </div>
+        <div class="slide-content">
+            <div class="grid-2">
+                <div class="presentation-card">
+                    <h3><i class="fa-solid fa-image"></i> AI 圖片分析 (多模態 OCR)</h3>
+                    <p>整合瀏覽器儲存的 **Gemini API 金鑰**。教師上傳心智圖截圖，AI 自動提取語詞與階層並填入大綱，打字時間歸零。</p>
+                </div>
+                <div class="presentation-card">
+                    <h3><i class="fa-solid fa-chalkboard"></i> 線上教學畫布與漸隱雷射筆</h3>
+                    <p>提供雙指捏合縮放、平移與拖拉卡牌。內建手寫板筆墨，以及專門用於吸引注意的「漸隱雷射筆軌跡（0.6 秒後自動消失）」。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Teacher's Logic 1 -->
+    <div class="slide">
+        <div class="slide-header">
+            <i class="fa-solid fa-lightbulb"></i> 解讀底層邏輯：教師如何與 AI 共作 (I)
+        </div>
+        <div class="slide-content">
+            <div class="grid-2">
+                <div class="presentation-card">
+                    <h3><i class="fa-solid fa-bullseye"></i> 1. 帶著真實情境與素材出發</h3>
+                    <p>AI 不懂真實教學現場。林老師主動提供**實體教材 PDF、配色鷹架理念、與無邊記介面**，精準建立對齊基準。</p>
+                </div>
+                <div class="presentation-card">
+                    <h3><i class="fa-solid fa-forward-step"></i> 2. 採用迭代演進思維 (MVP)</h3>
+                    <p>不一開始開出宏大系統。先要「PPTX 單檔字框」（救火），再要「產生器網頁」（工具），最後要「手寫畫布」（平台）。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Teacher's Logic 2 -->
+    <div class="slide">
+        <div class="slide-header">
+            <i class="fa-solid fa-lightbulb"></i> 解讀底層邏輯：教師如何與 AI 共作 (II)
+        </div>
+        <div class="slide-content">
+            <div class="grid-2">
+                <div class="presentation-card">
+                    <h3><i class="fa-solid fa-link"></i> 3. 工作流無縫融入與橋樑設計</h3>
+                    <p>新工具絕不破壞原先好用的習慣。善用 Keynote 作為資料橋樑，以極低的轉換成本達成無邊記心智圖的自動化準備。</p>
+                </div>
+                <div class="presentation-card">
+                    <h3><i class="fa-solid fa-bug"></i> 4. 協同調試 (Debug) 的心理建設</h3>
+                    <p>面對代碼報錯與金鑰不相容（如 Google 更新為 `AQ.` 新金鑰），林老師不放棄，而是貼出 Console 報錯圖，反哺系統升級。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Playbook for Teachers -->
+    <div class="slide">
+        <div class="slide-header">
+            <i class="fa-solid fa-book-open"></i> 教師與 AI 協同實戰三大心法
+        </div>
+        <div class="slide-content">
+            <ul>
+                <li><span class="highlight-text">心法一：提供真實情境，拒絕空泛對話</span> — 不要只跟 AI 說「我想做心智圖教學」，把您手邊的課文、PDF、照片直接餵給 AI，讓它進入課堂場景。</li>
+                <li><span class="highlight-text">心法二：從小任務出發，累積為工具</span> — 先解決今天的重複瑣事，測試好用後，引導 AI 寫出獨立工具（如網頁），把「個人知識」沉澱為「共創工具」。</li>
+                <li><span class="highlight-text">心法三：主動 Debug，將出錯視為養分</span> — 不要害怕 AI 犯錯，把錯誤畫面丟給它，引導它自我修正，這是軟體演進的必經之路。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 9: Conclusion -->
+    <div class="slide">
+        <div class="slide-header">
+            <i class="fa-solid fa-handshake"></i> 結語：專業互補，回歸教學初心
+        </div>
+        <div class="slide-content" style="text-align: center;">
+            <div class="presentation-card" style="display: inline-block; max-width: 800px; margin: 0 auto; text-align: left;">
+                <p style="font-size: 20px; line-height: 1.8; color: #ffffff;">
+                    林老師提供的是 <span class="highlight-text">「教學專業」</span> —— 知道三年級學生需要卡牌作為鷹架、知道大屏投影需要簡報雷射筆；
+                </p>
+                <p style="font-size: 20px; line-height: 1.8; color: #ffffff; margin-top: 12px;">
+                    AI 提供的是 <span class="highlight-text">「工程與自動化能力」</span> —— 快速撰寫 Canvas 手寫板與調用 API 解析圖片。
+                </p>
+                <p style="font-size: 16px; margin-top: 24px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+                    數位轉型的核心在於「釋放教師精力」，將老師從繁瑣的手工排版中解放，回歸到課堂上最溫暖的師生互動中。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation controls -->
+    <div class="nav-controls">
+        <div class="slide-counter" id="slide-counter">Slide 1 of 9</div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            <button class="nav-btn" onclick="prevSlide()" title="上一頁">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="nav-btn" onclick="nextSlide()" title="下一頁">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="keyboard-tip">
+    <i class="fa-solid fa-keyboard"></i> 鍵盤 <span>← / →</span> 或空白鍵可換頁，iPad 支援左右滑動切換
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const counterEl = document.getElementById('slide-counter');
+    const progressFill = document.getElementById('progress-fill');
+
+    function updateSlide() {
+        slides.forEach((slide, idx) => {
+            slide.classList.toggle('active', idx === currentSlide);
+        });
+        
+        counterEl.textContent = `Slide ${currentSlide + 1} of ${totalSlides}`;
+        const pct = ((currentSlide + 1) / totalSlides) * 100;
+        progressFill.style.width = `${pct}%`;
+    }
+
+    function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+            currentSlide++;
+            updateSlide();
+        }
+    }
+
+    function prevSlide() {
+        if (currentSlide > 0) {
+            currentSlide--;
+            updateSlide();
+        }
+    }
+
+    // 鍵盤導覽
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+            nextSlide();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+            prevSlide();
+        }
+    });
+
+    // iPad 左右滑動手勢
+    let touchstartX = 0;
+    let touchendX = 0;
+
+    document.addEventListener('touchstart', e => {
+        touchstartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', e => {
+        touchendX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+
+    function handleSwipe() {
+        if (touchendX < touchstartX - 60) {
+            nextSlide(); // 向左滑 -> 下一頁
+        }
+        if (touchendX > touchstartX + 60) {
+            prevSlide(); // 向右滑 -> 上一頁
+        }
+    }
+
+    // 初始化顯示
+    updateSlide();
+</script>
+
+</body>
+</html>

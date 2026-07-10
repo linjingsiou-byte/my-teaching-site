@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 無邊記心智圖卡牌產生器 — 林靜思數學教學</title>
+    <!-- Google Fonts: Outfit & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PPTXGenJS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgenjs.bundle.js"></script>
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            
+            /* 預設四階層卡牌顏色 */
+            --color-l0: #56b4e9; /* 藍色 */
+            --color-l1: #f5c242; /* 黃橘色 */
+            --color-l2: #5cb85c; /* 綠色 */
+            --color-l3: #5bc0de; /* 淺藍色 */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            flex-grow: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            font-size: 36px;
+            color: white;
+            box-shadow: 0 10px 25px rgba(129, 140, 248, 0.2);
+        }
+
+        h1 {
+            font-size: 28px; /* 符合 14pt 以上標準 */
+            font-weight: 900;
+            color: #1e1b4b;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* 雙欄排版 */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        @media (min-width: 900px) {
+            .workspace-grid {
+                grid-template-columns: 450px 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 18px; /* 符合 13pt 以上標準 */
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+        }
+
+        /* 輸入區與設定 */
+        textarea {
+            width: 100%;
+            height: 380px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            color: #334155;
+            resize: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        /* 顏色選取區 */
+        .color-settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+        }
+        .color-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .color-item label {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 600;
+            color: #475569;
+        }
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        input[type="color"] {
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+        }
+        .color-value {
+            font-size: 16px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        /* 按鈕區 */
+        .action-btns {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        .btn-full {
+            grid-column: 1 / -1;
+        }
+
+        /* 即時預覽區 */
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            align-content: start;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 580px;
+            padding-right: 8px;
+        }
+
+        .preview-column {
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: 18px;
+            padding: 16px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .col-header {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 700;
+            color: #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 4px;
+        }
+
+        .card-count {
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 16px;
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-weight: 600;
+        }
+
+        /* 卡牌樣式 */
+        .card-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 700;
+            color: #000000;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            word-break: break-all;
+            animation: cardFadeIn 0.3s ease;
+        }
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 教學說明區塊 */
+        .guide-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+            text-align: left;
+        }
+        .guide-title {
+            font-size: 18px; /* 符合 13pt 以上標準 */
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .steps-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        @media (min-width: 768px) {
+            .steps-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        .step-card {
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+        }
+        .step-num {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        .step-text h5 {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-bottom: 6px;
+        }
+        .step-text p {
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        footer {
+            background: #1e1b4b;
+            color: #cbd5e1;
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 16px; /* 符合 12pt 最低標準 */
+            margin-top: auto;
+        }
+        footer a {
+            color: #f8fafc;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="icon-wrapper">
+            <i class="fa-solid fa-brain"></i>
+        </div>
+        <h1>無邊記心智圖卡牌產生器</h1>
+        <p class="subtitle">輸入心智圖大綱，一鍵轉換為 iPad Keynote / 無邊記 (Freeform) 彩色詞磚</p>
+    </div>
+
+    <div class="workspace-grid">
+        <!-- 左欄：輸入與設定 -->
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fa-solid fa-keyboard"></i> 輸入心智圖大綱 (Markdown 格式)
+            </div>
+            <textarea id="outline-input" placeholder="請輸入心智圖內容..."></textarea>
+            
+            <!-- AI 圖片分析 -->
+            <div class="panel-title" style="margin-top: 10px;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> 📸 AI 圖片分析自動生成
+            </div>
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 24px;">
+                <p style="font-size: 16px; color: var(--text-muted); margin-bottom: 12px;">上傳教用版心智圖截圖，自動識別出大綱文字</p>
+                <button class="btn btn-secondary" onclick="triggerImageUpload()" id="upload-btn" style="width: 100%;">
+                    <i class="fa-solid fa-upload"></i> 上傳心智圖圖檔
+                </button>
+                <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                <div id="upload-loading" style="display: none; margin-top: 12px; font-size: 16px; color: var(--primary); font-weight: bold;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> AI 正在分析心智圖結構...
+                </div>
+            </div>
+
+            <div class="panel-title">
+                <i class="fa-solid fa-palette"></i> 各階層卡牌顏色設定
+            </div>
+            <div class="color-settings">
+                <div class="color-item">
+                    <label>主題 (L0)</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="color-l0" value="#56b4e9" onchange="updateColors()">
+                        <span id="val-l0" class="color-value">#56b4e9</span>
+                    </div>
+                </div>
+                <div class="color-item">
+                    <label>主幹 (L1)</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="color-l1" value="#f5c242" onchange="updateColors()">
+                        <span id="val-l1" class="color-value">#f5c242</span>
+                    </div>
+                </div>
+                <div class="color-item">
+                    <label>分枝 (L2)</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="color-l2" value="#5cb85c" onchange="updateColors()">
+                        <span id="val-l2" class="color-value">#5cb85c</span>
+                    </div>
+                </div>
+                <div class="color-item">
+                    <label>細節 (L3)</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="color-l3" value="#5bc0de" onchange="updateColors()">
+                        <span id="val-l3" class="color-value">#5bc0de</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-btns">
+                <button class="btn btn-primary" onclick="exportToPPTX()">
+                    <i class="fa-solid fa-file-powerpoint"></i> 匯出 PPTX 投影片詞磚
+                </button>
+                <button class="btn btn-secondary" onclick="loadDefaultTemplate()">
+                    <i class="fa-solid fa-rotate-left"></i> 重設為預約定範例
+                </button>
+                <button class="btn btn-primary btn-full" onclick="openInteractiveCanvas()" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25);">
+                    <i class="fa-solid fa-palette"></i> 🎨 開啟線上互動教學畫布
+                </button>
+            </div>
+        </div>
+
+        <!-- 右欄：即時預覽 -->
+        <div class="panel">
+            <div class="panel-title" style="margin-bottom: 24px;">
+                <i class="fa-solid fa-eye"></i> 即時詞磚預覽 (各階層排列)
+            </div>
+            <div class="preview-container">
+                <div class="preview-grid">
+                    <!-- L0 -->
+                    <div class="preview-column">
+                        <div class="col-header">
+                            <span>主題 (L0)</span>
+                            <span id="count-l0" class="card-count">0</span>
+                        </div>
+                        <div id="col-l0-body"></div>
+                    </div>
+                    <!-- L1 -->
+                    <div class="preview-column">
+                        <div class="col-header">
+                            <span>主幹 (L1)</span>
+                            <span id="count-l1" class="card-count">0</span>
+                        </div>
+                        <div id="col-l1-body"></div>
+                    </div>
+                    <!-- L2 -->
+                    <div class="preview-column">
+                        <div class="col-header">
+                            <span>分枝 (L2)</span>
+                            <span id="count-l2" class="card-count">0</span>
+                        </div>
+                        <div id="col-l2-body"></div>
+                    </div>
+                    <!-- L3 -->
+                    <div class="preview-column">
+                        <div class="col-header">
+                            <span>細節 (L3)</span>
+                            <span id="count-l3" class="card-count">0</span>
+                        </div>
+                        <div id="col-l3-body"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部教學指南 -->
+    <div class="guide-section">
+        <div class="guide-title">
+            <i class="fa-solid fa-circle-info"></i> 💡 如何在 iPad 無邊記 (Freeform) 中使用？
+        </div>
+        <div class="steps-container">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-text">
+                    <h5>輸入與調整</h5>
+                    <p>在左側輸入您的課文心智圖大綱，設定好您偏好的各階層卡磚顏色。</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-text">
+                    <h5>匯出 PPTX 檔</h5>
+                    <p>點擊「匯出 PPTX 投影片詞磚」按鈕下載簡報，並直接用 iPad 內建的 **Keynote** 軟體開啟它。</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-text">
+                    <h5>全選並複製</h5>
+                    <p>在 Keynote 簡報中，長按並拖曳選取投影片中所有的彩色圖形卡牌，點選「拷貝（Copy）」。</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-text">
+                    <h5>貼上至無邊記</h5>
+                    <p>開啟 iPad **無邊記** 畫布，長按空白處點選「貼上」。所有字框即可完美匯入，讓學生開始拖拉拉線！</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師 | <a href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回網站首頁</a></p>
+</footer>
+
+<script>
+    // 預設 Nani 三上第二課心智圖範例大綱
+    const DEFAULT_TEMPLATE = `# 我們的約定
+## 約定的原因
+### 時間
+- 開學不到幾天
+### 事情
+- 狀紙堆滿桌面
+### 同意
+- 訂定班級公約
+## 約定的經過
+### 主持人
+- 班長小惠
+### 會議中
+- 大家發言熱烈
+- 小豆子辛苦記錄
+### 訂定9個約定
+- 上學到校要準時
+- 教室走廊慢慢走
+- 上下樓梯請慢走
+- 上課認真不聊天
+- 想要發言先舉手
+- 對人有禮常微笑
+- 常用肥皂洗洗手
+- 三餐定量不挑食
+- 眼睛休息不忘記
+## 約定的結果
+### 公告地點
+- 教室裡
+### 提醒大家
+- 遵守約定
+### 同學反應
+- 幾家歡樂幾家愁
+### 小豆子承諾
+- 會努力做到自己管好自己`;
+
+    let parsedCards = [];
+
+    // 初始化頁面
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDefaultTemplate();
+        
+        // 監聽輸入框變動
+        document.getElementById('outline-input').addEventListener('input', () => {
+            renderPreview();
+        });
+    });
+
+    // 載入預設大綱
+    function loadDefaultTemplate() {
+        document.getElementById('outline-input').value = DEFAULT_TEMPLATE;
+        renderPreview();
+    }
+
+    // 更新顏色 picker 顯示字串
+    function updateColors() {
+        document.getElementById('val-l0').textContent = document.getElementById('color-l0').value.toUpperCase();
+        document.getElementById('val-l1').textContent = document.getElementById('color-l1').value.toUpperCase();
+        document.getElementById('val-l2').textContent = document.getElementById('color-l2').value.toUpperCase();
+        document.getElementById('val-l3').textContent = document.getElementById('color-l3').value.toUpperCase();
+        renderPreview();
+    }
+
+    // 核心解析邏輯
+    function parseOutline(text) {
+        const lines = text.split('\n');
+        const cards = [];
+        
+        for (let line of lines) {
+            let trimmed = line.trim();
+            if (!trimmed) continue;
+            
+            let level = 3; // 預設為細節階層 (L3)
+            let content = trimmed;
+            
+            // 優先檢查 Markdown 標題標籤
+            if (trimmed.startsWith('# ')) {
+                level = 0;
+                content = trimmed.substring(2).trim();
+            } else if (trimmed.startsWith('## ')) {
+                level = 1;
+                content = trimmed.substring(3).trim();
+            } else if (trimmed.startsWith('### ')) {
+                level = 2;
+                content = trimmed.substring(4).trim();
+            } else if (trimmed.startsWith('#### ')) {
+                level = 3;
+                content = trimmed.substring(5).trim();
+            } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                level = 3;
+                content = trimmed.substring(2).trim();
+            } else {
+                // 依據縮排寬度做階層推斷 (空格或 Tab)
+                const leadingSpaces = line.match(/^\s*/)[0];
+                const tabCount = (leadingSpaces.match(/\t/g) || []).length;
+                const spaceCount = (leadingSpaces.match(/ /g) || []).length;
+                
+                const totalIndent = tabCount + Math.floor(spaceCount / 2);
+                if (totalIndent === 0) level = 0;
+                else if (totalIndent === 1) level = 1;
+                else if (totalIndent === 2) level = 2;
+                else level = 3;
+            }
+            
+            cards.push({ text: content, level: level });
+        }
+        return cards;
+    }
+
+    // 渲染預覽區
+    function renderPreview() {
+        const text = document.getElementById('outline-input').value;
+        parsedCards = parseOutline(text);
+        
+        // 取得當前設定的顏色值
+        const colors = [
+            document.getElementById('color-l0').value,
+            document.getElementById('color-l1').value,
+            document.getElementById('color-l2').value,
+            document.getElementById('color-l3').value
+        ];
+
+        // 各欄位清空
+        const colBodies = [
+            document.getElementById('col-l0-body'),
+            document.getElementById('col-l1-body'),
+            document.getElementById('col-l2-body'),
+            document.getElementById('col-l3-body')
+        ];
+        colBodies.forEach(b => b.innerHTML = '');
+
+        const counts = [0, 0, 0, 0];
+
+        // 建立預覽項目
+        parsedCards.forEach(card => {
+            const lvl = Math.min(3, Math.max(0, card.level));
+            counts[lvl]++;
+            
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card-item';
+            cardEl.style.backgroundColor = colors[lvl];
+            cardEl.textContent = card.text;
+            
+            colBodies[lvl].appendChild(cardEl);
+        });
+
+        // 更新計數器
+        document.getElementById('count-l0').textContent = counts[0];
+        document.getElementById('count-l1').textContent = counts[1];
+        document.getElementById('count-l2').textContent = counts[2];
+        document.getElementById('count-l3').textContent = counts[3];
+    }
+
+    // 匯出 PPTX 主邏輯 (使用 PPTXGenJS)
+    function exportToPPTX() {
+        if (parsedCards.length === 0) {
+            alert('沒有任何詞磚可供匯出，請先輸入大綱文字！');
+            return;
+        }
+
+        const colors = [
+            document.getElementById('color-l0').value.replace('#', ''),
+            document.getElementById('color-l1').value.replace('#', ''),
+            document.getElementById('color-l2').value.replace('#', ''),
+            document.getElementById('color-l3').value.replace('#', '')
+        ];
+
+        // 將解析出的詞磚分階層整理
+        const groups = [[], [], [], []];
+        parsedCards.forEach(c => {
+            const lvl = Math.min(3, Math.max(0, c.level));
+            groups[lvl].push(c.text);
+        });
+
+        let pptx = new PptxGenJS();
+        
+        // 設定 16:9 比例簡報投影片
+        pptx.defineLayout({ name: 'WIDE_16_9', width: 13.333, height: 7.5 });
+        pptx.layout = 'WIDE_16_9';
+
+        let slide = pptx.addSlide();
+
+        const cardW = 2.2;
+        const cardH = 0.7;
+
+        // --- 繪製第一欄：主題 (L0) 與主幹 (L1) ---
+        let col0X = 0.5;
+        let col0Y = 0.5;
+        
+        // 畫主題
+        groups[0].forEach(text => {
+            slide.addText(text, {
+                shape: pptx.ShapeType.roundRect,
+                x: col0X, y: col0Y, w: cardW, h: cardH,
+                fill: { color: colors[0] },
+                color: '000000',
+                align: 'center', valign: 'middle',
+                fontFace: 'Microsoft JhengHei', fontSize: 14, bold: true,
+                line: { color: colors[0], width: 1 }
+            });
+            col0Y += 1.0;
+        });
+
+        col0Y += 0.2; // 加點間距
+        
+        // 畫主幹
+        groups[1].forEach(text => {
+            slide.addText(text, {
+                shape: pptx.ShapeType.roundRect,
+                x: col0X, y: col0Y, w: cardW, h: cardH,
+                fill: { color: colors[1] },
+                color: '000000',
+                align: 'center', valign: 'middle',
+                fontFace: 'Microsoft JhengHei', fontSize: 13, bold: true,
+                line: { color: colors[1], width: 1 }
+            });
+            col0Y += 0.95;
+        });
+
+        // --- 繪製第二欄：分枝 (L2) ---
+        // 採雙列排列，可排約 14 個
+        groups[2].forEach((text, i) => {
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            const cardX = 3.1 + col * 2.4;
+            const cardY = 0.5 + row * 0.95;
+            
+            slide.addText(text, {
+                shape: pptx.ShapeType.roundRect,
+                x: cardX, y: cardY, w: cardW, h: cardH,
+                fill: { color: colors[2] },
+                color: '000000',
+                align: 'center', valign: 'middle',
+                fontFace: 'Microsoft JhengHei', fontSize: 13, bold: true,
+                line: { color: colors[2], width: 1 }
+            });
+        });
+
+        // --- 繪製第三欄：細節 (L3) ---
+        // 採雙列排列，每列最多 9 個
+        groups[3].forEach((text, i) => {
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            
+            // 支援分頁邏輯：如果一個 slide 不夠裝，可以將其畫到第 2 張投影片中
+            let targetSlide = slide;
+            let drawRow = row;
+            
+            if (0.5 + row * 0.85 + cardH > 7.3) {
+                // 新增第二張投影片
+                if (pptx.slides.length < 2) {
+                    pptx.addSlide();
+                }
+                targetSlide = pptx.slides[1];
+                // 計算第二張投影片中的 row (扣除第一頁的上限)
+                const maxRowsPerPage = Math.floor((7.3 - 0.5 - cardH) / 0.85) + 1;
+                drawRow = row - maxRowsPerPage;
+            }
+            
+            const cardX = 8.1 + col * 2.4;
+            const cardY = 0.5 + drawRow * 0.85;
+
+            targetSlide.addText(text, {
+                shape: pptx.ShapeType.roundRect,
+                x: cardX, y: cardY, w: cardW, h: cardH,
+                fill: { color: colors[3] },
+                color: '000000',
+                align: 'center', valign: 'middle',
+                fontFace: 'Microsoft JhengHei', fontSize: 12,
+                line: { color: colors[3], width: 1 }
+            });
+        });
+
+        // 觸發瀏覽器下載
+        pptx.writeFile({ fileName: '無邊記心智圖詞磚_匯出檔.pptx' })
+            .then(fileName => {
+                console.log(`已成功下載: ${fileName}`);
+            })
+            .catch(err => {
+                alert('匯出簡報時發生錯誤：' + err);
+            });
+    }
+
+    // --- AI 圖片上傳解析邏輯 ---
+    function triggerImageUpload() {
+        document.getElementById('image-upload').click();
+    }
+
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Data = e.target.result.split(',')[1];
+            const mimeType = file.type;
+            analyzeMindmapImage(base64Data, mimeType);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function analyzeMindmapImage(base64Data, mimeType) {
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) {
+            alert('請點擊網頁下方的「🔑 Gemini API Key 設定助手」設定您的 API Key，即可使用 AI 圖片分析自動生成功能！');
+            return;
+        }
+
+        const uploadBtn = document.getElementById('upload-btn');
+        const loadingDiv = document.getElementById('upload-loading');
+
+        uploadBtn.disabled = true;
+        loadingDiv.style.display = 'block';
+
+        // 呼叫正式版 gemini-2.5-flash 模型
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const payload = {
+            contents: [{
+                parts: [
+                    { text: "你是一個專業的繁體中文 OCR 與心智圖結構解析專家。請分析這張心智圖圖片，提取其中所有的語詞，並根據連接線分析階層關係，輸出為 Markdown 大綱格式。使用 # 代表主題、## 代表主幹、### 代表分枝、- 代表細節。請只輸出大綱文字，不要包含任何 markdown 代碼塊標記（如 ```markdown ）或說明文字。" },
+                    {
+                        inlineData: {
+                            mimeType: mimeType,
+                            data: base64Data
+                        }
+                    }
+                ]
+            }]
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                let parsedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                // 移除 markdown 包裝
+                parsedText = parsedText.replace(/```markdown/gi, '').replace(/```/g, '').trim();
+
+                if (parsedText) {
+                    document.getElementById('outline-input').value = parsedText;
+                    renderPreview();
+                    alert('🎉 AI 心智圖解析成功！已自動填入大綱並生成詞磚預覽。');
+                } else {
+                    alert('未能成功解析文字，請上傳解析度更高或更清晰的心智圖圖片。');
+                }
+            } else {
+                const errorMsg = data.error?.message || `HTTP ${response.status}`;
+                alert(`AI 解析失敗：${errorMsg}\n\n請檢查您的金鑰是否儲存正常或有效。`);
+            }
+        } catch (error) {
+            alert(`網路連線異常：${error.message}`);
+        } finally {
+            uploadBtn.disabled = false;
+            loadingDiv.style.display = 'none';
+            document.getElementById('image-upload').value = '';
+        }
+    }
+
+    // --- 跳轉線上互動畫布 ---
+    function openInteractiveCanvas() {
+        if (parsedCards.length === 0) {
+            alert('請先輸入或上傳心智圖大綱以產生詞磚！');
+            return;
+        }
+
+        const colors = [
+            document.getElementById('color-l0').value,
+            document.getElementById('color-l1').value,
+            document.getElementById('color-l2').value,
+            document.getElementById('color-l3').value
+        ];
+
+        const canvasData = {
+            cards: parsedCards,
+            colors: colors
+        };
+
+        sessionStorage.setItem('mindmap_canvas_data', JSON.stringify(canvasData));
+        window.open('mindmap_canvas.html', '_blank');
+    }
+</script>
+
+</body>
+</html>

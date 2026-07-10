@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 互動教學畫布 — 林靜思數學教學</title>
+    <!-- Google Fonts: Outfit & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --grid-color: #cbd5e1;
+            --toolbar-bg: rgba(255, 255, 255, 0.85);
+            --toolbar-border: rgba(226, 232, 240, 0.8);
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-size: 16px;
+        }
+
+        /* 畫布視窗容器 */
+        .viewport {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .viewport:active {
+            cursor: grabbing;
+        }
+
+        /* 畫布主體：可平移與縮放 */
+        .canvas-board {
+            width: 4000px;
+            height: 3000px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            transform-origin: 0 0;
+            background-image: radial-gradient(var(--grid-color) 1.5px, transparent 1.5px);
+            background-size: 30px 30px;
+            background-color: #f8fafc;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.02);
+        }
+
+        /* 手寫繪圖層 */
+        #drawing-canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* 預設交由卡片或畫布平移 */
+        }
+        
+        /* 當啟用繪圖或雷射筆模式時，手寫層攔截事件 */
+        .draw-mode #drawing-canvas {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+        .laser-mode #drawing-canvas {
+            pointer-events: auto;
+            cursor: none; /* 隱藏預設指標，讓雷射點作為聚焦點 */
+        }
+
+        /* 卡牌樣式 */
+        .canvas-card {
+            position: absolute;
+            width: 200px;
+            min-height: 64px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 16px; /* 符合 12pt */
+            font-weight: 700;
+            color: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            cursor: move;
+            z-index: 20;
+            touch-action: none; /* 禁用瀏覽器預設觸控行為 */
+            transition: box-shadow 0.2s, transform 0.2s;
+            word-break: break-all;
+        }
+        .canvas-card:hover {
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.06);
+        }
+        .canvas-card.dragging {
+            box-shadow: 0 20px 35px rgba(0,0,0,0.15), 0 8px 16px rgba(0,0,0,0.08);
+            transform: scale(1.05);
+            z-index: 100;
+        }
+
+        /* 卡牌池標示 (方便收納) */
+        .card-pool-label {
+            position: absolute;
+            font-size: 14px;
+            font-weight: 700;
+            color: #94a3b8;
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 4px 12px;
+            pointer-events: none;
+        }
+
+        /* 懸浮工具列 */
+        .toolbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--toolbar-bg);
+            border: 1px solid var(--toolbar-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 1000;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 95vw;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-right: 1px solid #cbd5e1;
+            padding-right: 16px;
+        }
+        .toolbar-group:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        .tb-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: #475569;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tb-btn:hover {
+            background: rgba(0,0,0,0.05);
+            color: #0f172a;
+        }
+        .tb-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* 筆跡顏色按鈕 */
+        .color-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        .color-dot:hover {
+            transform: scale(1.15);
+        }
+        .color-dot.active {
+            border-color: #0f172a;
+            transform: scale(1.1);
+        }
+
+        /* 右下角縮放百分比顯示 */
+        .zoom-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--toolbar-bg);
+            border: 1px solid var(--toolbar-border);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #475569;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        /* Loading 遮罩 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--primary);
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loading" class="loading-overlay">
+    <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+    <span>正在初始化教學畫布...</span>
+</div>
+
+<div class="viewport" id="viewport">
+    <div class="canvas-board" id="board">
+        <!-- 手寫 Canvas -->
+        <canvas id="drawing-canvas"></canvas>
+        
+        <!-- 卡牌在此動態渲染 -->
+    </div>
+</div>
+
+<!-- 懸浮工具列 -->
+<div class="toolbar">
+    <!-- 功能切換組 -->
+    <div class="toolbar-group">
+        <button class="tb-btn active" id="btn-pan" title="移動畫布/卡牌" onclick="setMode('pan')">
+            <i class="fa-solid fa-hand"></i>
+        </button>
+        <button class="tb-btn" id="btn-draw" title="畫筆手寫" onclick="setMode('draw')">
+            <i class="fa-solid fa-pen-fancy"></i>
+        </button>
+        <button class="tb-btn" id="btn-erase" title="擦除筆跡" onclick="setMode('erase')">
+            <i class="fa-solid fa-eraser"></i>
+        </button>
+        <button class="tb-btn" id="btn-laser" title="雷射簡報筆" onclick="setMode('laser')">
+            <i class="fa-solid fa-bullseye" style="color: #ef4444;"></i>
+        </button>
+    </div>
+
+    <!-- 筆顏色選擇 (僅在畫筆模式下作用) -->
+    <div class="toolbar-group" id="color-group" style="display: none;">
+        <div class="color-dot active" style="background-color: #000000;" onclick="setPenColor('#000000', this)"></div>
+        <div class="color-dot" style="background-color: #ef4444;" onclick="setPenColor('#ef4444', this)"></div>
+        <div class="color-dot" style="background-color: #3b82f6;" onclick="setPenColor('#3b82f6', this)"></div>
+        <div class="color-dot" style="background-color: #22c55e;" onclick="setPenColor('#22c55e', this)"></div>
+        <div class="color-dot" style="background-color: #a855f7;" onclick="setPenColor('#a855f7', this)"></div>
+        <!-- 螢光黃 (半透明) -->
+        <div class="color-dot" style="background-color: rgba(234, 179, 8, 0.4); outline: 1px solid #e2e8f0;" onclick="setPenColor('rgba(234, 179, 8, 0.4)', this)"></div>
+        <!-- 自訂調色盤 -->
+        <div style="display: flex; align-items: center; gap: 4px; padding-left: 4px;" title="自訂顏色">
+            <i class="fa-solid fa-palette" style="font-size: 14px; color: #64748b;"></i>
+            <input type="color" id="custom-pen-color" value="#4f46e5" onchange="setCustomPenColor(this.value)" style="width: 24px; height: 24px; border: none; border-radius: 50%; cursor: pointer; background: none;">
+        </div>
+    </div>
+
+    <!-- 畫布縮放組 -->
+    <div class="toolbar-group">
+        <button class="tb-btn" title="放大" onclick="zoom(0.1)">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <button class="tb-btn" title="縮小" onclick="zoom(-0.1)">
+            <i class="fa-solid fa-minus"></i>
+        </button>
+        <button class="tb-btn" title="適合大小" onclick="zoomToFit()">
+            <i class="fa-solid fa-expand"></i>
+        </button>
+        <button class="tb-btn" title="100%" onclick="zoomTo100()">
+            <i class="fa-solid fa-compress"></i>
+        </button>
+    </div>
+
+    <!-- 操作組 -->
+    <div class="toolbar-group">
+        <button class="tb-btn" title="儲存進度" onclick="saveProgress()" style="color: var(--success);">
+            <i class="fa-solid fa-floppy-disk"></i>
+        </button>
+        <button class="tb-btn" title="清除所有塗鴉" onclick="clearDrawings()" style="color: var(--danger);">
+            <i class="fa-solid fa-trash-can"></i>
+        </button>
+        <button class="tb-btn" title="匯出為圖片" onclick="exportToPNG()" style="color: var(--primary);">
+            <i class="fa-solid fa-file-image"></i>
+        </button>
+        <button class="tb-btn" title="重置卡牌位置" onclick="resetCardPositions()">
+            <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+    </div>
+</div>
+
+<div class="zoom-badge" id="zoom-badge">100%</div>
+
+<script>
+    // 取得資料
+    let canvasData = null;
+    let cards = [];
+    let colors = [];
+
+    // 狀態變數
+    let scale = 1.0;
+    let panX = 100;
+    let panY = 100;
+    let mode = 'pan'; // 'pan', 'draw', 'erase', 'laser'
+    let penColor = '#000000';
+    let penWidth = 4;
+    let isDrawing = false;
+    let isPanning = false;
+    
+    // 雷射筆簡報相關
+    let laserPoints = [];
+    let laserActive = false;
+    let laserAnimationId = null;
+    
+    // 拖拉相關
+    let activeCard = null;
+    let cardOffsetX = 0;
+    let cardOffsetY = 0;
+    let startX = 0;
+    let startY = 0;
+
+    const viewport = document.getElementById('viewport');
+    const board = document.getElementById('board');
+    const drawingCanvas = document.getElementById('drawing-canvas');
+    const ctx = drawingCanvas.getContext('2d');
+
+    // 載入資料
+    document.addEventListener('DOMContentLoaded', () => {
+        const rawData = sessionStorage.getItem('mindmap_canvas_data');
+        if (!rawData) {
+            alert('找不到詞磚資料，請先從產生器點選「開啟線上互動教學畫布」！');
+            document.getElementById('loading').innerHTML = `
+                <p style="color: var(--danger);">❌ 未載入資料。請返回產生器。</p>
+                <button class="btn btn-secondary" onclick="window.close()" style="margin-top: 10px;">關閉此分頁</button>
+            `;
+            return;
+        }
+
+        canvasData = JSON.parse(rawData);
+        cards = canvasData.cards;
+        colors = canvasData.colors;
+
+        // 初始化 Canvas 尺寸
+        resizeDrawingCanvas();
+        window.addEventListener('resize', resizeDrawingCanvas);
+
+        // 渲染詞磚
+        renderCards();
+
+        // 讀取進度
+        loadSavedProgress();
+
+        // 隱藏 Loading
+        document.getElementById('loading').style.display = 'none';
+
+        // 綁定事件
+        initEvents();
+        updateBoardTransform();
+    });
+
+    function resizeDrawingCanvas() {
+        drawingCanvas.width = board.clientWidth;
+        drawingCanvas.height = board.clientHeight;
+        redrawCanvas();
+    }
+
+    // 渲染卡片
+    function renderCards() {
+        // 先移除所有舊卡片
+        const oldCards = board.querySelectorAll('.canvas-card');
+        oldCards.forEach(c => c.remove());
+
+        // 卡牌分類與排列邏輯
+        const groups = [[], [], [], []];
+        cards.forEach((c, index) => {
+            const lvl = Math.min(3, Math.max(0, c.level));
+            groups[lvl].push({ text: c.text, id: `card-${index}`, level: lvl });
+        });
+
+        // 預設卡牌池擺放位置 (將卡牌平均散落排列在畫布左右兩側)
+        // 畫布寬高 4000x3000
+        // 左側放置 L0 (主題) 與 L1 (主幹)
+        // 右側放置 L2 (分枝) 與 L3 (細節)
+        
+        // 1. 擺放 L0/L1 (左側 pool)
+        let leftY = 200;
+        groups[0].forEach(c => {
+            createCardEl(c.text, c.id, c.level, 150, leftY);
+            leftY += 100;
+        });
+        leftY += 50;
+        groups[1].forEach(c => {
+            createCardEl(c.text, c.id, c.level, 150, leftY);
+            leftY += 90;
+        });
+
+        // 2. 擺放 L2 (中間偏右)
+        let midY = 200;
+        groups[2].forEach((c, i) => {
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            const x = 500 + col * 230;
+            const y = 200 + row * 90;
+            createCardEl(c.text, c.id, c.level, x, y);
+        });
+
+        // 3. 擺放 L3 (右側 pool)
+        groups[3].forEach((c, i) => {
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            const x = 1100 + col * 230;
+            const y = 200 + row * 80;
+            createCardEl(c.text, c.id, c.level, x, y);
+        });
+    }
+
+    function createCardEl(text, id, level, x, y) {
+        const el = document.createElement('div');
+        el.className = 'canvas-card';
+        el.id = id;
+        el.style.backgroundColor = colors[level];
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.textContent = text;
+        el.dataset.level = level;
+        board.appendChild(el);
+    }
+
+    // 事件初始化 (PointerEvents 確保相容滑鼠與觸控手勢)
+    function initEvents() {
+        // --- 畫布平移與縮放 ---
+        viewport.addEventListener('pointerdown', (e) => {
+            // 如果是在點擊卡片，交給卡片拖曳處理
+            if (e.target.classList.contains('canvas-card')) return;
+            
+            // 如果不是繪圖模式，且點在畫布空白處，開啟平移
+            if (mode === 'pan') {
+                isPanning = true;
+                startX = e.clientX - panX;
+                startY = e.clientY - panY;
+                viewport.setPointerCapture(e.pointerId);
+            }
+        });
+
+        viewport.addEventListener('pointermove', (e) => {
+            if (isPanning) {
+                panX = e.clientX - startX;
+                panY = e.clientY - startY;
+                updateBoardTransform();
+            }
+        });
+
+        viewport.addEventListener('pointerup', (e) => {
+            if (isPanning) {
+                isPanning = false;
+                viewport.releasePointerCapture(e.pointerId);
+            }
+        });
+
+        // 滑鼠滾輪縮放
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = 1.1;
+            const rect = board.getBoundingClientRect();
+            
+            // 計算滑鼠在畫布上的相對座標
+            const mouseX = (e.clientX - rect.left) / scale;
+            const mouseY = (e.clientY - rect.top) / scale;
+
+            if (e.deltaY < 0) {
+                // 放大
+                scale = Math.min(3.0, scale * zoomFactor);
+            } else {
+                // 縮小
+                scale = Math.max(0.2, scale / zoomFactor);
+            }
+
+            // 調整平移量，以滑鼠位置為縮放中心
+            panX = e.clientX - mouseX * scale;
+            panY = e.clientY - mouseY * scale;
+
+            updateBoardTransform();
+        }, { passive: false });
+
+        // --- 詞磚拖曳邏輯 ---
+        board.addEventListener('pointerdown', (e) => {
+            const card = e.target.closest('.canvas-card');
+            if (card && mode === 'pan') {
+                activeCard = card;
+                card.classList.add('dragging');
+                
+                // 計算相對於卡片左上角的偏移行程 (需除以當前縮放比例)
+                const cardRect = card.getBoundingClientRect();
+                cardOffsetX = (e.clientX - cardRect.left) / scale;
+                cardOffsetY = (e.clientY - cardRect.top) / scale;
+                
+                card.setPointerCapture(e.pointerId);
+                e.stopPropagation();
+            }
+        });
+
+        board.addEventListener('pointermove', (e) => {
+            if (activeCard) {
+                const rect = board.getBoundingClientRect();
+                // 算回 board 座標系下的 x, y
+                const x = (e.clientX - rect.left) / scale - cardOffsetX;
+                const y = (e.clientY - rect.top) / scale - cardOffsetY;
+                
+                // 限制在 board 範圍內
+                const limitX = Math.max(0, Math.min(board.clientWidth - activeCard.clientWidth, x));
+                const limitY = Math.max(0, Math.min(board.clientHeight - activeCard.clientHeight, y));
+                
+                activeCard.style.left = `${limitX}px`;
+                activeCard.style.top = `${limitY}px`;
+                e.stopPropagation();
+            }
+        });
+
+        board.addEventListener('pointerup', (e) => {
+            if (activeCard) {
+                activeCard.classList.remove('dragging');
+                activeCard.releasePointerCapture(e.pointerId);
+                activeCard = null;
+                e.stopPropagation();
+            }
+        });
+
+        // --- 繪圖與塗鴉手寫邏輯 ---
+        let points = [];
+        let paths = []; // 儲存所有的歷史塗鴉筆跡路徑
+
+        drawingCanvas.addEventListener('pointerdown', (e) => {
+            if (mode === 'draw' || mode === 'erase') {
+                isDrawing = true;
+                const pt = getCanvasCoords(e);
+                points = [pt];
+                
+                ctx.beginPath();
+                ctx.moveTo(pt.x, pt.y);
+                
+                drawingCanvas.setPointerCapture(e.pointerId);
+            }
+        });
+
+        drawingCanvas.addEventListener('pointermove', (e) => {
+            const pt = getCanvasCoords(e);
+            
+            if (mode === 'laser') {
+                // 雷射簡報筆：記錄點與時間，並啟動動畫
+                laserPoints.push({ x: pt.x, y: pt.y, time: Date.now() });
+                if (!laserAnimationId) {
+                    laserActive = true;
+                    animateLaser();
+                }
+                return;
+            }
+
+            if (!isDrawing) return;
+            
+            if (mode === 'draw') {
+                points.push(pt);
+                // 畫出目前的線條
+                ctx.lineWidth = penWidth;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = penColor;
+                
+                ctx.lineTo(pt.x, pt.y);
+                ctx.stroke();
+            } else if (mode === 'erase') {
+                // 橡皮擦：擦除與目前位置重疊的歷史塗鴉線段
+                eraseAt(pt.x, pt.y, 25);
+            }
+        });
+
+        drawingCanvas.addEventListener('pointerup', (e) => {
+            if (isDrawing) {
+                isDrawing = false;
+                drawingCanvas.releasePointerCapture(e.pointerId);
+                
+                if (mode === 'draw' && points.length > 1) {
+                    paths.push({
+                        type: 'draw',
+                        points: points,
+                        color: penColor,
+                        width: penWidth
+                    });
+                }
+                points = [];
+            }
+        });
+
+        // 當雷射筆滑出畫布時清空點
+        drawingCanvas.addEventListener('pointerleave', (e) => {
+            if (mode === 'laser') {
+                laserPoints = [];
+            }
+        });
+
+        // 輔助獲取縮放座標
+        function getCanvasCoords(e) {
+            const rect = drawingCanvas.getBoundingClientRect();
+            // 在 Canvas 解析度座標系下的 X, Y (考量 CSS Transform 縮放)
+            return {
+                x: (e.clientX - rect.left) / scale,
+                y: (e.clientY - rect.top) / scale
+            };
+        }
+
+        // 橡皮擦邏輯
+        function eraseAt(x, y, radius) {
+            // 遍歷所有歷史路徑，若有任何點靠近 (x, y) 就將該路徑移除
+            paths = paths.filter(path => {
+                if (path.type !== 'draw') return true;
+                // 只要點之間的距離小於 radius，就過濾掉
+                const hasNearPoint = path.points.some(p => {
+                    const dx = p.x - x;
+                    const dy = p.y - y;
+                    return (dx * dx + dy * dy) < (radius * radius);
+                });
+                return !hasNearPoint;
+            });
+            redrawCanvas();
+        }
+
+        // 重繪 Canvas
+        window.redrawCanvas = function() {
+            ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+            paths.forEach(path => {
+                if (path.type === 'draw') {
+                    ctx.beginPath();
+                    ctx.lineWidth = path.width;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.strokeStyle = path.color;
+                    
+                    const pts = path.points;
+                    ctx.moveTo(pts[0].x, pts[0].y);
+                    for (let i = 1; i < pts.length; i++) {
+                        ctx.lineTo(pts[i].x, pts[i].y);
+                    }
+                    ctx.stroke();
+                }
+            });
+        }
+        
+        window.getPaths = function() { return paths; };
+        window.setPaths = function(p) { paths = p; redrawCanvas(); };
+    }
+
+    // 更新畫布顯示樣式
+    function updateBoardTransform() {
+        board.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        document.getElementById('zoom-badge').textContent = `${Math.round(scale * 100)}%`;
+    }
+
+    // 雷射簡報筆動畫循環
+    function animateLaser() {
+        if (mode !== 'laser' && laserPoints.length === 0) {
+            cancelAnimationFrame(laserAnimationId);
+            laserAnimationId = null;
+            laserActive = false;
+            if (typeof redrawCanvas === 'function') redrawCanvas();
+            return;
+        }
+
+        if (typeof redrawCanvas === 'function') redrawCanvas();
+
+        const now = Date.now();
+        // 僅保留 600 毫秒內的雷射點，以形成漸隱軌跡
+        laserPoints = laserPoints.filter(p => now - p.time < 600);
+
+        if (laserPoints.length > 0) {
+            // 1. 繪製漸隱的發光紅色軌跡
+            ctx.beginPath();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            for (let i = 0; i < laserPoints.length; i++) {
+                const p = laserPoints[i];
+                const age = now - p.time;
+                const alpha = Math.max(0, 1 - age / 600);
+                
+                ctx.strokeStyle = `rgba(239, 68, 68, ${alpha * 0.85})`;
+                ctx.lineWidth = 14 * alpha;
+                
+                if (i === 0) {
+                    ctx.moveTo(p.x, p.y);
+                } else {
+                    ctx.lineTo(p.x, p.y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                }
+            }
+
+            // 2. 繪製最前端的亮紅鐳射聚焦點 (帶有放射狀發光漸層)
+            const tip = laserPoints[laserPoints.length - 1];
+            const grad = ctx.createRadialGradient(tip.x, tip.y, 2, tip.x, tip.y, 20);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.15, '#ff3b30');
+            grad.addColorStop(0.55, 'rgba(255, 59, 48, 0.45)');
+            grad.addColorStop(1, 'rgba(255, 59, 48, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(tip.x, tip.y, 20, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        laserAnimationId = requestAnimationFrame(animateLaser);
+    }
+
+    // 工具列功能切換
+    function setMode(newMode) {
+        mode = newMode;
+        
+        // 切換按鈕狀態
+        document.getElementById('btn-pan').classList.toggle('active', mode === 'pan');
+        document.getElementById('btn-draw').classList.toggle('active', mode === 'draw');
+        document.getElementById('btn-erase').classList.toggle('active', mode === 'erase');
+        document.getElementById('btn-laser').classList.toggle('active', mode === 'laser');
+        
+        // 畫布樣式切換
+        document.body.className = '';
+        if (mode === 'draw' || mode === 'erase') {
+            document.body.className = 'draw-mode';
+        } else if (mode === 'laser') {
+            document.body.className = 'laser-mode';
+            laserActive = true;
+        }
+        
+        // 顏色選擇器顯示隱藏
+        document.getElementById('color-group').style.display = mode === 'draw' ? 'flex' : 'none';
+
+        // 離開雷射模式時重設與清理
+        if (mode !== 'laser') {
+            laserActive = false;
+            laserPoints = [];
+            if (laserAnimationId) {
+                cancelAnimationFrame(laserAnimationId);
+                laserAnimationId = null;
+            }
+            if (typeof redrawCanvas === 'function') redrawCanvas();
+        }
+    }
+
+    function setPenColor(color, el) {
+        penColor = color;
+        // 調整筆跡粗細，如果是螢光筆就加粗一點
+        penWidth = color.startsWith('rgba') ? 16 : 4;
+        
+        const dots = document.querySelectorAll('.color-dot');
+        dots.forEach(d => d.classList.remove('active'));
+        if (el) el.classList.add('active');
+    }
+
+    function setCustomPenColor(val) {
+        // 更新當前手寫筆顏色為自訂色
+        setPenColor(val, null);
+    }
+
+    // 縮放操作
+    function zoom(delta) {
+        // 以螢幕中心為縮放中心
+        const viewCenterX = viewport.clientWidth / 2;
+        const viewCenterY = viewport.clientHeight / 2;
+        const rect = board.getBoundingClientRect();
+        
+        const boardX = (viewCenterX - rect.left) / scale;
+        const boardY = (viewCenterY - rect.top) / scale;
+
+        scale = Math.max(0.2, Math.min(3.0, scale + delta));
+        panX = viewCenterX - boardX * scale;
+        panY = viewCenterY - boardY * scale;
+
+        updateBoardTransform();
+    }
+
+    function zoomTo100() {
+        scale = 1.0;
+        // 置中
+        panX = (viewport.clientWidth - board.clientWidth) / 2;
+        panY = (viewport.clientHeight - board.clientHeight) / 2;
+        updateBoardTransform();
+    }
+
+    function zoomToFit() {
+        // 計算出一個可以讓所有卡片顯示在螢幕裡的合理縮放
+        const cardEls = board.querySelectorAll('.canvas-card');
+        if (cardEls.length === 0) return;
+        
+        let minX = 9999, minY = 9999, maxX = 0, maxY = 0;
+        cardEls.forEach(card => {
+            const x = parseInt(card.style.left);
+            const y = parseInt(card.style.top);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x + card.clientWidth);
+            maxY = Math.max(maxY, y + card.clientHeight);
+        });
+
+        // 預留一點邊距
+        const w = (maxX - minX) + 100;
+        const h = (maxY - minY) + 100;
+
+        const scaleW = viewport.clientWidth / w;
+        const scaleH = viewport.clientHeight / h;
+        scale = Math.max(0.2, Math.min(1.5, Math.min(scaleW, scaleH)));
+
+        // 平移置中
+        panX = (viewport.clientWidth - w * scale) / 2 - minX * scale + 50 * scale;
+        panY = (viewport.clientHeight - h * scale) / 2 - minY * scale + 50 * scale;
+
+        updateBoardTransform();
+    }
+
+    // 重置卡牌位置
+    function resetCardPositions() {
+        if (confirm('確定要重置所有卡牌的位置嗎？（手寫塗鴉將保留）')) {
+            renderCards();
+            saveProgress();
+        }
+    }
+
+    // 清除塗鴉
+    function clearDrawings() {
+        if (confirm('確定要清除畫布上的所有手寫筆跡與塗鴉嗎？')) {
+            setPaths([]);
+            saveProgress();
+        }
+    }
+
+    // --- 儲存與讀取進度 (localStorage) ---
+    function getSaveKey() {
+        // 使用主題作為 Key 的一部分，區隔不同課程
+        const titleCard = cards.find(c => c.level === 0)?.text || 'default';
+        return `mindmap_save_${titleCard}`;
+    }
+
+    function saveProgress() {
+        const positions = {};
+        board.querySelectorAll('.canvas-card').forEach(card => {
+            positions[card.id] = {
+                left: card.style.left,
+                top: card.style.top
+            };
+        });
+
+        const progress = {
+            positions: positions,
+            paths: getPaths(),
+            scale: scale,
+            panX: panX,
+            panY: panY
+        };
+
+        localStorage.setItem(getSaveKey(), JSON.stringify(progress));
+        alert('💾 畫布進度（卡片位置與筆跡）已成功儲存至本機瀏覽器！');
+    }
+
+    function loadSavedProgress() {
+        const raw = localStorage.getItem(getSaveKey());
+        if (!raw) return;
+
+        try {
+            const progress = JSON.parse(raw);
+            
+            // 1. 還原卡片位置
+            if (progress.positions) {
+                Object.keys(progress.positions).forEach(id => {
+                    const card = board.querySelector(`#${id}`);
+                    if (card) {
+                        card.style.left = progress.positions[id].left;
+                        card.style.top = progress.positions[id].top;
+                    }
+                });
+            }
+            
+            // 2. 還原筆跡
+            if (progress.paths) {
+                setPaths(progress.paths);
+            }
+
+            // 3. 還原縮放平移
+            if (progress.scale) scale = progress.scale;
+            if (progress.panX) panX = progress.panX;
+            if (progress.panY) panY = progress.panY;
+            updateBoardTransform();
+
+        } catch (e) {
+            console.error('還原進度失敗：', e);
+        }
+    }
+
+    // --- 匯出 PNG 主邏輯 (純網頁原生繪製導出) ---
+    function exportToPNG() {
+        const cardEls = board.querySelectorAll('.canvas-card');
+        if (cardEls.length === 0) return;
+
+        // 1. 計算所有內容 (卡牌與筆跡) 的最小外接矩形以決定導出範圍
+        let minX = 9999, minY = 9999, maxX = 0, maxY = 0;
+        cardEls.forEach(card => {
+            const x = parseInt(card.style.left);
+            const y = parseInt(card.style.top);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x + card.clientWidth);
+            maxY = Math.max(maxY, y + card.clientHeight);
+        });
+
+        // 同時將筆跡納入邊界考量
+        const paths = getPaths();
+        paths.forEach(p => {
+            p.points.forEach(pt => {
+                minX = Math.min(minX, pt.x);
+                minY = Math.min(minY, pt.y);
+                maxX = Math.max(maxX, pt.x);
+                maxY = Math.max(maxY, pt.y);
+            });
+        });
+
+        // 加點外邊距
+        minX = Math.max(0, minX - 60);
+        minY = Math.max(0, minY - 60);
+        maxX = Math.min(board.clientWidth, maxX + 60);
+        maxY = Math.min(board.clientHeight, maxY + 60);
+
+        const exportW = maxX - minX;
+        const exportH = maxY - minY;
+
+        if (exportW <= 0 || exportH <= 0) return;
+
+        // 2. 建立離屏 Canvas 進行繪製
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = exportW;
+        exportCanvas.height = exportH;
+        const eCtx = exportCanvas.getContext('2d');
+
+        // 3. 繪製背景 (白色背景與圓點格線)
+        eCtx.fillStyle = '#ffffff';
+        eCtx.fillRect(0, 0, exportW, exportH);
+        
+        eCtx.fillStyle = '#cbd5e1';
+        const startDotX = minX - (minX % 30);
+        const startDotY = minY - (minY % 30);
+        for (let gx = startDotX; gx < maxX; gx += 30) {
+            for (let gy = startDotY; gy < maxY; gy += 30) {
+                eCtx.beginPath();
+                eCtx.arc(gx - minX, gy - minY, 1.5, 0, Math.PI * 2);
+                eCtx.fill();
+            }
+        }
+
+        // 4. 繪製卡牌
+        cardEls.forEach(card => {
+            const cardX = parseInt(card.style.left) - minX;
+            const cardY = parseInt(card.style.top) - minY;
+            const w = card.clientWidth;
+            const h = card.clientHeight;
+
+            // 圓角矩形背景
+            eCtx.fillStyle = card.style.backgroundColor;
+            eCtx.strokeStyle = 'rgba(0,0,0,0.08)';
+            eCtx.lineWidth = 1;
+            drawRoundRect(eCtx, cardX, cardY, w, h, 16);
+            eCtx.fill();
+            eCtx.stroke();
+
+            // 繪製文字 (配合折行)
+            eCtx.fillStyle = '#000000';
+            eCtx.font = 'bold 15px "Microsoft JhengHei", sans-serif';
+            eCtx.textAlign = 'center';
+            eCtx.textBaseline = 'middle';
+            
+            const text = card.textContent;
+            wrapText(eCtx, text, cardX + w/2, cardY + h/2, w - 24, 20);
+        });
+
+        // 5. 繪製塗鴉筆跡
+        paths.forEach(path => {
+            if (path.type === 'draw') {
+                eCtx.beginPath();
+                eCtx.lineWidth = path.width;
+                eCtx.lineCap = 'round';
+                eCtx.lineJoin = 'round';
+                eCtx.strokeStyle = path.color;
+                
+                const pts = path.points;
+                eCtx.moveTo(pts[0].x - minX, pts[0].y - minY);
+                for (let i = 1; i < pts.length; i++) {
+                    eCtx.lineTo(pts[i].x - minX, pts[i].y - minY);
+                }
+                eCtx.stroke();
+            }
+        });
+
+        // 6. 匯出下載
+        const titleCard = cards.find(c => c.level === 0)?.text || '心智圖教學';
+        const link = document.createElement('a');
+        link.download = `${titleCard}_教學畫布導出.png`;
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+    }
+
+    // 圓角矩形輔助繪製
+    function drawRoundRect(c, x, y, width, height, radius) {
+        c.beginPath();
+        c.moveTo(x + radius, y);
+        c.lineTo(x + width - radius, y);
+        c.quadraticCurveTo(x + width, y, x + width, y + radius);
+        c.lineTo(x + width, y + height - radius);
+        c.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        c.lineTo(x + radius, y + height);
+        c.quadraticCurveTo(x, y + height, x, y + height - radius);
+        c.lineTo(x, y + radius);
+        c.quadraticCurveTo(x, y, x + radius, y);
+        c.closePath();
+    }
+
+    // 文字折行輔助
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        const words = text.split('');
+        let line = '';
+        const lines = [];
+
+        for (let n = 0; n < words.length; n++) {
+            let testLine = line + words[n];
+            let metrics = context.measureText(testLine);
+            let testWidth = metrics.width;
+            if (testWidth > maxWidth && n > 0) {
+                lines.push(line);
+                line = words[n];
+            } else {
+                line = testLine;
+            }
+        }
+        lines.push(line);
+
+        // 垂直居中補正
+        const startY = y - ((lines.length - 1) * lineHeight) / 2;
+        for (let i = 0; i < lines.length; i++) {
+            context.fillText(lines[i], x, startY + i * lineHeight);
+        }
+    }
+</script>
+
+</body>
+</html>
