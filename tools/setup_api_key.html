@@ -506,9 +506,9 @@
         }
 
         // 基本格式檢查
-        if (!key.startsWith('AIzaSy')) {
+        if (!key.startsWith('AIzaSy') && !key.startsWith('AQ.')) {
             resultBox.className = 'test-result error';
-            resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> 格式警告：標準的 Google Gemini API Key 通常以 <b>AIzaSy</b> 開頭，請再次檢查。`;
+            resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> 格式警告：標準的 Google Gemini API Key 通常以 <b>AIzaSy</b> 或 <b>AQ.</b> 開頭，請再次檢查。`;
             resultBox.style.display = 'block';
             return;
         }
