@@ -98,6 +98,26 @@ a:hover {
   color: var(--primary-color);
 }
 
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 0 16px;
+  }
+  .navbar-links {
+    gap: 16px;
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: calc(100vw - 120px); /* 留給左邊 brand 的空間 */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  .navbar-links::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  .navbar-links li {
+    flex-shrink: 0;
+  }
+}
+
 /* 主要排版區塊 */
 .container {
   max-width: 1024px;
@@ -244,7 +264,7 @@ a:hover {
 /* 網格卡片佈局 (Card Grid) */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 20px;
   margin-bottom: 40px;
 }
@@ -487,7 +507,7 @@ a:hover {
 /* 雙欄或多欄圖片並排（透過 Python 編譯將多圖段落轉為 post-image-grid，不依賴 :has()） */
 .post-image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: 20px;
   align-items: start;
   justify-items: center;
@@ -512,6 +532,9 @@ a:hover {
 
 /* 響應式優化 */
 @media (max-width: 768px) {
+  .container {
+    padding: 24px 16px 60px 16px;
+  }
   .hero-title {
     font-size: 36px;
   }
@@ -531,7 +554,7 @@ a:hover {
 /* 關於我圖片展示區 */
 .about-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
   gap: 20px;
   margin-top: 24px;
   margin-bottom: 24px;
