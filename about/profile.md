@@ -19,7 +19,7 @@ avatar: "about/講師自我介紹.png"
   </div>
 </div>
 
-作為 **夢的N次方** 國小數學共備團隊的講師，我長期深耕數學教學，落實「說數學」教學法，並結合 **Apple Teacher**、**Apple Learning Coach** 與 **Google 教育家 (Level 1 & 2)** 的數位認證，引導孩子以科技輔助學習，培養解決問題的素養與美學敏銳度。
+作為 **夢的N次方** 國小數學共備團隊的講師，我長期深耕數學教學，落實「說數學」教學法，並結合 **Apple Teacher**、**Apple Learning Coach** 與 **Google 教育家 (Level 1 & 2)** 的數位認證，引導孩子以科技輔助學習，培養解決問題的素養。
 
 ---
 
@@ -104,6 +104,15 @@ avatar: "about/講師自我介紹.png"
       <div class="about-gallery-title">敬修老師使用說明書 (家長版)</div>
       <div class="btn-download-container">
         <a href="about/敬修老師使用說明書(家長版).png" download class="btn-download">⬇️ 下載圖檔</a>
+      </div>
+    </div>
+  </div>
+  <div class="about-gallery-card">
+    <img class="about-gallery-img gallery-trigger" src="about/家校同行_教孩子學會負責.png" alt="家校同行，教孩子學會負責">
+    <div class="about-gallery-info">
+      <div class="about-gallery-title">家校同行，教孩子學會負責</div>
+      <div class="btn-download-container">
+        <a href="about/家校同行_教孩子學會負責.png" download class="btn-download">⬇️ 下載圖檔</a>
       </div>
     </div>
   </div>

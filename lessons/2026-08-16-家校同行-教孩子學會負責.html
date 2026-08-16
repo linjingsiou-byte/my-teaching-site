@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家校同行，教孩子學會負責：親師共好與行為界線指引 | 林敬修 老師</title>
+    <link rel="stylesheet" href="../assets/css/style.css?v=1.1?v=1.0.1">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../index.html">返回首頁</a></li>
+                <li><a href="../index.html#projects">精選作品</a></li>
+                <li><a href="../index.html#lessons">教學文章</a></li>
+                <li><a href="../index.html#parenting">親職教養資源</a></li>
+                <li><a href="../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">家校同行，教孩子學會負責：親師共好與行為界線指引</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 2026-08-16</span>
+                    <span>🏷️ 分類: 親職教育</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>家校同行，教孩子學會負責</h1>
+<p>❤️ <strong>愛孩子，也教孩子界線、尊重與責任。</strong> ❤️</p>
+<div style="text-align: center; margin: 24px 0;">
+  <img src="家校同行_教孩子學會負責.png" alt="家校同行，教孩子學會負責" style="max-width: 100%; max-height: 550px; border-radius: 12px; box-shadow: var(--shadow-md);" class="gallery-trigger">
+  <div style="margin-top: 12px;">
+    <a href="家校同行_教孩子學會負責.png" download class="btn-download">⬇️ 下載圖檔原圖</a>
+  </div>
+</div>
+
+<hr />
+<h3>💡 核心溝通理念與教育指引</h3>
+<ol>
+<li><strong>家庭教育與學校教育並重</strong></li>
+<li>孩子的教育不只是學校的責任，家庭教育更是非常重要的一環。</li>
+<li>
+<p>當孩子出現不適當的言行時，家長也應該負起教育與引導的責任，而不是一味把責任推給學校、老師或其他個人。</p>
+</li>
+<li>
+<p><strong>建立界線、責任與尊重</strong></p>
+</li>
+<li>如果在家裡孩子對父母不尊重的言行被認為沒關係，或許是家庭不同的教育方式；</li>
+<li>但是孩子終究要走向社會，不能期待社會也接受同樣的行為。</li>
+<li>
+<p>家庭可以包容孩子，但更重要的是教會孩子界線、責任與尊重。</p>
+</li>
+<li>
+<p><strong>為自己的行為負責</strong></p>
+</li>
+<li>教育孩子不是替孩子承擔所有後果，而是幫助他學會為自己的行為負責。</li>
+<li>家長與老師是孩子成長路上的教育夥伴！</li>
+</ol>
+<hr />
+<p>🤝 <strong>家長與老師，是孩子成長路上的教育夥伴！</strong><br />
+❤️ 一起支持 🌟 一起引導 🌱 一起陪伴 ➡️ 讓孩子成為更好的自己！</p>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../index.html#parenting" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+        <p>設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師 | 🔑 <a href="../tools/setup_api_key.html" style="color: #cbd5e1; text-decoration: underline;">Gemini API Key 設定助手</a></p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>
