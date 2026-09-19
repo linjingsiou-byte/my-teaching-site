@@ -15,6 +15,7 @@ summary: "整理了國小數學互動式教學教具、線上工具，以及學�
 這是我為國小數學課整理的線上互動式工具，非常適合用於布題、示範、分組活動或課後練習。
 
 ### 🧮 百數表與數算工具
+* **[康軒國小數學三上 全冊視覺化複習網站](https://linjingsiou-byte.github.io/math-review-deck/)** — 林敬修老師修訂開發之全冊互動視覺化教材，左邊講觀念、右邊看圖動態操作，支援一鍵投影與雷射筆教具。
 * **[康軒國小數學互動布題GGB教學專區](https://digitalmaster.knsh.com.tw/el/math/GGB/)** — 豐富的 Geogebra 互動教材，適合課堂布題。
 * **[Mathigon Polypad](https://polypad.amplify.com/p)** — 功能強大的虛擬教具牆，提供數卡、多邊形等多樣數學工具。
 * **[加減法練習](https://jinshuanyu.github.io/add-and-subtract/?fbclid=IwY2xjawMc0pNleHRuA2FlbQIxMABicmlkETFCUWVDZnZTQnVZVFhCb0JuAR5QRkfqn74GT1APXdhuCWEqIh8_S9yYRz8WcXaNTeo6YfLQXNoH0TVcnlZvRQ_aem_T4vlL2VNAbkAX87Gj35kow)** — 線上口算與加減練習小工具。
