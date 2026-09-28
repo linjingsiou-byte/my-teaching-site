@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>從 1 公分的距離，看見觀察的魔法！ | 林敬修 老師</title>
+    <link rel="stylesheet" href="../../assets/css/style.css?v=1.1?v=1.0.1">
+</head>
+<body>
+
+    <!-- 頂部導覽列 (毛玻璃效果) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../../index.html" class="navbar-brand">林敬修 老師</a>
+            <ul class="navbar-links">
+                <li><a href="../../index.html">返回首頁</a></li>
+                <li><a href="../../index.html#projects">精選作品</a></li>
+                <li><a href="../../index.html#lessons">教學文章</a></li>
+                <li><a href="../../index.html#parenting">親職教養資源</a></li>
+                <li><a href="../../index.html#resources">學習資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-detail" style="background-color: var(--card-bg); padding: 40px; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-top: 20px;">
+            <header class="post-header">
+                <h1 class="post-title">從 1 公分的距離，看見觀察的魔法！</h1>
+                <div class="post-meta">
+                    <span>📅 發布日期: 2026-09-28</span>
+                    <span>🏷️ 分類: 說數學</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                <h1>📏✨【從 1 公分的距離，看見觀察的魔法！】</h1>
+<p><code>#說數學</code> <code>#教學日誌</code> <code>#屏科實中國小部</code></p>
+<p>🌟 謝謝扶堂主任的好書及共備主持人分享</p>
+<hr />
+<div style="text-align: center; margin: 20px 0;">
+    <img src="../../assets/images/2026-09-28-from-1cm-distance.jpg" alt="從 1 公分的距離，看見觀察的魔法" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" class="gallery-trigger">
+</div>
+
+<p>「孩子們，不拿尺，憑你的感覺……1 公分到底有多長？」</p>
+<p>今天在數學課上，我跟孩子們玩了一個小挑戰。<br />
+我讓大家在白紙上點出兩個點，試著憑直覺畫出一條「剛好 1 公分」的線段。</p>
+<p>拿起尺一量，教室裡立刻傳出各種驚呼聲：<br />
+「哇！我畫得剛剛好欸！」<br />
+「太長了啦！我畫到快 2 公分了！」<br />
+「原來 1 公分比我想像中的還要短許多！」</p>
+<hr />
+<blockquote>
+<p>🔗 原貼文連結：<a href="https://www.facebook.com/jing.siou.lin/posts/pfbid0GXqxTaQpwFpw1UL2XnnNkP4Z4yBkhuqbLUYdjo4RZ2L4o9baug26GJ7xy32aZ8eTl">敬修老師 Facebook 貼文</a></p>
+</blockquote>
+            </div>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="../../index.html#lessons" class="btn btn-primary">← 返回文章列表</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+        <p>© 2026 林敬修 老師. All rights reserved.</p>
+        <p>設計者：國立屏科實驗高級中等學校(國小部) 林敬修老師 | 🔑 <a href="../../tools/setup_api_key.html" style="color: #cbd5e1; text-decoration: underline;">Gemini API Key 設定助手</a></p>
+    </footer>
+
+    <!-- 圖片燈箱 JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery-trigger, .about-section img, .post-content img');
+            if (images.length === 0) return;
+
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox-modal';
+            lightbox.innerHTML = `
+                <span class="lightbox-close">&times;</span>
+                <img class="lightbox-content" src="" alt="放大圖片">
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('.lightbox-content');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 300);
+            };
+
+            images.forEach(img => {
+                if (img.closest('a')) return;
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || '放大圖片';
+                    lightbox.style.display = 'flex';
+                    lightbox.offsetHeight; // force reflow
+                    lightbox.classList.add('active');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            });
+        });
+    </script>
+
+</body>
+</html>
