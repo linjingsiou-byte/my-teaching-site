@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>國小三年級數學：認識角與角的大小比較（響應式互動教具）</title>
+  <style>
+    :root {
+      --bg: #12161f;
+      --card-bg: #1b2230;
+      --card-border: #2e384d;
+      --accent-orange: #ff7a1a;
+      --accent-yellow: #fbc02d;
+      --accent-cyan: #00e5ff;
+      --accent-green: #00e676;
+      --accent-red: #ff5252;
+      --text-main: #f5f7fa;
+      --text-sub: #9ea9bf;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    /* 頂部導航列 */
+    header {
+      background: #181f2c;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--card-border);
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-unit {
+      background: var(--accent-orange);
+      color: #fff;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 15px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      background: #0f131a;
+      padding: 4px;
+      border-radius: 10px;
+      overflow-x: auto;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-sub);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      min-height: 42px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-orange);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255, 122, 26, 0.35);
+    }
+
+    .sound-toggle {
+      background: #252e40;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      min-height: 42px;
+    }
+
+    /* 主要容器 */
+    main {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      gap: 16px;
+    }
+
+    .view-panel {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      gap: 14px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .view-panel.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 頂部說明條 */
+    .banner-summary {
+      background: linear-gradient(135deg, #1f283a 0%, #171d2b 100%);
+      border: 1px solid var(--card-border);
+      border-left: 6px solid var(--accent-orange);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .banner-text {
+      color: var(--text-main);
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .banner-text strong {
+      color: var(--accent-yellow);
+      font-size: 18px;
+    }
+
+    /* 響應式黑板容器 */
+    .board-container {
+      width: 100%;
+      height: clamp(380px, 52vh, 620px);
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .canvas-svg {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      touch-action: none;
+      display: block;
+    }
+
+    /* 工具控制列 */
+    .toolbar-panel {
+      background: #181f2c;
+      border-top: 1px solid var(--card-border);
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      background: #2a3449;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 40px;
+    }
+
+    .btn:hover {
+      background: #34425d;
+      border-color: #485b80;
+    }
+
+    .btn-primary {
+      background: var(--accent-orange);
+      color: #fff;
+      border-color: var(--accent-orange);
+    }
+
+    .btn-primary:hover {
+      background: #ff8c3a;
+      box-shadow: 0 4px 14px rgba(255, 122, 26, 0.4);
+    }
+
+    .btn-cyan {
+      background: #0097a7;
+      color: #fff;
+      border-color: #00bcd4;
+    }
+
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #111622;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      flex-wrap: wrap;
+    }
+
+    .slider-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-sub);
+      white-space: nowrap;
+    }
+
+    .slider-val {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--accent-yellow);
+      min-width: 48px;
+      text-align: right;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 150px;
+      height: 8px;
+      border-radius: 4px;
+      background: #2f3a52;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent-orange);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(255, 122, 26, 0.6);
+      transition: transform 0.1s;
+    }
+
+    /* 懸浮提示框（響應式調整） */
+    .tip-bubble {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(18, 23, 33, 0.94);
+      border: 2px solid var(--accent-yellow);
+      border-radius: 12px;
+      padding: 12px 16px;
+      max-width: 340px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      line-height: 1.5;
+      font-size: 15px;
+      pointer-events: none;
+      backdrop-filter: blur(6px);
+      z-index: 10;
+    }
+
+    .tip-bubble h4 {
+      color: var(--accent-yellow);
+      margin-bottom: 4px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 反例題目卡片（響應式網格） */
+    .quiz-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .quiz-card {
+      background: #181f2c;
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-card:hover {
+      border-color: var(--accent-orange);
+      transform: translateY(-2px);
+    }
+
+    .quiz-svg {
+      width: 100%;
+      height: 120px;
+      background: #10141d;
+      border-radius: 8px;
+    }
+
+    .quiz-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .quiz-hint-btn {
+      background: #252e40;
+      border: 1px dashed var(--card-border);
+      color: var(--text-sub);
+      font-size: 14px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      pointer-events: none;
+      transition: all 0.2s;
+    }
+
+    .quiz-card:hover .quiz-hint-btn {
+      color: var(--text-main);
+      border-color: var(--accent-orange);
+    }
+
+    .quiz-card.is-correct .quiz-hint-btn,
+    .quiz-card.is-wrong .quiz-hint-btn {
+      display: none;
+    }
+
+    .quiz-result {
+      font-size: 15px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      display: none;
+      width: 100%;
+      text-align: center;
+      line-height: 1.5;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .quiz-card.is-correct .quiz-result {
+      display: block;
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+    }
+
+    .quiz-card.is-wrong .quiz-result {
+      display: block;
+      background: rgba(255, 82, 82, 0.15);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
+
+    .quiz-card.is-correct {
+      border-color: var(--accent-green) !important;
+      background: #142220;
+    }
+
+    .quiz-card.is-wrong {
+      border-color: var(--accent-red) !important;
+      background: #26161a;
+    }
+
+    /* 拖曳手把樣式 */
+    .handle-circle {
+      cursor: grab;
+      fill: #fff;
+      stroke: var(--accent-orange);
+      stroke-width: 4px;
+      transition: r 0.15s ease;
+    }
+    .handle-circle:hover {
+      r: 16px;
+    }
+    .handle-circle:active {
+      cursor: grabbing;
+      fill: var(--accent-yellow);
+    }
+
+    /* 手機與窄螢幕斷點 */
+    @media (max-width: 768px) {
+      header {
+        padding: 10px 14px;
+      }
+      h1 {
+        font-size: 18px;
+      }
+      .badge-unit {
+        font-size: 13px;
+        padding: 2px 8px;
+      }
+      .tab-btn {
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+      main {
+        padding: 10px;
+        gap: 12px;
+      }
+      .board-container {
+        height: 380px;
+      }
+      .tip-bubble {
+        position: static;
+        max-width: 100%;
+        margin-top: 10px;
+      }
+      .toolbar-panel {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .slider-group {
+        justify-content: space-between;
+      }
+      input[type=range] {
+        flex: 1;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部標題與導航 -->
+  <header>
+    <div class="title-group">
+      <div class="badge-unit">單元 5</div>
+      <h1>認識角與角的大小比較 📐</h1>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab(0)">
+        <span>1. 認識角與要件</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(1)">
+        <span>2. 開口大小實驗室</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab(2)">
+        <span>3. ★ 邊長長短無關！</span>
+      </button>
+    </div>
+
+    <button class="sound-toggle" id="soundBtn" onclick="toggleSound()">
+      <span>🔊 音效：開</span>
+    </button>
+  </header>
+
+  <main>
+
+    <!-- ==================== 頁面 1：認識角與組成要件 ==================== -->
+    <div class="view-panel active" id="panel-0">
+      <div class="banner-summary">
+        <div class="banner-text">
+          💡 <strong>角的組成要件</strong>：角有 <strong>1 個頂點</strong> 和 <strong>2 條直線邊</strong>。兩條直線邊相接的地方就是「頂點」！
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="highlightPart('all')">✨ 標示全部要件</button>
+          <button class="btn" onclick="highlightPart('vertex')">🔴 標示頂點</button>
+          <button class="btn" onclick="highlightPart('sides')">🔵 標示兩條邊</button>
+          <button class="btn" onclick="highlightPart('angle')">🟡 標示夾角 ∠</button>
+        </div>
+      </div>
+
+      <div class="board-container">
+        <svg class="canvas-svg" id="svg1" viewBox="0 0 1000 550" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1d2638" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+
+          <!-- 角的填色弧度扇形 -->
+          <path id="sec-1" d="" fill="rgba(251, 192, 45, 0.18)" stroke="none" />
+          <path id="arc-1" d="" fill="none" stroke="#fbc02d" stroke-width="4" stroke-dasharray="8 4" />
+
+          <!-- 底邊 (固定水平線) -->
+          <line id="line-1a" x1="220" y1="360" x2="620" y2="360" stroke="#00e5ff" stroke-width="7" stroke-linecap="round" />
+
+          <!-- 上方可開闔邊 (動態旋轉射線) -->
+          <line id="line-1b" x1="220" y1="360" x2="520" y2="150" stroke="#00e5ff" stroke-width="7" stroke-linecap="round" />
+          
+          <!-- 上方射線全段感應透明熱區 (方便大螢幕手指觸控) -->
+          <line id="line-1b-hit" x1="220" y1="360" x2="520" y2="150" stroke="transparent" stroke-width="36" stroke-linecap="round" style="cursor: grab;" />
+
+          <!-- 頂點紅點 -->
+          <circle id="point-v" cx="220" cy="360" r="13" fill="#ff5252" stroke="#fff" stroke-width="3" />
+
+          <!-- 標註文字與箭頭 (動態位置群組) -->
+          <g id="labels-group">
+            <!-- 頂點標籤 -->
+            <rect id="bg-lbl-v" x="90" y="340" width="100" height="40" rx="8" fill="#ff5252" />
+            <text id="lbl-v" x="140" y="367" font-size="20" font-weight="bold" fill="#fff" text-anchor="middle">頂點</text>
+            <line x1="190" y1="360" x2="208" y2="360" stroke="#ff5252" stroke-width="3" />
+
+            <!-- 底邊標籤 (自動置於底邊中點下方) -->
+            <rect id="bg-lbl-s1" x="380" y="380" width="80" height="38" rx="8" fill="#0097a7" />
+            <text id="lbl-s1" x="420" y="405" font-size="19" font-weight="bold" fill="#fff" text-anchor="middle">邊</text>
+
+            <!-- ★ 上方張開邊標籤 (跟隨上方射線動態移動！) -->
+            <rect id="bg-lbl-s2" x="380" y="210" width="80" height="38" rx="8" fill="#0097a7" />
+            <text id="lbl-s2" x="420" y="235" font-size="19" font-weight="bold" fill="#fff" text-anchor="middle">邊</text>
+
+            <!-- ★ 角標籤 (跟隨角平分線居中動態移動！) -->
+            <rect id="bg-lbl-ang" x="320" y="295" width="90" height="40" rx="8" fill="#fbc02d" />
+            <text id="lbl-ang" x="365" y="322" font-size="20" font-weight="bold" fill="#12161f" text-anchor="middle">角 (∠)</text>
+          </g>
+
+          <!-- 互動把手：加大觸控命中區 -->
+          <circle id="handle-1-hit" cx="520" cy="150" r="32" fill="transparent" style="cursor: grab;" />
+          <circle id="handle-1" class="handle-circle" cx="520" cy="150" r="12" />
+          <text id="lbl-handle-1" x="540" y="145" font-size="16" fill="#f5f7fa" font-weight="bold">拖曳我改變角度</text>
+        </svg>
+
+        <div class="tip-bubble">
+          <h4>💡 教學重點問答</h4>
+          <p>「角有幾條邊？幾個頂點？」<br>👉 <strong>1 個頂點、2 條邊</strong>，且這 2 條邊必須是直直的線喔！</p>
+        </div>
+      </div>
+
+      <!-- 反例辨析區 -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; flex-wrap: wrap; gap: 8px;">
+        <h3 style="font-size: 18px;">🔍 反例挑戰：哪個圖形是「角」？（請點選圖形）</h3>
+        <button class="btn" onclick="resetQuizCards()" style="font-size: 14px; padding: 4px 12px; min-height: 34px;">🔄 清除重測</button>
+      </div>
+      <div class="quiz-container">
+        <div class="quiz-card" onclick="checkQuiz(1, this, false)">
+          <div class="quiz-title">圖形 A</div>
+          <svg class="quiz-svg" viewBox="0 0 240 120">
+            <path d="M 40 80 Q 120 40 200 90" stroke="#00e5ff" stroke-width="5" fill="none" />
+            <line x1="40" y1="80" x2="180" y2="30" stroke="#00e5ff" stroke-width="5" />
+            <circle cx="40" cy="80" r="6" fill="#ff5252" />
+          </svg>
+          <div class="quiz-hint-btn">👆 點我測試是不是角</div>
+          <div class="quiz-result">❌ 不是角！一條邊是彎曲的曲線，角的邊必須是直線！</div>
+        </div>
+
+        <div class="quiz-card" onclick="checkQuiz(2, this, false)">
+          <div class="quiz-title">圖形 B</div>
+          <svg class="quiz-svg" viewBox="0 0 240 120">
+            <line x1="50" y1="80" x2="190" y2="80" stroke="#00e5ff" stroke-width="5" />
+            <line x1="60" y1="65" x2="170" y2="25" stroke="#00e5ff" stroke-width="5" />
+          </svg>
+          <div class="quiz-hint-btn">👆 點我測試是不是角</div>
+          <div class="quiz-result">❌ 不是角！兩條線沒有在同一個頂點相接！</div>
+        </div>
+
+        <div class="quiz-card" onclick="checkQuiz(3, this, true)">
+          <div class="quiz-title">圖形 C</div>
+          <svg class="quiz-svg" viewBox="0 0 240 120">
+            <line x1="50" y1="85" x2="200" y2="85" stroke="#00e5ff" stroke-width="5" />
+            <line x1="50" y1="85" x2="160" y2="25" stroke="#00e5ff" stroke-width="5" />
+            <circle cx="50" cy="85" r="7" fill="#ff5252" />
+            <path d="M 90 85 A 40 40 0 0 0 81 64" fill="none" stroke="#fbc02d" stroke-width="3" />
+          </svg>
+          <div class="quiz-hint-btn">👆 點我測試是不是角</div>
+          <div class="quiz-result">✅ 太棒了！這是標準的角：1 個頂點與 2 條筆直的邊！</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 頁面 2：開口大小實驗室 ==================== -->
+    <div class="view-panel" id="panel-1">
+      <div class="banner-summary">
+        <div class="banner-text">
+          📐 <strong>開口大小與角的大小</strong>：角的「開口張開得越大」，角就越大！請<strong>用手拖曳右邊的【角 2】</strong>，拉過來和【角 1】疊合比較大小！
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-overlap-tab2" onclick="toggleTab2Overlap()">🚀 一鍵疊合比較</button>
+          <button class="btn btn-cyan" onclick="resetTab2Positions()">↩️ 分開兩角</button>
+          <button class="btn" onclick="setPresetAngle1(30)">∠1 設為 30°</button>
+          <button class="btn" onclick="setPresetAngle1(90)">∠1 設為 90°(直角)</button>
+        </div>
+      </div>
+
+      <div class="board-container">
+        <svg class="canvas-svg" id="svg2" viewBox="0 0 1000 550" preserveAspectRatio="xMidYMid meet">
+          <rect width="100%" height="100%" fill="url(#grid)" />
+
+          <!-- 重疊比較結果懸浮橫幅 -->
+          <g id="tab2-verdict-banner" transform="translate(180, 25)">
+            <rect id="tab2-verdict-box" x="0" y="0" width="640" height="75" rx="14" fill="rgba(18, 24, 38, 0.94)" stroke="#ff7a1a" stroke-width="2.5" />
+            <text id="tab2-verdict-title" x="320" y="34" font-size="22" font-weight="bold" fill="#fbc02d" text-anchor="middle">👉 請抓著右邊【角 2】的頂點，拖過來和【角 1】疊合！</text>
+            <text id="tab2-verdict-sub" x="320" y="60" font-size="16" fill="#f5f7fa" text-anchor="middle">比較看看誰的上方開口張得比較開？</text>
+          </g>
+
+          <!-- ================= 左側：角 1（橘色固定角） ================= -->
+          <g id="group-tab2-angle1">
+            <!-- 扇形開口填色 -->
+            <path id="fan1-fill" d="" fill="rgba(255, 122, 26, 0.28)" />
+            <path id="fan1-arc" d="" fill="none" stroke="#ff7a1a" stroke-width="5" />
+
+            <!-- 底邊 -->
+            <line id="fan1-line1" x1="200" y1="380" x2="540" y2="380" stroke="#f5f7fa" stroke-width="7" stroke-linecap="round" />
+            <!-- 上方開闔邊 -->
+            <line id="fan1-line2" x1="200" y1="380" x2="494" y2="210" stroke="#ff7a1a" stroke-width="7" stroke-linecap="round" />
+
+            <!-- 上方邊標籤動態跟隨 -->
+            <rect id="bg-fan1-s2" x="330" y="270" width="70" height="34" rx="6" fill="#ff7a1a" />
+            <text id="lbl-fan1-s2" x="365" y="293" font-size="17" font-weight="bold" fill="#fff" text-anchor="middle">邊</text>
+
+            <!-- 頂點紅點 -->
+            <circle cx="200" cy="380" r="12" fill="#ff5252" stroke="#fff" stroke-width="3" />
+            <text x="175" y="415" font-size="18" font-weight="bold" fill="#ff7a1a" text-anchor="middle">∠1 頂點</text>
+
+            <!-- 開口角度文字 (精確同步，居中跟隨) -->
+            <text id="fan1-text-deg" x="320" y="345" font-size="28" font-weight="bold" fill="#fbc02d" text-anchor="middle">30°</text>
+          </g>
+
+          <!-- ================= 右側：角 2（青色可拖曳移動角） ================= -->
+          <g id="group-tab2-angle2" style="cursor: grab;">
+            <!-- 扇形開口填色 -->
+            <path id="fan2-fill" d="" fill="rgba(0, 229, 255, 0.25)" />
+            <path id="fan2-arc" d="" fill="none" stroke="#00e5ff" stroke-width="5" />
+
+            <!-- 底邊 -->
+            <line id="fan2-line1" x1="0" y1="0" x2="340" y2="0" stroke="#90caf9" stroke-width="7" stroke-linecap="round" />
+            <!-- 上方開闔邊 -->
+            <line id="fan2-line2" x1="0" y1="0" x2="218" y2="-260" stroke="#00e5ff" stroke-width="7" stroke-linecap="round" />
+
+            <!-- 上方邊標籤跟隨 -->
+            <rect id="bg-fan2-s2" x="90" y="-150" width="70" height="34" rx="6" fill="#0097a7" />
+            <text id="lbl-fan2-s2" x="125" y="-127" font-size="17" font-weight="bold" fill="#fff" text-anchor="middle">邊</text>
+
+            <!-- 頂點手把 (支援整個人拖曳，加大命中區) -->
+            <circle cx="0" cy="0" r="34" fill="transparent" id="hit-tab2-v2" />
+            <circle cx="0" cy="0" r="15" fill="#00e5ff" stroke="#fff" stroke-width="4" id="circle-tab2-v2" />
+            <text id="lbl-tab2-draghint" x="0" y="35" font-size="17" font-weight="bold" fill="#00e5ff" text-anchor="middle">✋ 拖我拉過來疊合</text>
+
+            <!-- 開口角度文字 -->
+            <text id="fan2-text-deg" x="100" y="-45" font-size="28" font-weight="bold" fill="#00e5ff" text-anchor="middle">50°</text>
+          </g>
+        </svg>
+
+        <div class="toolbar-panel">
+          <div class="slider-group">
+            <span class="slider-label">調整 ∠1 角度（橘）：</span>
+            <input type="range" id="angleRange1" min="10" max="150" value="30" oninput="onAngle1SliderChange(this.value)">
+            <span class="slider-val" id="angle1ValText" style="color: #ff7a1a;">30°</span>
+          </div>
+
+          <div class="slider-group">
+            <span class="slider-label">調整 ∠2 角度（青）：</span>
+            <input type="range" id="angleRange2" min="10" max="150" value="50" oninput="onAngle2SliderChange(this.value)">
+            <span class="slider-val" id="angle2ValText" style="color: #00e5ff;">50°</span>
+          </div>
+
+          <div style="font-size: 15px; color: var(--text-sub); display: flex; align-items: center; gap: 6px;">
+            <span>💡 提示：在畫布上直接<strong>用手指抓著【角 2 頂點】拖曳</strong>，靠近角 1 會自動磁吸對齊！</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 頁面 3：邊長長短無關（核心迷思） ==================== -->
+    <div class="view-panel" id="panel-2">
+      <div class="banner-summary" style="border-left-color: var(--accent-cyan);">
+        <div class="banner-text">
+          🚨 <strong>三年級最容易掉入的陷阱！</strong> 看起來「邊長比較長」的角，真的比較大嗎？
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="overlapBtn" onclick="toggleOverlap()">🚀 一鍵重疊驗證 (對齊頂點與邊)</button>
+          <button class="btn btn-cyan" onclick="resetMythExperiment()">🔄 重置位置</button>
+        </div>
+      </div>
+
+      <div class="board-container">
+        <svg class="canvas-svg" id="svg3" viewBox="0 0 1000 550" preserveAspectRatio="xMidYMid meet">
+          <rect width="100%" height="100%" fill="url(#grid)" />
+
+          <!-- 角 A（左側：短邊、但開口大 60°） -->
+          <g id="group-angleA" style="transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);">
+            <path id="sec-A" d="" fill="rgba(255, 122, 26, 0.3)" />
+            <path id="arc-A" d="" fill="none" stroke="#ff7a1a" stroke-width="5" />
+            <line id="line-A1" x1="0" y1="0" x2="160" y2="0" stroke="#ff7a1a" stroke-width="7" stroke-linecap="round" />
+            <line id="line-A2" x1="0" y1="0" x2="80" y2="-138" stroke="#ff7a1a" stroke-width="7" stroke-linecap="round" />
+            <circle cx="0" cy="0" r="11" fill="#ff5252" stroke="#fff" stroke-width="3" />
+
+            <!-- 上邊標籤跟隨 -->
+            <rect id="bg-lbl-mA2" x="30" y="-85" width="60" height="30" rx="6" fill="#ff7a1a" />
+            <text id="lbl-mA2" x="60" y="-65" font-size="15" font-weight="bold" fill="#fff" text-anchor="middle">邊</text>
+
+            <text x="50" y="-30" font-size="22" font-weight="bold" fill="#ff7a1a">∠A (60°)</text>
+            <text x="0" y="38" font-size="16" fill="#f5f7fa" font-weight="bold">邊長較短</text>
+          </g>
+
+          <!-- 角 B（右側：長邊、但開口小 35°） -->
+          <g id="group-angleB" style="transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);">
+            <path id="sec-B" d="" fill="rgba(0, 229, 255, 0.25)" />
+            <path id="arc-B" d="" fill="none" stroke="#00e5ff" stroke-width="5" />
+            <line id="line-B1" x1="0" y1="0" x2="360" y2="0" stroke="#00e5ff" stroke-width="7" stroke-linecap="round" />
+            <line id="line-B2" x1="0" y1="0" x2="295" y2="-206" stroke="#00e5ff" stroke-width="7" stroke-linecap="round" />
+            <circle cx="0" cy="0" r="11" fill="#ff5252" stroke="#fff" stroke-width="3" />
+
+            <text x="70" y="-30" font-size="22" font-weight="bold" fill="#00e5ff">∠B (35°)</text>
+            <text x="0" y="38" font-size="16" fill="#f5f7fa" font-weight="bold">邊長超長！</text>
+          </g>
+
+          <!-- 重疊後的結論大字卡 -->
+          <g id="overlap-verdict" opacity="0" style="transition: opacity 0.5s ease 0.4s;">
+            <rect x="220" y="30" width="560" height="90" rx="16" fill="rgba(18, 24, 38, 0.95)" stroke="#00e676" stroke-width="3" />
+            <text x="500" y="70" font-size="26" font-weight="bold" fill="#00e676" text-anchor="middle">重疊真相：∠A (60°) ＞ ∠B (35°)</text>
+            <text x="500" y="100" font-size="17" fill="#f5f7fa" text-anchor="middle">角 A 的開口張開比較大！邊長長短完全不影響角的大小！</text>
+          </g>
+        </svg>
+
+        <div class="toolbar-panel">
+          <div class="slider-group">
+            <span class="slider-label">🪄 金箍棒魔術（拉長/縮短角 A 的邊）：</span>
+            <input type="range" id="lengthSlider" min="90" max="380" value="160" oninput="changeArmLength(this.value)">
+            <span class="slider-val" id="lenValText">160px</span>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn" onclick="rotateAngleA()">🔄 旋轉角的方向（朝向不同，大小一樣）</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /* 音效合成 (Web Audio API) */
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function playTone(freq, type = 'sine', duration = 0.12) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundBtn').innerHTML = soundEnabled ? '<span>🔊 音效：開</span>' : '<span>🔇 音效：關</span>';
+      if (soundEnabled) playTone(587, 'sine', 0.1);
+    }
+
+    /* 頁面 Tab 切換 */
+    function switchTab(index) {
+      playTone(523, 'sine', 0.08);
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === index);
+      });
+      document.querySelectorAll('.view-panel').forEach((panel, idx) => {
+        panel.classList.toggle('active', idx === index);
+      });
+      if (index === 0) updateSvg1();
+      if (index === 1) initTab2();
+      if (index === 2) resetMythExperiment();
+    }
+
+    /* ==================== 模組一：認識角（頂點與邊動態跟隨） ==================== */
+    let currentAngleDeg1 = 38;
+    const vertex1 = { x: 220, y: 360 };
+    const armLen1 = 360;
+
+    function updateSvg1() {
+      const rad = (currentAngleDeg1 * Math.PI) / 180;
+      const x2 = vertex1.x + armLen1 * Math.cos(rad);
+      const y2 = vertex1.y - armLen1 * Math.sin(rad);
+
+      // 設定底邊與上方張開邊
+      document.getElementById('line-1a').setAttribute('x2', vertex1.x + armLen1);
+      document.getElementById('line-1b').setAttribute('x2', x2);
+      document.getElementById('line-1b').setAttribute('y2', y2);
+
+      // 觸控熱區連動
+      document.getElementById('line-1b-hit').setAttribute('x2', x2);
+      document.getElementById('line-1b-hit').setAttribute('y2', y2);
+
+      // 把手位置連動
+      document.getElementById('handle-1').setAttribute('cx', x2);
+      document.getElementById('handle-1').setAttribute('cy', y2);
+      document.getElementById('handle-1-hit').setAttribute('cx', x2);
+      document.getElementById('handle-1-hit').setAttribute('cy', y2);
+
+      // ★ 把手說明文字跟隨上方邊的端點
+      const lblHandle = document.getElementById('lbl-handle-1');
+      if (lblHandle) {
+        lblHandle.setAttribute('x', x2 + 18);
+        lblHandle.setAttribute('y', y2 - 14);
+      }
+
+      // ★ 上方邊的標籤「邊」：精準跟隨張開邊的中點，並向外微幅偏移垂直法向量
+      const midX2 = (vertex1.x + x2) / 2;
+      const midY2 = (vertex1.y + y2) / 2;
+      // 垂直法向量（逆時針指向外側上方）
+      const normRad = rad + Math.PI / 2;
+      const offsetDist = 34;
+      const tagX2 = midX2 + offsetDist * Math.cos(normRad);
+      const tagY2 = midY2 - offsetDist * Math.sin(normRad);
+
+      const bgLblS2 = document.getElementById('bg-lbl-s2');
+      const lblS2 = document.getElementById('lbl-s2');
+      if (bgLblS2 && lblS2) {
+        bgLblS2.setAttribute('x', tagX2 - 40);
+        bgLblS2.setAttribute('y', tagY2 - 19);
+        lblS2.setAttribute('x', tagX2);
+        lblS2.setAttribute('y', tagY2 + 6);
+      }
+
+      // 底邊標籤置於底邊中點下方
+      const midX1 = vertex1.x + armLen1 / 2;
+      const bgLblS1 = document.getElementById('bg-lbl-s1');
+      const lblS1 = document.getElementById('lbl-s1');
+      if (bgLblS1 && lblS1) {
+        bgLblS1.setAttribute('x', midX1 - 40);
+        bgLblS1.setAttribute('y', 380);
+        lblS1.setAttribute('x', midX1);
+        lblS1.setAttribute('y', 405);
+      }
+
+      // 弧度
+      const arcR = 100;
+      const arcX = vertex1.x + arcR * Math.cos(rad);
+      const arcY = vertex1.y - arcR * Math.sin(rad);
+      const dSec = `M ${vertex1.x} ${vertex1.y} L ${vertex1.x + arcR} ${vertex1.y} A ${arcR} ${arcR} 0 0 0 ${arcX} ${arcY} Z`;
+      const dArc = `M ${vertex1.x + arcR} ${vertex1.y} A ${arcR} ${arcR} 0 0 0 ${arcX} ${arcY}`;
+
+      document.getElementById('sec-1').setAttribute('d', dSec);
+      document.getElementById('arc-1').setAttribute('d', dArc);
+
+      // ★ 角標籤「角 (∠)」：精準跟隨角平分線居中動態移動
+      const halfRad = rad / 2;
+      const angLabelDist = Math.max(140, arcR + 45);
+      const angTagX = vertex1.x + angLabelDist * Math.cos(halfRad);
+      const angTagY = vertex1.y - angLabelDist * Math.sin(halfRad);
+
+      const bgLblAng = document.getElementById('bg-lbl-ang');
+      const lblAng = document.getElementById('lbl-ang');
+      if (bgLblAng && lblAng) {
+        bgLblAng.setAttribute('x', angTagX - 45);
+        bgLblAng.setAttribute('y', angTagY - 20);
+        lblAng.setAttribute('x', angTagX);
+        lblAng.setAttribute('y', angTagY + 6);
+      }
+    }
+
+    function highlightPart(part) {
+      playTone(659, 'triangle', 0.15);
+      const allLabels = ['bg-lbl-v', 'lbl-v', 'bg-lbl-s1', 'lbl-s1', 'bg-lbl-s2', 'lbl-s2', 'bg-lbl-ang', 'lbl-ang'];
+      allLabels.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.opacity = '0.3';
+      });
+
+      if (part === 'all') {
+        allLabels.forEach(id => document.getElementById(id).style.opacity = '1');
+      } else if (part === 'vertex') {
+        document.getElementById('bg-lbl-v').style.opacity = '1';
+        document.getElementById('lbl-v').style.opacity = '1';
+      } else if (part === 'sides') {
+        ['bg-lbl-s1', 'lbl-s1', 'bg-lbl-s2', 'lbl-s2'].forEach(id => document.getElementById(id).style.opacity = '1');
+      } else if (part === 'angle') {
+        document.getElementById('bg-lbl-ang').style.opacity = '1';
+        document.getElementById('lbl-ang').style.opacity = '1';
+      }
+    }
+
+    // 模組一拖曳改變角度（支援把手與整條邊拖曳，支援滑鼠與大螢幕觸控）
+    let isDraggingHandle1 = false;
+    const svg1 = document.getElementById('svg1');
+    const handle1Hit = document.getElementById('handle-1-hit');
+    const line1bHit = document.getElementById('line-1b-hit');
+
+    function startDrag(e) {
+      isDraggingHandle1 = true;
+      e.target.setPointerCapture(e.pointerId);
+      playTone(480, 'sine', 0.05);
+    }
+
+    handle1Hit.addEventListener('pointerdown', startDrag);
+    line1bHit.addEventListener('pointerdown', startDrag);
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDraggingHandle1) return;
+      const rect = svg1.getBoundingClientRect();
+      const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+      const ptY = (e.clientY - rect.top) * (550 / rect.height);
+      const dx = ptX - vertex1.x;
+      const dy = vertex1.y - ptY;
+      let angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+      if (angle < 8) angle = 8;
+      if (angle > 165) angle = 165;
+      currentAngleDeg1 = angle;
+      updateSvg1();
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (isDraggingHandle1) {
+        isDraggingHandle1 = false;
+        playTone(600, 'sine', 0.08);
+      }
+    });
+
+    function checkQuiz(qNum, cardEl, isCorrect) {
+      if (cardEl.classList.contains('is-correct') || cardEl.classList.contains('is-wrong')) return;
+      if (isCorrect) {
+        playTone(880, 'sine', 0.2);
+        cardEl.classList.add('is-correct');
+      } else {
+        playTone(220, 'sawtooth', 0.25);
+        cardEl.classList.add('is-wrong');
+      }
+    }
+
+    function resetQuizCards() {
+      playTone(520, 'sine', 0.1);
+      document.querySelectorAll('.quiz-card').forEach(card => {
+        card.classList.remove('is-correct', 'is-wrong');
+      });
+    }
+
+    /* ==================== 模組二：開口大小實驗室（手動拖曳疊合與精準度數） ==================== */
+    let tab2Angle1 = 30;
+    let tab2Angle2 = 50;
+    const tab2Pos1 = { x: 200, y: 380 };
+    let tab2Pos2 = { x: 600, y: 380 };
+    let isTab2Overlapped = false;
+    let isDraggingTab2 = false;
+
+    function initTab2() {
+      updateTab2Angle1();
+      updateTab2Angle2();
+      setTab2Pos2(600, 380, false);
+    }
+
+    function onAngle1SliderChange(val) {
+      tab2Angle1 = Number(val);
+      updateTab2Angle1();
+    }
+
+    function onAngle2SliderChange(val) {
+      tab2Angle2 = Number(val);
+      updateTab2Angle2();
+    }
+
+    function setPresetAngle1(deg) {
+      playTone(700, 'sine', 0.1);
+      tab2Angle1 = deg;
+      document.getElementById('angleRange1').value = deg;
+      updateTab2Angle1();
+    }
+
+    function updateTab2Angle1() {
+      // 1. 同步文字 (絕不使用 innerText，保證 SVG 絕對同步)
+      document.getElementById('angle1ValText').textContent = tab2Angle1 + '°';
+      const degTextEl = document.getElementById('fan1-text-deg');
+      if (degTextEl) degTextEl.textContent = tab2Angle1 + '°';
+
+      const rad = (tab2Angle1 * Math.PI) / 180;
+      const vX = tab2Pos1.x, vY = tab2Pos1.y, len = 340;
+      const x2 = vX + len * Math.cos(rad);
+      const y2 = vY - len * Math.sin(rad);
+
+      // 上方開闔邊
+      const line2 = document.getElementById('fan1-line2');
+      if (line2) {
+        line2.setAttribute('x2', x2);
+        line2.setAttribute('y2', y2);
+      }
+
+      // 上方邊標籤動態跟隨
+      const midX = (vX + x2) / 2;
+      const midY = (vY + y2) / 2;
+      const normRad = rad + Math.PI / 2;
+      const tagX = midX + 30 * Math.cos(normRad);
+      const tagY = midY - 30 * Math.sin(normRad);
+      const bgS2 = document.getElementById('bg-fan1-s2');
+      const lblS2 = document.getElementById('lbl-fan1-s2');
+      if (bgS2 && lblS2) {
+        bgS2.setAttribute('x', tagX - 35);
+        bgS2.setAttribute('y', tagY - 17);
+        lblS2.setAttribute('x', tagX);
+        lblS2.setAttribute('y', tagY + 6);
+      }
+
+      // 弧度與扇形
+      const arcR = 125;
+      const arcX = vX + arcR * Math.cos(rad);
+      const arcY = vY - arcR * Math.sin(rad);
+      const largeArc = tab2Angle1 > 180 ? 1 : 0;
+      const dSec = `M ${vX} ${vY} L ${vX + arcR} ${vY} A ${arcR} ${arcR} 0 ${largeArc} 0 ${arcX} ${arcY} Z`;
+      const dArc = `M ${vX + arcR} ${vY} A ${arcR} ${arcR} 0 ${largeArc} 0 ${arcX} ${arcY}`;
+
+      const fillEl = document.getElementById('fan1-fill');
+      const arcEl = document.getElementById('fan1-arc');
+      if (fillEl) fillEl.setAttribute('d', dSec);
+      if (arcEl) arcEl.setAttribute('d', dArc);
+
+      // 角度文字沿角平分線居中
+      const halfRad = rad / 2;
+      const textDist = Math.max(145, arcR + 35);
+      if (degTextEl) {
+        degTextEl.setAttribute('x', vX + textDist * Math.cos(halfRad));
+        degTextEl.setAttribute('y', vY - textDist * Math.sin(halfRad) + 8);
+      }
+
+      checkTab2Comparison();
+    }
+
+    function updateTab2Angle2() {
+      // 1. 同步文字
+      document.getElementById('angle2ValText').textContent = tab2Angle2 + '°';
+      const degTextEl = document.getElementById('fan2-text-deg');
+      if (degTextEl) degTextEl.textContent = tab2Angle2 + '°';
+
+      const rad = (tab2Angle2 * Math.PI) / 180;
+      const len = 340;
+      const x2 = len * Math.cos(rad);
+      const y2 = -len * Math.sin(rad);
+
+      // 上方邊
+      const line2 = document.getElementById('fan2-line2');
+      if (line2) {
+        line2.setAttribute('x2', x2);
+        line2.setAttribute('y2', y2);
+      }
+
+      // 上方邊標籤動態跟隨
+      const midX = x2 / 2;
+      const midY = y2 / 2;
+      const normRad = rad + Math.PI / 2;
+      const tagX = midX + 30 * Math.cos(normRad);
+      const tagY = midY - 30 * Math.sin(normRad);
+      const bgS2 = document.getElementById('bg-fan2-s2');
+      const lblS2 = document.getElementById('lbl-fan2-s2');
+      if (bgS2 && lblS2) {
+        bgS2.setAttribute('x', tagX - 35);
+        bgS2.setAttribute('y', tagY - 17);
+        lblS2.setAttribute('x', tagX);
+        lblS2.setAttribute('y', tagY + 6);
+      }
+
+      // 弧度與扇形
+      const arcR = 120;
+      const arcX = arcR * Math.cos(rad);
+      const arcY = -arcR * Math.sin(rad);
+      const largeArc = tab2Angle2 > 180 ? 1 : 0;
+      const dSec = `M 0 0 L ${arcR} 0 A ${arcR} ${arcR} 0 ${largeArc} 0 ${arcX} ${arcY} Z`;
+      const dArc = `M ${arcR} 0 A ${arcR} ${arcR} 0 ${largeArc} 0 ${arcX} ${arcY}`;
+
+      const fillEl = document.getElementById('fan2-fill');
+      const arcEl = document.getElementById('fan2-arc');
+      if (fillEl) fillEl.setAttribute('d', dSec);
+      if (arcEl) arcEl.setAttribute('d', dArc);
+
+      // 角度文字沿角平分線居中
+      const halfRad = rad / 2;
+      const textDist = Math.max(140, arcR + 35);
+      if (degTextEl) {
+        degTextEl.setAttribute('x', textDist * Math.cos(halfRad));
+        degTextEl.setAttribute('y', -textDist * Math.sin(halfRad) + 8);
+      }
+
+      checkTab2Comparison();
+    }
+
+    function setTab2Pos2(x, y, smooth = false) {
+      tab2Pos2 = { x, y };
+      const g2 = document.getElementById('group-tab2-angle2');
+      if (g2) {
+        g2.style.transition = smooth ? 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none';
+        g2.setAttribute('transform', `translate(${x}, ${y})`);
+      }
+
+      // 檢查是否磁吸疊合 (距離角 1 頂點 < 45px)
+      const dist = Math.hypot(x - tab2Pos1.x, y - tab2Pos1.y);
+      if (dist < 45) {
+        if (!isTab2Overlapped) {
+          playTone(880, 'triangle', 0.2);
+        }
+        isTab2Overlapped = true;
+        // 磁吸完全對齊
+        if (g2) g2.setAttribute('transform', `translate(${tab2Pos1.x}, ${tab2Pos1.y})`);
+        document.getElementById('lbl-tab2-draghint').textContent = '✅ 已精準疊合！可再拖開';
+      } else {
+        isTab2Overlapped = false;
+        document.getElementById('lbl-tab2-draghint').textContent = '✋ 拖我拉過來疊合';
+      }
+
+      const btnOverlap = document.getElementById('btn-overlap-tab2');
+      if (btnOverlap) {
+        btnOverlap.textContent = isTab2Overlapped ? '↩️ 分開角 1 與角 2' : '🚀 一鍵疊合比較';
+      }
+
+      checkTab2Comparison();
+    }
+
+    function toggleTab2Overlap() {
+      if (isTab2Overlapped) {
+        resetTab2Positions();
+      } else {
+        playTone(740, 'triangle', 0.2);
+        setTab2Pos2(tab2Pos1.x, tab2Pos1.y, true);
+        setTimeout(() => playTone(988, 'sine', 0.25), 300);
+      }
+    }
+
+    function resetTab2Positions() {
+      playTone(440, 'sine', 0.15);
+      setTab2Pos2(600, 380, true);
+    }
+
+    function checkTab2Comparison() {
+      const bannerTitle = document.getElementById('tab2-verdict-title');
+      const bannerSub = document.getElementById('tab2-verdict-sub');
+      const bannerBox = document.getElementById('tab2-verdict-box');
+      if (!bannerTitle || !bannerSub || !bannerBox) return;
+
+      if (isTab2Overlapped) {
+        if (tab2Angle1 > tab2Angle2) {
+          bannerTitle.textContent = `🎯 疊合真相：∠1 (${tab2Angle1}°) ＞ ∠2 (${tab2Angle2}°)`;
+          bannerTitle.setAttribute('fill', '#00e676');
+          bannerSub.textContent = `你看！橘色【角 1】的開口張得比較開，所以角 1 大於角 2！`;
+          bannerBox.setAttribute('stroke', '#00e676');
+        } else if (tab2Angle1 === tab2Angle2) {
+          bannerTitle.textContent = `🎯 疊合真相：∠1 (${tab2Angle1}°) ＝ ∠2 (${tab2Angle2}°)`;
+          bannerTitle.setAttribute('fill', '#fbc02d');
+          bannerSub.textContent = `兩條邊完全重合！兩個角的開口大小一模一樣！`;
+          bannerBox.setAttribute('stroke', '#fbc02d');
+        } else {
+          bannerTitle.textContent = `🎯 疊合真相：∠1 (${tab2Angle1}°) ＜ ∠2 (${tab2Angle2}°)`;
+          bannerTitle.setAttribute('fill', '#ff5252');
+          bannerSub.textContent = `你看！青色【角 2】的開口張得比較開，所以角 2 大於角 1！`;
+          bannerBox.setAttribute('stroke', '#ff5252');
+        }
+      } else {
+        bannerTitle.textContent = `👉 請抓著右邊【角 2】的頂點，拖過來和【角 1】疊合！`;
+        bannerTitle.setAttribute('fill', '#fbc02d');
+        bannerSub.textContent = `目前位置分開中。當兩角頂點靠攏時會自動磁吸對齊！`;
+        bannerBox.setAttribute('stroke', '#ff7a1a');
+      }
+    }
+
+    // 支援手動拖曳角 2 (滑鼠與觸控)
+    const svg2 = document.getElementById('svg2');
+    const groupTab2Angle2 = document.getElementById('group-tab2-angle2');
+
+    let dragOffset = { x: 0, y: 0 };
+
+    groupTab2Angle2.addEventListener('pointerdown', (e) => {
+      isDraggingTab2 = true;
+      e.target.setPointerCapture(e.pointerId);
+      groupTab2Angle2.style.cursor = 'grabbing';
+      groupTab2Angle2.style.transition = 'none';
+
+      const rect = svg2.getBoundingClientRect();
+      const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+      const ptY = (e.clientY - rect.top) * (550 / rect.height);
+
+      dragOffset.x = ptX - tab2Pos2.x;
+      dragOffset.y = ptY - tab2Pos2.y;
+      playTone(520, 'sine', 0.05);
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDraggingTab2) return;
+      const rect = svg2.getBoundingClientRect();
+      const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+      const ptY = (e.clientY - rect.top) * (550 / rect.height);
+
+      let newX = ptX - dragOffset.x;
+      let newY = ptY - dragOffset.y;
+
+      // 邊界保護
+      newX = Math.max(120, Math.min(850, newX));
+      newY = Math.max(200, Math.min(480, newY));
+
+      setTab2Pos2(newX, newY, false);
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (isDraggingTab2) {
+        isDraggingTab2 = false;
+        groupTab2Angle2.style.cursor = 'grab';
+        playTone(660, 'sine', 0.08);
+      }
+    });
+
+    /* ==================== 模組三：邊長長短無關 (迷思大破解) ==================== */
+    let isOverlapped = false;
+    let angleARotation = 0;
+    let armLenA = 160;
+
+    const angleA_deg = 60;
+    const angleB_deg = 35;
+
+    function renderAnglesInMyth() {
+      // 角 A (60度)
+      const radA = (angleA_deg * Math.PI) / 180;
+      const xA2 = armLenA * Math.cos(radA);
+      const yA2 = -armLenA * Math.sin(radA);
+
+      document.getElementById('line-A1').setAttribute('x2', armLenA);
+      document.getElementById('line-A2').setAttribute('x2', xA2);
+      document.getElementById('line-A2').setAttribute('y2', yA2);
+
+      // 上方邊標籤動態跟隨
+      const midXA = xA2 / 2;
+      const midYA = yA2 / 2;
+      const normRadA = radA + Math.PI / 2;
+      const tagXA = midXA + 24 * Math.cos(normRadA);
+      const tagYA = midYA - 24 * Math.sin(normRadA);
+      document.getElementById('bg-lbl-mA2').setAttribute('x', tagXA - 30);
+      document.getElementById('bg-lbl-mA2').setAttribute('y', tagYA - 15);
+      document.getElementById('lbl-mA2').setAttribute('x', tagXA);
+      document.getElementById('lbl-mA2').setAttribute('y', tagYA + 5);
+
+      const arcRA = Math.min(80, armLenA * 0.7);
+      const arcAX = arcRA * Math.cos(radA);
+      const arcAY = -arcRA * Math.sin(radA);
+      document.getElementById('sec-A').setAttribute('d', `M 0 0 L ${arcRA} 0 A ${arcRA} ${arcRA} 0 0 0 ${arcAX} ${arcAY} Z`);
+      document.getElementById('arc-A').setAttribute('d', `M ${arcRA} 0 A ${arcRA} ${arcRA} 0 0 0 ${arcAX} ${arcAY}`);
+
+      // 角 B (35度，邊長固定 360)
+      const radB = (angleB_deg * Math.PI) / 180;
+      const arcRB = 90;
+      const arcBX = arcRB * Math.cos(radB);
+      const arcBY = -arcRB * Math.sin(radB);
+      document.getElementById('sec-B').setAttribute('d', `M 0 0 L ${arcRB} 0 A ${arcRB} ${arcRB} 0 0 0 ${arcBX} ${arcBY} Z`);
+      document.getElementById('arc-B').setAttribute('d', `M ${arcRB} 0 A ${arcRB} ${arcRB} 0 0 0 ${arcBX} ${arcBY}`);
+    }
+
+    function resetMythExperiment() {
+      isOverlapped = false;
+      angleARotation = 0;
+      document.getElementById('overlapBtn').innerHTML = '🚀 一鍵重疊驗證 (對齊頂點與邊)';
+      document.getElementById('overlap-verdict').style.opacity = '0';
+
+      // 恢復原始位置 (A 在左 x=180, y=360；B 在右 x=540, y=360)
+      document.getElementById('group-angleA').style.transform = 'translate(180px, 360px)';
+      document.getElementById('group-angleB').style.transform = 'translate(540px, 360px)';
+      renderAnglesInMyth();
+    }
+
+    function toggleOverlap() {
+      isOverlapped = !isOverlapped;
+      if (isOverlapped) {
+        playTone(784, 'triangle', 0.25);
+        document.getElementById('overlapBtn').innerHTML = '↩️ 分開角 A 與角 B';
+        // 將角 A 移動到與角 B 頂點對齊 (x=540, y=360)
+        document.getElementById('group-angleA').style.transform = 'translate(540px, 360px)';
+        document.getElementById('overlap-verdict').style.opacity = '1';
+        setTimeout(() => playTone(1046, 'sine', 0.35), 600);
+      } else {
+        playTone(440, 'sine', 0.15);
+        resetMythExperiment();
+      }
+    }
+
+    function changeArmLength(val) {
+      armLenA = Number(val);
+      document.getElementById('lenValText').textContent = val + 'px';
+      renderAnglesInMyth();
+      playTone(400 + armLenA, 'sine', 0.05);
+    }
+
+    function rotateAngleA() {
+      angleARotation = (angleARotation + 45) % 360;
+      playTone(600, 'sine', 0.1);
+      const curTransform = document.getElementById('group-angleA').style.transform;
+      const transMatch = curTransform.match(/translate\([^)]+\)/);
+      const transStr = transMatch ? transMatch[0] : 'translate(180px, 360px)';
+      document.getElementById('group-angleA').style.transform = `${transStr} rotate(${angleARotation}deg)`;
+    }
+
+    // 初始化啟動
+    updateSvg1();
+    initTab2();
+    resetMythExperiment();
+  </script>
+</body>
+</html>
