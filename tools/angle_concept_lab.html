@@ -322,23 +322,75 @@
       background: rgba(18, 23, 33, 0.94);
       border: 2px solid var(--accent-yellow);
       border-radius: 12px;
-      padding: 12px 16px;
-      max-width: 340px;
+      padding: 14px 18px;
+      max-width: 360px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
       line-height: 1.5;
       font-size: 15px;
-      pointer-events: none;
+      pointer-events: auto;
       backdrop-filter: blur(6px);
       z-index: 10;
     }
 
     .tip-bubble h4 {
       color: var(--accent-yellow);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       font-size: 16px;
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+
+    .tip-finger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #2a3449;
+      border: 1px dashed var(--accent-yellow);
+      border-radius: 8px;
+      cursor: pointer;
+      color: #ffca28;
+      font-size: 15px;
+      font-weight: 700;
+      transition: all 0.25s ease;
+      user-select: none;
+      min-height: 40px;
+    }
+
+    .tip-finger-btn:hover {
+      background: #394763;
+      border-color: #ffe082;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(251, 192, 45, 0.35);
+    }
+
+    .tip-finger-btn .finger-icon {
+      font-size: 22px;
+      display: inline-block;
+      animation: fingerBounce 1.2s infinite ease-in-out;
+    }
+
+    @keyframes fingerBounce {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(6px); }
+    }
+
+    .tip-answer-box {
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: rgba(33, 44, 63, 0.95);
+      border-left: 4px solid var(--accent-yellow);
+      border-radius: 6px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #f5f7fa;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tip-answer-box strong {
+      color: var(--accent-yellow);
+      font-size: 16px;
     }
 
     /* 反例題目卡片（響應式網格） */
@@ -548,47 +600,58 @@
           <path id="sec-1" d="" fill="rgba(251, 192, 45, 0.18)" stroke="none" />
           <path id="arc-1" d="" fill="none" stroke="#fbc02d" stroke-width="4" stroke-dasharray="8 4" />
 
-          <!-- 底邊 (固定水平線) -->
-          <line id="line-1a" x1="220" y1="360" x2="620" y2="360" stroke="#00e5ff" stroke-width="7" stroke-linecap="round" />
+          <!-- 第一條邊 (Side 1，可旋轉射線) -->
+          <line id="line-1a" x1="340" y1="300" x2="610" y2="300" stroke="#00e5ff" stroke-width="7" stroke-linecap="round" />
+          <line id="line-1a-hit" x1="340" y1="300" x2="610" y2="300" stroke="transparent" stroke-width="36" stroke-linecap="round" style="cursor: grab;" />
 
-          <!-- 上方可開闔邊 (動態旋轉射線) -->
-          <line id="line-1b" x1="220" y1="360" x2="520" y2="150" stroke="#00e5ff" stroke-width="7" stroke-linecap="round" />
-          
-          <!-- 上方射線全段感應透明熱區 (方便大螢幕手指觸控) -->
-          <line id="line-1b-hit" x1="220" y1="360" x2="520" y2="150" stroke="transparent" stroke-width="36" stroke-linecap="round" style="cursor: grab;" />
+          <!-- 第二條邊 (Side 2，可旋轉射線) -->
+          <line id="line-1b" x1="340" y1="300" x2="547" y2="126" stroke="#00e5ff" stroke-width="7" stroke-linecap="round" />
+          <line id="line-1b-hit" x1="340" y1="300" x2="547" y2="126" stroke="transparent" stroke-width="36" stroke-linecap="round" style="cursor: grab;" />
 
           <!-- 頂點紅點 -->
-          <circle id="point-v" cx="220" cy="360" r="13" fill="#ff5252" stroke="#fff" stroke-width="3" />
+          <circle id="point-v" cx="340" cy="300" r="13" fill="#ff5252" stroke="#fff" stroke-width="3" />
 
           <!-- 標註文字與箭頭 (動態位置群組) -->
           <g id="labels-group">
             <!-- 頂點標籤 -->
-            <rect id="bg-lbl-v" x="90" y="340" width="100" height="40" rx="8" fill="#ff5252" />
-            <text id="lbl-v" x="140" y="367" font-size="20" font-weight="bold" fill="#fff" text-anchor="middle">頂點</text>
-            <line x1="190" y1="360" x2="208" y2="360" stroke="#ff5252" stroke-width="3" />
+            <line id="line-lbl-v" x1="230" y1="300" x2="326" y2="300" stroke="#ff5252" stroke-width="3" stroke-dasharray="4 3" />
+            <rect id="bg-lbl-v" x="180" y="280" width="100" height="40" rx="8" fill="#ff5252" />
+            <text id="lbl-v" x="230" y="307" font-size="20" font-weight="bold" fill="#fff" text-anchor="middle">頂點</text>
 
-            <!-- 底邊標籤 (自動置於底邊中點下方) -->
-            <rect id="bg-lbl-s1" x="380" y="380" width="80" height="38" rx="8" fill="#0097a7" />
-            <text id="lbl-s1" x="420" y="405" font-size="19" font-weight="bold" fill="#fff" text-anchor="middle">邊</text>
+            <!-- 邊 1 標籤 (動態跟隨第一條邊) -->
+            <rect id="bg-lbl-s1" x="435" y="320" width="80" height="38" rx="8" fill="#0097a7" />
+            <text id="lbl-s1" x="475" y="345" font-size="19" font-weight="bold" fill="#fff" text-anchor="middle">邊</text>
 
-            <!-- ★ 上方張開邊標籤 (跟隨上方射線動態移動！) -->
-            <rect id="bg-lbl-s2" x="380" y="210" width="80" height="38" rx="8" fill="#0097a7" />
-            <text id="lbl-s2" x="420" y="235" font-size="19" font-weight="bold" fill="#fff" text-anchor="middle">邊</text>
+            <!-- 邊 2 標籤 (動態跟隨第二條邊) -->
+            <rect id="bg-lbl-s2" x="403" y="180" width="80" height="38" rx="8" fill="#0097a7" />
+            <text id="lbl-s2" x="443" y="205" font-size="19" font-weight="bold" fill="#fff" text-anchor="middle">邊</text>
 
-            <!-- ★ 角標籤 (跟隨角平分線居中動態移動！) -->
-            <rect id="bg-lbl-ang" x="320" y="295" width="90" height="40" rx="8" fill="#fbc02d" />
-            <text id="lbl-ang" x="365" y="322" font-size="20" font-weight="bold" fill="#12161f" text-anchor="middle">角 (∠)</text>
+            <!-- 角標籤 (動態跟隨角平分線) -->
+            <rect id="bg-lbl-ang" x="410" y="240" width="90" height="40" rx="8" fill="#fbc02d" />
+            <text id="lbl-ang" x="455" y="267" font-size="20" font-weight="bold" fill="#12161f" text-anchor="middle">角 (∠)</text>
           </g>
 
-          <!-- 互動把手：加大觸控命中區 -->
-          <circle id="handle-1-hit" cx="520" cy="150" r="32" fill="transparent" style="cursor: grab;" />
-          <circle id="handle-1" class="handle-circle" cx="520" cy="150" r="12" />
-          <text id="lbl-handle-1" x="540" y="145" font-size="16" fill="#f5f7fa" font-weight="bold">拖曳我改變角度</text>
+          <!-- 互動把手 1 (Side 1 端點) -->
+          <circle id="handle-1a-hit" cx="610" cy="300" r="32" fill="transparent" style="cursor: grab;" />
+          <circle id="handle-1a" class="handle-circle" cx="610" cy="300" r="12" />
+          <text id="lbl-handle-1a" x="628" y="318" font-size="16" fill="#f5f7fa" font-weight="bold">拖曳我改變角度</text>
+
+          <!-- 互動把手 2 (Side 2 端點) -->
+          <circle id="handle-1b-hit" cx="547" cy="126" r="32" fill="transparent" style="cursor: grab;" />
+          <circle id="handle-1b" class="handle-circle" cx="547" cy="126" r="12" />
+          <text id="lbl-handle-1b" x="565" y="112" font-size="16" fill="#f5f7fa" font-weight="bold">拖曳我改變角度</text>
         </svg>
 
-        <div class="tip-bubble">
+        <div class="tip-bubble" id="tip-bubble-box">
           <h4>💡 教學重點問答</h4>
-          <p>「角有幾條邊？幾個頂點？」<br>👉 <strong>1 個頂點、2 條邊</strong>，且這 2 條邊必須是直直的線喔！</p>
+          <p style="margin-bottom: 8px;">「角有幾條邊？幾個頂點？」</p>
+          <button id="btn-reveal-tip" class="tip-finger-btn" onclick="toggleTipAnswer()">
+            <span class="finger-icon">👉</span>
+            <span id="btn-reveal-tip-text">點按手指看重點解答</span>
+          </button>
+          <div id="tip-answer-box" class="tip-answer-box" style="display: none;">
+            👉 <strong>1 個頂點、2 條邊</strong>，且這 2 條邊必須是直直的線喔！
+          </div>
         </div>
       </div>
 
@@ -836,47 +899,115 @@
       if (index === 2) resetMythExperiment();
     }
 
-    /* ==================== 模組一：認識角（頂點與邊動態跟隨） ==================== */
-    let currentAngleDeg1 = 38;
-    const vertex1 = { x: 220, y: 360 };
-    const armLen1 = 360;
+    /* ==================== 模組一：認識角（雙邊皆可動，頂點與邊動態跟隨） ==================== */
+    let theta1 = 0;   // 第一條邊 (下方) 角度（度數）
+    let theta2 = 40;  // 第二條邊 (上方) 角度（度數）
+    const vertex1 = { x: 340, y: 300 };
+    const armLen1 = 260;
 
     function updateSvg1() {
-      const rad = (currentAngleDeg1 * Math.PI) / 180;
-      const x2 = vertex1.x + armLen1 * Math.cos(rad);
-      const y2 = vertex1.y - armLen1 * Math.sin(rad);
+      const rad1 = (theta1 * Math.PI) / 180;
+      const rad2 = (theta2 * Math.PI) / 180;
 
-      // 設定底邊與上方張開邊
-      document.getElementById('line-1a').setAttribute('x2', vertex1.x + armLen1);
-      document.getElementById('line-1b').setAttribute('x2', x2);
-      document.getElementById('line-1b').setAttribute('y2', y2);
+      const x1 = vertex1.x + armLen1 * Math.cos(rad1);
+      const y1 = vertex1.y - armLen1 * Math.sin(rad1);
+      const x2 = vertex1.x + armLen1 * Math.cos(rad2);
+      const y2 = vertex1.y - armLen1 * Math.sin(rad2);
 
-      // 觸控熱區連動
-      document.getElementById('line-1b-hit').setAttribute('x2', x2);
-      document.getElementById('line-1b-hit').setAttribute('y2', y2);
-
-      // 把手位置連動
-      document.getElementById('handle-1').setAttribute('cx', x2);
-      document.getElementById('handle-1').setAttribute('cy', y2);
-      document.getElementById('handle-1-hit').setAttribute('cx', x2);
-      document.getElementById('handle-1-hit').setAttribute('cy', y2);
-
-      // ★ 把手說明文字跟隨上方邊的端點
-      const lblHandle = document.getElementById('lbl-handle-1');
-      if (lblHandle) {
-        lblHandle.setAttribute('x', x2 + 18);
-        lblHandle.setAttribute('y', y2 - 14);
+      // 第一條邊 (Side 1)
+      const line1a = document.getElementById('line-1a');
+      const line1aHit = document.getElementById('line-1a-hit');
+      if (line1a) {
+        line1a.setAttribute('x1', vertex1.x);
+        line1a.setAttribute('y1', vertex1.y);
+        line1a.setAttribute('x2', x1);
+        line1a.setAttribute('y2', y1);
+      }
+      if (line1aHit) {
+        line1aHit.setAttribute('x1', vertex1.x);
+        line1aHit.setAttribute('y1', vertex1.y);
+        line1aHit.setAttribute('x2', x1);
+        line1aHit.setAttribute('y2', y1);
       }
 
-      // ★ 上方邊的標籤「邊」：精準跟隨張開邊的中點，並向外微幅偏移垂直法向量
+      // 第二條邊 (Side 2)
+      const line1b = document.getElementById('line-1b');
+      const line1bHit = document.getElementById('line-1b-hit');
+      if (line1b) {
+        line1b.setAttribute('x1', vertex1.x);
+        line1b.setAttribute('y1', vertex1.y);
+        line1b.setAttribute('x2', x2);
+        line1b.setAttribute('y2', y2);
+      }
+      if (line1bHit) {
+        line1bHit.setAttribute('x1', vertex1.x);
+        line1bHit.setAttribute('y1', vertex1.y);
+        line1bHit.setAttribute('x2', x2);
+        line1bHit.setAttribute('y2', y2);
+      }
+
+      // 頂點紅點位置
+      const ptV = document.getElementById('point-v');
+      if (ptV) {
+        ptV.setAttribute('cx', vertex1.x);
+        ptV.setAttribute('cy', vertex1.y);
+      }
+
+      // 把手 1 (Side 1 控制點)
+      const h1 = document.getElementById('handle-1a');
+      const h1Hit = document.getElementById('handle-1a-hit');
+      const lblH1 = document.getElementById('lbl-handle-1a');
+      if (h1) {
+        h1.setAttribute('cx', x1);
+        h1.setAttribute('cy', y1);
+      }
+      if (h1Hit) {
+        h1Hit.setAttribute('cx', x1);
+        h1Hit.setAttribute('cy', y1);
+      }
+      if (lblH1) {
+        lblH1.setAttribute('x', x1 + 18);
+        lblH1.setAttribute('y', y1 + 18);
+      }
+
+      // 把手 2 (Side 2 控制點)
+      const h2 = document.getElementById('handle-1b');
+      const h2Hit = document.getElementById('handle-1b-hit');
+      const lblH2 = document.getElementById('lbl-handle-1b');
+      if (h2) {
+        h2.setAttribute('cx', x2);
+        h2.setAttribute('cy', y2);
+      }
+      if (h2Hit) {
+        h2Hit.setAttribute('cx', x2);
+        h2Hit.setAttribute('cy', y2);
+      }
+      if (lblH2) {
+        lblH2.setAttribute('x', x2 + 18);
+        lblH2.setAttribute('y', y2 - 14);
+      }
+
+      // 邊 1 標籤：位於邊 1 中點外側
+      const midX1 = (vertex1.x + x1) / 2;
+      const midY1 = (vertex1.y + y1) / 2;
+      const normRad1 = rad1 - Math.PI / 2; // 順時針外側
+      const tagX1 = midX1 + 34 * Math.cos(normRad1);
+      const tagY1 = midY1 - 34 * Math.sin(normRad1);
+      const bgLblS1 = document.getElementById('bg-lbl-s1');
+      const lblS1 = document.getElementById('lbl-s1');
+      if (bgLblS1 && lblS1) {
+        bgLblS1.setAttribute('x', tagX1 - 40);
+        bgLblS1.setAttribute('y', tagY1 - 19);
+        lblS1.setAttribute('x', tagX1);
+        lblS1.setAttribute('y', tagY1 + 6);
+      }
+
+      // 邊 2 標籤：位於邊 2 中點外側
       const midX2 = (vertex1.x + x2) / 2;
       const midY2 = (vertex1.y + y2) / 2;
-      // 垂直法向量（逆時針指向外側上方）
-      const normRad = rad + Math.PI / 2;
-      const offsetDist = 34;
-      const tagX2 = midX2 + offsetDist * Math.cos(normRad);
-      const tagY2 = midY2 - offsetDist * Math.sin(normRad);
-
+      const normRad2 = rad2 + Math.PI / 2; // 逆時針外側
+      const tagX2 = midX2 + 34 * Math.cos(normRad2);
+      const tagY2 = midY2 - 34 * Math.sin(normRad2);
       const bgLblS2 = document.getElementById('bg-lbl-s2');
       const lblS2 = document.getElementById('lbl-s2');
       if (bgLblS2 && lblS2) {
@@ -886,33 +1017,26 @@
         lblS2.setAttribute('y', tagY2 + 6);
       }
 
-      // 底邊標籤置於底邊中點下方
-      const midX1 = vertex1.x + armLen1 / 2;
-      const bgLblS1 = document.getElementById('bg-lbl-s1');
-      const lblS1 = document.getElementById('lbl-s1');
-      if (bgLblS1 && lblS1) {
-        bgLblS1.setAttribute('x', midX1 - 40);
-        bgLblS1.setAttribute('y', 380);
-        lblS1.setAttribute('x', midX1);
-        lblS1.setAttribute('y', 405);
-      }
+      // 夾角扇形與弧線 (從 rad1 到 rad2)
+      const arcR = 90;
+      const ax1 = vertex1.x + arcR * Math.cos(rad1);
+      const ay1 = vertex1.y - arcR * Math.sin(rad1);
+      const ax2 = vertex1.x + arcR * Math.cos(rad2);
+      const ay2 = vertex1.y - arcR * Math.sin(rad2);
 
-      // 弧度
-      const arcR = 100;
-      const arcX = vertex1.x + arcR * Math.cos(rad);
-      const arcY = vertex1.y - arcR * Math.sin(rad);
-      const dSec = `M ${vertex1.x} ${vertex1.y} L ${vertex1.x + arcR} ${vertex1.y} A ${arcR} ${arcR} 0 0 0 ${arcX} ${arcY} Z`;
-      const dArc = `M ${vertex1.x + arcR} ${vertex1.y} A ${arcR} ${arcR} 0 0 0 ${arcX} ${arcY}`;
+      const dSec = `M ${vertex1.x} ${vertex1.y} L ${ax1} ${ay1} A ${arcR} ${arcR} 0 0 0 ${ax2} ${ay2} Z`;
+      const dArc = `M ${ax1} ${ay1} A ${arcR} ${arcR} 0 0 0 ${ax2} ${ay2}`;
 
-      document.getElementById('sec-1').setAttribute('d', dSec);
-      document.getElementById('arc-1').setAttribute('d', dArc);
+      const secEl = document.getElementById('sec-1');
+      const arcEl = document.getElementById('arc-1');
+      if (secEl) secEl.setAttribute('d', dSec);
+      if (arcEl) arcEl.setAttribute('d', dArc);
 
-      // ★ 角標籤「角 (∠)」：精準跟隨角平分線居中動態移動
-      const halfRad = rad / 2;
-      const angLabelDist = Math.max(140, arcR + 45);
-      const angTagX = vertex1.x + angLabelDist * Math.cos(halfRad);
-      const angTagY = vertex1.y - angLabelDist * Math.sin(halfRad);
-
+      // 角標籤「角 (∠)」：位於角平分線上
+      const midRad = (rad1 + rad2) / 2;
+      const angLabelDist = Math.max(130, arcR + 45);
+      const angTagX = vertex1.x + angLabelDist * Math.cos(midRad);
+      const angTagY = vertex1.y - angLabelDist * Math.sin(midRad);
       const bgLblAng = document.getElementById('bg-lbl-ang');
       const lblAng = document.getElementById('lbl-ang');
       if (bgLblAng && lblAng) {
@@ -921,61 +1045,128 @@
         lblAng.setAttribute('x', angTagX);
         lblAng.setAttribute('y', angTagY + 6);
       }
+
+      // 頂點標籤「頂點」：自動置於角平分線相反方向（角的外側），永不與兩邊碰撞
+      const oppRad = midRad + Math.PI;
+      const vDist = 110;
+      const tagVx = vertex1.x + vDist * Math.cos(oppRad);
+      const tagVy = vertex1.y - vDist * Math.sin(oppRad);
+      const bgLblV = document.getElementById('bg-lbl-v');
+      const lblV = document.getElementById('lbl-v');
+      const lineV = document.getElementById('line-lbl-v');
+      if (bgLblV && lblV) {
+        bgLblV.setAttribute('x', tagVx - 50);
+        bgLblV.setAttribute('y', tagVy - 20);
+        lblV.setAttribute('x', tagVx);
+        lblV.setAttribute('y', tagVy + 7);
+      }
+      if (lineV) {
+        const lineStartX = tagVx + 35 * Math.cos(midRad);
+        const lineStartY = tagVy - 35 * Math.sin(midRad);
+        lineV.setAttribute('x1', lineStartX);
+        lineV.setAttribute('y1', lineStartY);
+        lineV.setAttribute('x2', vertex1.x - 14 * Math.cos(oppRad));
+        lineV.setAttribute('y2', vertex1.y + 14 * Math.sin(oppRad));
+      }
     }
 
     function highlightPart(part) {
       playTone(659, 'triangle', 0.15);
-      const allLabels = ['bg-lbl-v', 'lbl-v', 'bg-lbl-s1', 'lbl-s1', 'bg-lbl-s2', 'lbl-s2', 'bg-lbl-ang', 'lbl-ang'];
+      const allLabels = ['bg-lbl-v', 'lbl-v', 'line-lbl-v', 'bg-lbl-s1', 'lbl-s1', 'bg-lbl-s2', 'lbl-s2', 'bg-lbl-ang', 'lbl-ang'];
       allLabels.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.opacity = '0.3';
       });
 
       if (part === 'all') {
-        allLabels.forEach(id => document.getElementById(id).style.opacity = '1');
+        allLabels.forEach(id => { const el = document.getElementById(id); if (el) el.style.opacity = '1'; });
       } else if (part === 'vertex') {
-        document.getElementById('bg-lbl-v').style.opacity = '1';
-        document.getElementById('lbl-v').style.opacity = '1';
+        ['bg-lbl-v', 'lbl-v', 'line-lbl-v'].forEach(id => { const el = document.getElementById(id); if (el) el.style.opacity = '1'; });
       } else if (part === 'sides') {
-        ['bg-lbl-s1', 'lbl-s1', 'bg-lbl-s2', 'lbl-s2'].forEach(id => document.getElementById(id).style.opacity = '1');
+        ['bg-lbl-s1', 'lbl-s1', 'bg-lbl-s2', 'lbl-s2'].forEach(id => { const el = document.getElementById(id); if (el) el.style.opacity = '1'; });
       } else if (part === 'angle') {
-        document.getElementById('bg-lbl-ang').style.opacity = '1';
-        document.getElementById('lbl-ang').style.opacity = '1';
+        ['bg-lbl-ang', 'lbl-ang'].forEach(id => { const el = document.getElementById(id); if (el) el.style.opacity = '1'; });
       }
     }
 
-    // 模組一拖曳改變角度（支援把手與整條邊拖曳，支援滑鼠與大螢幕觸控）
-    let isDraggingHandle1 = false;
+    // 右下角重點問答：點按手指切換展開/收合
+    function toggleTipAnswer() {
+      const box = document.getElementById('tip-answer-box');
+      const btnText = document.getElementById('btn-reveal-tip-text');
+      if (!box) return;
+      if (box.style.display === 'none' || box.style.display === '') {
+        box.style.display = 'block';
+        if (btnText) btnText.textContent = '點按收合重點解答';
+        playTone(784, 'sine', 0.15);
+      } else {
+        box.style.display = 'none';
+        if (btnText) btnText.textContent = '點按手指看重點解答';
+        playTone(523, 'sine', 0.1);
+      }
+    }
+
+    // 模組一拖曳改變角度（雙邊獨立拖曳，開口最多 180 度，支援滑鼠與大螢幕觸控）
+    let currentDragTarget = null;
     const svg1 = document.getElementById('svg1');
-    const handle1Hit = document.getElementById('handle-1-hit');
+    const handle1aHit = document.getElementById('handle-1a-hit');
+    const line1aHit = document.getElementById('line-1a-hit');
+    const handle1bHit = document.getElementById('handle-1b-hit');
     const line1bHit = document.getElementById('line-1b-hit');
 
-    function startDrag(e) {
-      isDraggingHandle1 = true;
+    function startDragSide(e, target) {
+      currentDragTarget = target;
       e.target.setPointerCapture(e.pointerId);
       playTone(480, 'sine', 0.05);
     }
 
-    handle1Hit.addEventListener('pointerdown', startDrag);
-    line1bHit.addEventListener('pointerdown', startDrag);
+    if (handle1aHit) handle1aHit.addEventListener('pointerdown', (e) => startDragSide(e, 'side1'));
+    if (line1aHit) line1aHit.addEventListener('pointerdown', (e) => startDragSide(e, 'side1'));
+    if (handle1bHit) handle1bHit.addEventListener('pointerdown', (e) => startDragSide(e, 'side2'));
+    if (line1bHit) line1bHit.addEventListener('pointerdown', (e) => startDragSide(e, 'side2'));
 
     window.addEventListener('pointermove', (e) => {
-      if (!isDraggingHandle1) return;
+      if (!currentDragTarget) return;
       const rect = svg1.getBoundingClientRect();
       const ptX = (e.clientX - rect.left) * (1000 / rect.width);
       const ptY = (e.clientY - rect.top) * (550 / rect.height);
       const dx = ptX - vertex1.x;
       const dy = vertex1.y - ptY;
-      let angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-      if (angle < 8) angle = 8;
-      if (angle > 165) angle = 165;
-      currentAngleDeg1 = angle;
+      let cursorAngle = (Math.atan2(dy, dx) * 180) / Math.PI;
+
+      if (currentDragTarget === 'side2') {
+        // 拖曳 Side 2 (上方邊)：以 theta1 為基準，逆時針計算開口，開口限制在 5度 ~ 180度
+        let diff = (cursorAngle - theta1) % 360;
+        if (diff < 0) diff += 360;
+        if (diff > 180) {
+          if (diff < 270) diff = 180;
+          else diff = 5;
+        } else if (diff < 5) {
+          diff = 5;
+        }
+        theta2 = theta1 + diff;
+      } else if (currentDragTarget === 'side1') {
+        // 拖曳 Side 1 (下方邊)：以 theta2 為基準，順時針計算開口，開口限制在 5度 ~ 180度
+        let diff = (theta2 - cursorAngle) % 360;
+        if (diff < 0) diff += 360;
+        if (diff > 180) {
+          if (diff < 270) diff = 180;
+          else diff = 5;
+        } else if (diff < 5) {
+          diff = 5;
+        }
+        theta1 = theta2 - diff;
+      }
+
+      // 正規化角度區間，避免數值無限制累積
+      if (theta1 > 180) { theta1 -= 360; theta2 -= 360; }
+      if (theta1 < -180) { theta1 += 360; theta2 += 360; }
+
       updateSvg1();
     });
 
     window.addEventListener('pointerup', () => {
-      if (isDraggingHandle1) {
-        isDraggingHandle1 = false;
+      if (currentDragTarget) {
+        currentDragTarget = null;
         playTone(600, 'sine', 0.08);
       }
     });
