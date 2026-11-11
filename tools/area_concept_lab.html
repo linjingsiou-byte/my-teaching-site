@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>國小三年級數學：認識面積與平方公分（響應式互動教具）</title>
+  <style>
+    :root {
+      --bg: #12161f;
+      --card-bg: #1b2230;
+      --card-border: #2e384d;
+      --accent-orange: #ff7a1a;
+      --accent-yellow: #fbc02d;
+      --accent-cyan: #00e5ff;
+      --accent-green: #00e676;
+      --accent-red: #ff5252;
+      --accent-purple: #b388ff;
+      --text-main: #f5f7fa;
+      --text-sub: #9ea9bf;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      font-size: 16px;
+    }
+
+    /* 頂部導覽列（響應式） */
+    header {
+      background-color: #161b26;
+      border-bottom: 2px solid var(--card-border);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      background: var(--accent-orange);
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background: #0e1118;
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--text-sub);
+      border: none;
+      padding: 10px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-orange);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255, 122, 26, 0.35);
+    }
+
+    .audio-toggle {
+      background: #232b3d;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+    }
+
+    /* 主舞台區 */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .view-panel {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .view-panel.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 工具列與操作提示欄 */
+    .toolbar-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .prompt-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent-yellow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.4;
+    }
+
+    .prompt-sub {
+      color: var(--text-main);
+      font-weight: 400;
+      font-size: 16px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #2a3449;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+      font-family: inherit;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #34425d;
+      border-color: #485b80;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent-orange);
+      color: #fff;
+      border-color: var(--accent-orange);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #ff8c3a;
+      box-shadow: 0 4px 14px rgba(255, 122, 26, 0.4);
+    }
+
+    .btn-cyan {
+      background: #00838f;
+      color: #fff;
+      border-color: #00bcd4;
+    }
+
+    .btn-cyan:hover:not(:disabled) {
+      background: #0097a7;
+    }
+
+    .btn-green {
+      background: #00796b;
+      color: #fff;
+      border-color: var(--accent-green);
+    }
+
+    .btn-green:hover:not(:disabled) {
+      background: #00897b;
+    }
+
+    .btn-active-mode {
+      background: var(--accent-orange);
+      color: #fff;
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 12px rgba(255, 122, 26, 0.45);
+    }
+
+    /* 互動白板容器 */
+    .board-container {
+      flex: 1;
+      background: #141923;
+      border: 2px solid var(--card-border);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      min-height: 460px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    svg.canvas-svg {
+      width: 100%;
+      height: 100%;
+      min-height: 460px;
+      display: block;
+      touch-action: none;
+    }
+
+    /* 右下角可點按氣泡提示框 */
+    .tip-bubble {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(18, 23, 33, 0.95);
+      border: 2px solid var(--accent-yellow);
+      border-radius: 12px;
+      padding: 14px 18px;
+      max-width: 380px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      line-height: 1.5;
+      font-size: 16px;
+      pointer-events: auto;
+      backdrop-filter: blur(6px);
+      z-index: 10;
+    }
+
+    .tip-bubble h4 {
+      color: var(--accent-yellow);
+      margin-bottom: 6px;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tip-finger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #2a3449;
+      border: 1px dashed var(--accent-yellow);
+      border-radius: 8px;
+      cursor: pointer;
+      color: #ffca28;
+      font-size: 16px;
+      font-weight: 700;
+      transition: all 0.25s ease;
+      user-select: none;
+      min-height: 44px;
+      font-family: inherit;
+    }
+
+    .tip-finger-btn:hover {
+      background: #394763;
+      border-color: #ffe082;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(251, 192, 45, 0.35);
+    }
+
+    .tip-finger-btn .finger-icon {
+      font-size: 22px;
+      display: inline-block;
+      animation: fingerBounce 1.2s infinite ease-in-out;
+    }
+
+    @keyframes fingerBounce {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(6px); }
+    }
+
+    .tip-answer-box {
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: rgba(33, 44, 63, 0.95);
+      border-left: 4px solid var(--accent-yellow);
+      border-radius: 6px;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #f5f7fa;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tip-answer-box strong {
+      color: var(--accent-yellow);
+    }
+
+    /* 迷思反例挑戰卡片 */
+    .quiz-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .quiz-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .quiz-card:hover {
+      border-color: var(--accent-orange);
+      transform: translateY(-2px);
+    }
+
+    .quiz-card.is-correct {
+      border-color: var(--accent-green);
+      background: rgba(0, 230, 118, 0.08);
+    }
+
+    .quiz-card.is-wrong {
+      border-color: var(--accent-red);
+      background: rgba(255, 82, 82, 0.08);
+    }
+
+    .quiz-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .quiz-hint-btn {
+      font-size: 16px;
+      color: var(--text-sub);
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px dashed var(--card-border);
+      margin-top: 4px;
+      width: 100%;
+    }
+
+    .quiz-card.is-correct .quiz-hint-btn,
+    .quiz-card.is-wrong .quiz-hint-btn {
+      display: none;
+    }
+
+    .quiz-result {
+      font-size: 16px;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 8px;
+      width: 100%;
+      display: none;
+      line-height: 1.5;
+    }
+
+    .quiz-card.is-correct .quiz-result {
+      display: block;
+      background: rgba(0, 230, 118, 0.18);
+      color: var(--accent-green);
+    }
+
+    .quiz-card.is-wrong .quiz-result {
+      display: block;
+      background: rgba(255, 82, 82, 0.18);
+      color: #ff8a80;
+    }
+
+    /* Tab 2 統計狀態條與算式解說區 */
+    .status-banner {
+      background: #1b2230;
+      border: 2px solid var(--accent-cyan);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .count-big {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent-yellow);
+    }
+
+    .equation-note {
+      font-size: 16px;
+      color: #cfd8dc;
+      background: rgba(0, 229, 255, 0.1);
+      padding: 8px 14px;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent-cyan);
+    }
+
+    /* Tab 3 控制工具浮動與狀態提示 */
+    .toast-msg {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(27, 34, 48, 0.96);
+      border: 2px solid var(--accent-orange);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      z-index: 30;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+    }
+
+    /* RWD 響應式斷點 */
+    @media (max-width: 900px) {
+      header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px;
+      }
+      .brand {
+        justify-content: space-between;
+      }
+      .tabs {
+        width: 100%;
+        justify-content: center;
+      }
+      .tab-btn {
+        flex: 1;
+        font-size: 16px;
+        padding: 8px 10px;
+        text-align: center;
+      }
+      .quiz-container {
+        grid-template-columns: 1fr;
+      }
+      .tip-bubble {
+        position: static;
+        max-width: 100%;
+        margin-top: 10px;
+      }
+      .board-container {
+        flex-direction: column;
+        min-height: 400px;
+      }
+      .toolbar-panel {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部導覽 -->
+  <header>
+    <div class="brand">
+      <span class="brand-badge">單元 6</span>
+      <h1>認識面積與平方公分 📐</h1>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(0)">1. 觀念澄清：什麼是 1 cm²？</button>
+      <button class="tab-btn" onclick="switchTab(1)">2. 動態鋪排與平方公分板</button>
+      <button class="tab-btn" onclick="switchTab(2)">3. 切割・旋轉・翻轉算面積</button>
+    </div>
+
+    <button class="audio-toggle" id="soundBtn" onclick="toggleSound()">
+      <span>🔊 音效：開</span>
+    </button>
+  </header>
+
+  <main>
+    <!-- ==================== TAB 1：觀念澄清室 ==================== -->
+    <section class="view-panel active" id="panel-0">
+      <div class="toolbar-panel">
+        <div class="prompt-text">
+          <span>💡 核心澄清：</span>
+          <span class="prompt-sub">面積不是「1公分 × 1公分算出來」，而是先規定 1cm² 再去<strong>「數有幾個」</strong>！</span>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-cyan" onclick="tab1StepRuler()">📏 1. 用直尺量邊長</button>
+          <button class="btn" style="border-color: var(--accent-red); color: #ff8a80;" onclick="tab1TestMyth()">❌ 2. 常見誤會：1cm × 1cm？</button>
+          <button class="btn btn-primary" onclick="tab1StampDef()">🏆 3. 蓋上數學定義印章</button>
+          <button class="btn" onclick="tab1Reset()">🔄 重設示範</button>
+        </div>
+      </div>
+
+      <div class="board-container">
+        <svg class="canvas-svg" id="svg-tab1" viewBox="0 0 1000 480" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="grid-bg-1" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1d2638" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid-bg-1)" />
+
+          <!-- 左側主舞台：單一白色方瓦放大觀察 -->
+          <g transform="translate(80, 50)">
+            <rect x="0" y="0" width="410" height="380" rx="16" fill="#18202e" stroke="#2e384d" stroke-width="2" />
+            <text x="205" y="34" font-size="19" font-weight="bold" fill="#00e5ff" text-anchor="middle">🔍 白色方瓦放大鏡（邊長 1 公分正方形）</text>
+
+            <!-- 正方形方瓦本體 -->
+            <rect id="tile-main" x="135" y="105" width="140" height="140" rx="4" fill="#f5f7fa" stroke="#90a4ae" stroke-width="4" />
+
+            <!-- 直角記號 -->
+            <g id="tile-right-angles" opacity="0">
+              <polyline points="135,123 153,123 153,105" fill="none" stroke="#ff7a1a" stroke-width="3" />
+              <polyline points="275,123 257,123 257,105" fill="none" stroke="#ff7a1a" stroke-width="3" />
+              <polyline points="135,227 153,227 153,245" fill="none" stroke="#ff7a1a" stroke-width="3" />
+              <polyline points="275,227 257,227 257,245" fill="none" stroke="#ff7a1a" stroke-width="3" />
+            </g>
+
+            <!-- 邊長直尺測量標示 -->
+            <g id="ruler-overlay" opacity="0" style="transition: opacity 0.3s;">
+              <!-- 上方直尺 -->
+              <rect x="125" y="64" width="160" height="32" rx="4" fill="#fbc02d" stroke="#f57f17" stroke-width="2" />
+              <line x1="135" y1="84" x2="135" y2="96" stroke="#12161f" stroke-width="3" />
+              <line x1="205" y1="88" x2="205" y2="96" stroke="#12161f" stroke-width="2" />
+              <line x1="275" y1="84" x2="275" y2="96" stroke="#12161f" stroke-width="3" />
+              <text x="205" y="83" font-size="16" font-weight="bold" fill="#12161f" text-anchor="middle">1 公分 (1 cm)</text>
+
+              <!-- 左側直尺 -->
+              <rect x="92" y="95" width="34" height="160" rx="4" fill="#fbc02d" stroke="#f57f17" stroke-width="2" />
+              <line x1="114" y1="105" x2="126" y2="105" stroke="#12161f" stroke-width="3" />
+              <line x1="118" y1="175" x2="126" y2="175" stroke="#12161f" stroke-width="2" />
+              <line x1="114" y1="245" x2="126" y2="245" stroke="#12161f" stroke-width="3" />
+              <text x="80" y="175" font-size="16" font-weight="bold" fill="#fbc02d" text-anchor="end">1 公分</text>
+              <text x="80" y="198" font-size="16" font-weight="bold" fill="#fbc02d" text-anchor="end">(1 cm)</text>
+            </g>
+
+            <!-- 常見迷思紅叉蓋章 -->
+            <g id="myth-stamp" opacity="0" style="transition: opacity 0.25s;">
+              <rect x="30" y="265" width="350" height="96" rx="10" fill="rgba(255, 82, 82, 0.16)" stroke="#ff5252" stroke-width="2" />
+              <text x="205" y="295" font-size="18" font-weight="bold" fill="#ff8a80" text-anchor="middle">❌ 誤會：1 公分 × 1 公分 算出來的？</text>
+              <text x="205" y="322" font-size="16" fill="#f5f7fa" text-anchor="middle">不對喔！面積不是拿尺乘邊長！</text>
+              <text x="205" y="346" font-size="16" fill="#fbc02d" text-anchor="middle">三年級是先「規定 1 cm²」，再數有幾個！</text>
+            </g>
+
+            <!-- 正確數學定義印章 -->
+            <g id="def-stamp" opacity="0" style="transition: opacity 0.25s;">
+              <rect x="135" y="105" width="140" height="140" rx="4" fill="rgba(255, 122, 26, 0.22)" stroke="#ff7a1a" stroke-width="4" />
+              <text x="205" y="168" font-size="22" font-weight="bold" fill="#12161f" text-anchor="middle">1 平方公分</text>
+              <text x="205" y="198" font-size="20" font-weight="bold" fill="#d84315" text-anchor="middle">(1 cm²)</text>
+
+              <rect x="20" y="265" width="370" height="96" rx="10" fill="rgba(0, 230, 118, 0.14)" stroke="#00e676" stroke-width="2" />
+              <text x="205" y="294" font-size="18" font-weight="bold" fill="#00e676" text-anchor="middle">🏆 公約定義：邊長 1 公分的正方形</text>
+              <text x="205" y="322" font-size="16" fill="#f5f7fa" text-anchor="middle">這塊「面」的大小叫做 1 平方公分 (1 cm²)</text>
+              <text x="205" y="346" font-size="16" fill="#fbc02d" text-anchor="middle">👉 重點：面積就是「數數看有幾個 1 cm²」</text>
+            </g>
+          </g>
+
+          <!-- 右側互動實驗：點數 1cm² 的合體體驗（排法不同，只要個數一樣，面積就一樣） -->
+          <g transform="translate(520, 50)">
+            <rect x="0" y="0" width="420" height="300" rx="16" fill="#18202e" stroke="#2e384d" stroke-width="2" />
+            <text x="210" y="34" font-size="19" font-weight="bold" fill="#fbc02d" text-anchor="middle">🧩 動手點數：點選格子排排看（共幾個 1 cm²？）</text>
+            <text x="210" y="60" font-size="16" fill="#9ea9bf" text-anchor="middle">點擊下方網格加入或拿掉 1 cm² 白色方瓦，觀察面積變化</text>
+
+            <!-- 4x2 可點選小網格 (每格 60x60) -->
+            <g id="mini-sandbox-grid" transform="translate(90, 80)"></g>
+
+            <!-- 即時點數結果 -->
+            <rect x="30" y="220" width="360" height="62" rx="10" fill="#12161f" stroke="#00e5ff" stroke-width="2" />
+            <text id="sandbox-count-text" x="210" y="257" font-size="20" font-weight="bold" fill="#00e5ff" text-anchor="middle">目前：3 個 1 cm² ＝ 3 平方公分</text>
+          </g>
+        </svg>
+
+        <!-- 右下角點按手指揭曉解答 -->
+        <div class="tip-bubble">
+          <h4>💡 教學重點問答</h4>
+          <p style="margin-bottom: 8px;">「為什麼邊長 1 公分正方形的面積是 1 平方公分？」</p>
+          <button id="btn-reveal-tip-1" class="tip-finger-btn" onclick="toggleTipAnswer(1)">
+            <span class="finger-icon">👉</span>
+            <span id="btn-reveal-tip-text-1">點按手指看重點解答</span>
+          </button>
+          <div id="tip-answer-box-1" class="tip-answer-box" style="display: none;">
+            👉 這是數學家的<strong>「規定（定義）」</strong>！不是 1×1 算出來的，而是先規定好 1 cm² 的大小，再<strong>去數圖形裡有幾個 1 cm²</strong>！
+          </div>
+        </div>
+      </div>
+
+      <!-- 迷思反例挑戰區（點選後才顯示反饋） -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <h3 style="font-size: 18px;">🔍 觀念快問快答：下列說法對嗎？（請點選卡片測試）</h3>
+        <button class="btn" onclick="resetQuizCards()" style="font-size: 16px; padding: 6px 14px;">🔄 清除重測</button>
+      </div>
+      <div class="quiz-container">
+        <div class="quiz-card" onclick="checkQuiz(this, false)">
+          <div class="quiz-title">說法 A：「1 cm² 是因為 1 公分 × 1 公分算出來的。」</div>
+          <div class="quiz-hint-btn">👆 點我檢查對不對</div>
+          <div class="quiz-result">❌ 不對喔！1 平方公分是先「規定」邊長 1 公分正方形的面積大小，不是乘出來的！</div>
+        </div>
+
+        <div class="quiz-card" onclick="checkQuiz(this, true)">
+          <div class="quiz-title">說法 B：「5 個 1 cm² 排成長條形或 L 形，面積都是 5 cm²。」</div>
+          <div class="quiz-hint-btn">👆 點我檢查對不對</div>
+          <div class="quiz-result">✅ 完全正確！只要都是 5 個 1 平方公分合起來，不管怎麼排，面積都是 5 平方公分！</div>
+        </div>
+
+        <div class="quiz-card" onclick="checkQuiz(this, true)">
+          <div class="quiz-title">說法 C：「用透明平方公分板蓋在圖形上，數幾格就是幾 cm²。」</div>
+          <div class="quiz-hint-btn">👆 點我檢查對不對</div>
+          <div class="quiz-result">✅ 太棒了！每格都是 1 cm²，把格線對齊邊線覆蓋上去，就能直接點數面積！</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2：動態鋪排室 ==================== -->
+    <section class="view-panel" id="panel-1">
+      <div class="toolbar-panel">
+        <div class="btn-group">
+          <button class="btn btn-active-mode" id="shape-btn-0" onclick="selectTab2Shape(0)">卡片 A (4×3)</button>
+          <button class="btn" id="shape-btn-1" onclick="selectTab2Shape(1)">課本 P.91 卡片 (6×4)</button>
+          <button class="btn" id="shape-btn-2" onclick="selectTab2Shape(2)">正方形 (5×5)</button>
+          <button class="btn" id="shape-btn-3" onclick="selectTab2Shape(3)">階梯 L 形 (14格)</button>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-cyan" id="mode-btn-tile" onclick="setTab2Mode('tile')">🧱 逐塊鋪方瓦</button>
+          <button class="btn" id="mode-btn-row" onclick="setTab2Mode('row')">📏 一排一排鋪</button>
+          <button class="btn" id="mode-btn-board" onclick="setTab2Mode('board')">🔍 拖曳平方公分板</button>
+        </div>
+      </div>
+
+      <div class="status-banner">
+        <div>
+          <span style="font-size: 17px; color: var(--text-sub);">點數面積結果：</span>
+          <span class="count-big" id="tab2-count-display">已鋪 0 個 1 cm² ＝ 0 平方公分</span>
+        </div>
+        <div class="equation-note" id="tab2-equation-note">
+          💡 點擊圖形內的格子放入 1 cm² 白色方瓦，或按右側自動鋪排！
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="tab2-action-btn" onclick="runTab2Action()">⚡ 自動依序鋪滿點數</button>
+          <button class="btn" onclick="resetTab2Current()">🔄 清空重鋪</button>
+        </div>
+      </div>
+
+      <div class="board-container">
+        <svg class="canvas-svg" id="svg-tab2" viewBox="0 0 1000 480" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="grid-bg-2" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1d2638" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid-bg-2)" />
+
+          <!-- 目標卡片底圖群組 -->
+          <g id="tab2-card-group"></g>
+
+          <!-- 鋪上去的方瓦層 -->
+          <g id="tab2-tiles-layer"></g>
+
+          <!-- 可拖曳透明平方公分板 (Mode = board 時出現) -->
+          <g id="transparent-board" style="display: none; cursor: grab;"></g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3：切割・旋轉・翻轉算面積 ==================== -->
+    <section class="view-panel" id="panel-2">
+      <div class="toolbar-panel">
+        <div class="btn-group">
+          <button class="btn btn-active-mode" id="cut-lvl-0" onclick="loadCutLevel(0)">關卡 1：斜角梯形 (4 cm²)</button>
+          <button class="btn" id="cut-lvl-1" onclick="loadCutLevel(1)">關卡 2：火箭造型 (5 cm²)</button>
+          <button class="btn" id="cut-lvl-2" onclick="loadCutLevel(2)">關卡 3：跨兩格大三角形</button>
+          <button class="btn" id="cut-lvl-3" onclick="loadCutLevel(3)">關卡 4：雙翻轉綜合 (5 cm²)</button>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-cut-start" onclick="performCut()">✂️ 1. 切割斜角</button>
+          <button class="btn btn-cyan" onclick="transformSelected('rotCCW')" title="逆時針轉 90 度">↺ 左轉 90°</button>
+          <button class="btn btn-cyan" onclick="transformSelected('rotCW')" title="順時針轉 90 度">↻ 右轉 90°</button>
+          <button class="btn btn-cyan" onclick="transformSelected('flipH')" title="左右水平翻轉">↔️ 水平翻轉</button>
+          <button class="btn btn-cyan" onclick="transformSelected('flipV')" title="上下垂直翻轉">↕️ 垂直翻轉</button>
+          <button class="btn btn-green" onclick="recountCutArea()">🔢 2. 重新點數面積</button>
+          <button class="btn" onclick="resetCutLevel()">🔄 恢復原狀</button>
+        </div>
+      </div>
+
+      <div class="status-banner" style="border-color: var(--accent-yellow);">
+        <div>
+          <span style="font-size: 17px; color: var(--text-sub);">步驟提示：</span>
+          <span style="font-size: 18px; font-weight: 700; color: var(--accent-yellow);" id="tab3-status-text">請先按「✂️ 切割斜角」，再點選橘色碎片進行「旋轉 / 翻轉」並拖曳到缺角處拼成整格！</span>
+        </div>
+        <div style="font-size: 20px; font-weight: 800; color: var(--accent-green);" id="tab3-area-result">目前總面積：待拼湊點數</div>
+      </div>
+
+      <div class="board-container">
+        <div id="tab3-toast" class="toast-msg">提示訊息</div>
+        <svg class="canvas-svg" id="svg-tab3" viewBox="0 0 1000 480" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="grid-bg-3" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#243045" stroke-width="1.5"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid-bg-3)" />
+
+          <!-- 1cm 比例尺標示 -->
+          <g transform="translate(30, 25)">
+            <rect x="0" y="0" width="160" height="36" rx="8" fill="rgba(18, 22, 31, 0.85)" stroke="#2e384d" stroke-width="1.5" />
+            <rect x="12" y="8" width="20" height="20" fill="rgba(0, 229, 255, 0.3)" stroke="#00e5ff" stroke-width="2" />
+            <text x="42" y="24" font-size="16" font-weight="bold" fill="#f5f7fa">1 格 ＝ 1 cm²</text>
+          </g>
+
+          <!-- 固定底圖層（含完整方格與目標缺口） -->
+          <g id="tab3-base-layer"></g>
+
+          <!-- 可切割移動旋轉翻轉的碎片層 -->
+          <g id="tab3-pieces-layer"></g>
+
+          <!-- 點數標號動畫層 -->
+          <g id="tab3-numbers-layer"></g>
+        </svg>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /* ==================== 全域音效系統 ==================== */
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.12, vol = 0.15) {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundBtn').innerHTML = soundEnabled ? '<span>🔊 音效：開</span>' : '<span>🔇 音效：關</span>';
+      if (soundEnabled) playTone(587, 'sine', 0.1);
+    }
+
+    /* 頁面切換 */
+    function switchTab(index) {
+      playTone(523, 'sine', 0.08);
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === index);
+      });
+      document.querySelectorAll('.view-panel').forEach((panel, idx) => {
+        panel.classList.toggle('active', idx === index);
+      });
+      if (index === 1) renderTab2();
+      if (index === 2) renderCutLevel();
+    }
+
+    function toggleTipAnswer(tabNum) {
+      const box = document.getElementById(`tip-answer-box-${tabNum}`);
+      const btnText = document.getElementById(`btn-reveal-tip-text-${tabNum}`);
+      if (!box) return;
+      if (box.style.display === 'none' || box.style.display === '') {
+        box.style.display = 'block';
+        if (btnText) btnText.textContent = '點按收合重點解答';
+        playTone(784, 'sine', 0.15);
+      } else {
+        box.style.display = 'none';
+        if (btnText) btnText.textContent = '點按手指看重點解答';
+        playTone(523, 'sine', 0.1);
+      }
+    }
+
+    /* ==================== TAB 1：觀念澄清與沙盒 ==================== */
+    function tab1StepRuler() {
+      playTone(659, 'triangle', 0.12);
+      document.getElementById('ruler-overlay').setAttribute('opacity', '1');
+      document.getElementById('tile-right-angles').setAttribute('opacity', '1');
+    }
+
+    function tab1TestMyth() {
+      playTone(220, 'sawtooth', 0.25);
+      document.getElementById('myth-stamp').setAttribute('opacity', '1');
+      document.getElementById('def-stamp').setAttribute('opacity', '0');
+    }
+
+    function tab1StampDef() {
+      playTone(880, 'sine', 0.22);
+      document.getElementById('ruler-overlay').setAttribute('opacity', '1');
+      document.getElementById('tile-right-angles').setAttribute('opacity', '1');
+      document.getElementById('myth-stamp').setAttribute('opacity', '0');
+      document.getElementById('def-stamp').setAttribute('opacity', '1');
+    }
+
+    function tab1Reset() {
+      playTone(440, 'sine', 0.1);
+      document.getElementById('ruler-overlay').setAttribute('opacity', '0');
+      document.getElementById('tile-right-angles').setAttribute('opacity', '0');
+      document.getElementById('myth-stamp').setAttribute('opacity', '0');
+      document.getElementById('def-stamp').setAttribute('opacity', '0');
+    }
+
+    // Tab 1 右側 4x2 點數沙盒
+    const sandboxState = [
+      [true, true, true, false],
+      [false, false, false, false]
+    ];
+
+    function renderSandboxGrid() {
+      const g = document.getElementById('mini-sandbox-grid');
+      if (!g) return;
+      g.innerHTML = '';
+      let count = 0;
+      const cellSize = 60;
+      for (let r = 0; r < 2; r++) {
+        for (let c = 0; c < 4; c++) {
+          const active = sandboxState[r][c];
+          if (active) count++;
+          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('x', c * cellSize + 2);
+          rect.setAttribute('y', r * cellSize + 2);
+          rect.setAttribute('width', cellSize - 4);
+          rect.setAttribute('height', cellSize - 4);
+          rect.setAttribute('rx', 6);
+          rect.setAttribute('fill', active ? '#f5f7fa' : '#232c3d');
+          rect.setAttribute('stroke', active ? '#ff7a1a' : '#3a4761');
+          rect.setAttribute('stroke-width', active ? '3' : '1.5');
+          rect.style.cursor = 'pointer';
+          rect.onclick = () => {
+            sandboxState[r][c] = !sandboxState[r][c];
+            playTone(sandboxState[r][c] ? 698 : 392, 'sine', 0.1);
+            renderSandboxGrid();
+          };
+          g.appendChild(rect);
+
+          if (active) {
+            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txt.setAttribute('x', c * cellSize + cellSize / 2);
+            txt.setAttribute('y', r * cellSize + cellSize / 2 + 6);
+            txt.setAttribute('font-size', '16');
+            txt.setAttribute('font-weight', 'bold');
+            txt.setAttribute('fill', '#d84315');
+            txt.setAttribute('text-anchor', 'middle');
+            txt.style.pointerEvents = 'none';
+            txt.textContent = '1cm²';
+            g.appendChild(txt);
+          }
+        }
+      }
+      document.getElementById('sandbox-count-text').textContent = `目前：${count} 個 1 cm² ＝ ${count} 平方公分`;
+    }
+
+    function checkQuiz(cardEl, isCorrect) {
+      if (cardEl.classList.contains('is-correct') || cardEl.classList.contains('is-wrong')) return;
+      if (isCorrect) {
+        playTone(880, 'sine', 0.2);
+        cardEl.classList.add('is-correct');
+      } else {
+        playTone(220, 'sawtooth', 0.25);
+        cardEl.classList.add('is-wrong');
+      }
+    }
+
+    function resetQuizCards() {
+      playTone(500, 'sine', 0.08);
+      document.querySelectorAll('#panel-0 .quiz-card').forEach(card => {
+        card.classList.remove('is-correct', 'is-wrong');
+      });
+    }
+
+    /* ==================== TAB 2：動態鋪排與平方公分板 ==================== */
+    const tab2Shapes = [
+      { name: '卡片 A (4×3)', cols: 4, rows: 3, isRect: true, mask: [[1,1,1,1],[1,1,1,1],[1,1,1,1]] },
+      { name: '課本 P.91 卡片 (6×4)', cols: 6, rows: 4, isRect: true, mask: [[1,1,1,1,1,1],[1,1,1,1,1,1],[1,1,1,1,1,1],[1,1,1,1,1,1]] },
+      { name: '正方形 (5×5)', cols: 5, rows: 5, isRect: true, mask: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]] },
+      { name: '階梯 L 形', cols: 5, rows: 4, isRect: false, mask: [[1,1,0,0,0],[1,1,1,0,0],[1,1,1,1,0],[1,1,1,1,1]] }
+    ];
+
+    let curShapeIdx = 0;
+    let tab2Mode = 'tile'; // 'tile' | 'row' | 'board'
+    let placedTiles = new Set();
+    let currentRowFilled = 0;
+    let tab2AnimTimer = null;
+    const t2Cell = 58;
+    let t2Origin = { x: 240, y: 100 };
+
+    // 透明平方公分板位置
+    let boardPos = { x: 640, y: 80 };
+    let isBoardSnapped = false;
+    let boardCounted = false;
+
+    function selectTab2Shape(idx) {
+      curShapeIdx = idx;
+      document.querySelectorAll('[id^="shape-btn-"]').forEach((b, i) => {
+        b.classList.toggle('btn-active-mode', i === idx);
+      });
+      playTone(587, 'sine', 0.08);
+      resetTab2Current();
+    }
+
+    function setTab2Mode(mode) {
+      tab2Mode = mode;
+      document.getElementById('mode-btn-tile').classList.toggle('btn-cyan', mode === 'tile');
+      document.getElementById('mode-btn-row').classList.toggle('btn-cyan', mode === 'row');
+      document.getElementById('mode-btn-board').classList.toggle('btn-cyan', mode === 'board');
+      playTone(622, 'sine', 0.08);
+      resetTab2Current();
+    }
+
+    function resetTab2Current() {
+      if (tab2AnimTimer) { clearInterval(tab2AnimTimer); tab2AnimTimer = null; }
+      placedTiles.clear();
+      currentRowFilled = 0;
+      boardPos = { x: 620, y: 90 };
+      isBoardSnapped = false;
+      boardCounted = false;
+      renderTab2();
+    }
+
+    function getTotalShapeCells(shape) {
+      let total = 0;
+      for (let r = 0; r < shape.rows; r++) {
+        for (let c = 0; c < shape.cols; c++) {
+          if (shape.mask[r][c]) total++;
+        }
+      }
+      return total;
+    }
+
+    function renderTab2() {
+      const shape = tab2Shapes[curShapeIdx];
+      const totalCells = getTotalShapeCells(shape);
+      if (tab2Mode === 'board') {
+        t2Origin = { x: 110, y: Math.max(70, (480 - shape.rows * t2Cell) / 2) };
+      } else {
+        t2Origin = { x: (1000 - shape.cols * t2Cell) / 2, y: Math.max(70, (480 - shape.rows * t2Cell) / 2) };
+      }
+
+      const cardGroup = document.getElementById('tab2-card-group');
+      const tilesLayer = document.getElementById('tab2-tiles-layer');
+      const boardGroup = document.getElementById('transparent-board');
+      cardGroup.innerHTML = '';
+      tilesLayer.innerHTML = '';
+      boardGroup.innerHTML = '';
+
+      // 繪製目標圖形卡片外輪廓與底色
+      for (let r = 0; r < shape.rows; r++) {
+        for (let c = 0; c < shape.cols; c++) {
+          if (!shape.mask[r][c]) continue;
+          const x = t2Origin.x + c * t2Cell;
+          const y = t2Origin.y + r * t2Cell;
+          const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bg.setAttribute('x', x);
+          bg.setAttribute('y', y);
+          bg.setAttribute('width', t2Cell);
+          bg.setAttribute('height', t2Cell);
+          bg.setAttribute('fill', '#28354a');
+          bg.setAttribute('stroke', tab2Mode === 'board' ? '#28354a' : '#4a6085');
+          bg.setAttribute('stroke-width', '1.5');
+          bg.style.cursor = tab2Mode === 'tile' ? 'pointer' : 'default';
+
+          if (tab2Mode === 'tile') {
+            bg.onclick = () => {
+              const key = `${r},${c}`;
+              if (placedTiles.has(key)) placedTiles.delete(key);
+              else placedTiles.add(key);
+              playTone(placedTiles.has(key) ? 740 : 400, 'sine', 0.08);
+              renderTab2();
+            };
+          }
+          cardGroup.appendChild(bg);
+        }
+      }
+
+      // 繪製外框亮線，呈現「沒有格線的實體卡片」視覺感（特別是對透明板模式）
+      if (shape.isRect) {
+        const outline = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        outline.setAttribute('x', t2Origin.x);
+        outline.setAttribute('y', t2Origin.y);
+        outline.setAttribute('width', shape.cols * t2Cell);
+        outline.setAttribute('height', shape.rows * t2Cell);
+        outline.setAttribute('fill', 'none');
+        outline.setAttribute('stroke', '#00e5ff');
+        outline.setAttribute('stroke-width', '4');
+        outline.style.pointerEvents = 'none';
+        cardGroup.appendChild(outline);
+      }
+
+      // 在 tile 或 row 模式下，繪製已鋪放的方瓦並依序編號
+      if (tab2Mode !== 'board') {
+        boardGroup.style.display = 'none';
+        let seq = 0;
+        for (let r = 0; r < shape.rows; r++) {
+          for (let c = 0; c < shape.cols; c++) {
+            const key = `${r},${c}`;
+            if (placedTiles.has(key)) {
+              seq++;
+              const x = t2Origin.x + c * t2Cell;
+              const y = t2Origin.y + r * t2Cell;
+              const tile = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+              tile.setAttribute('x', x + 2);
+              tile.setAttribute('y', y + 2);
+              tile.setAttribute('width', t2Cell - 4);
+              tile.setAttribute('height', t2Cell - 4);
+              tile.setAttribute('rx', 4);
+              tile.setAttribute('fill', '#f5f7fa');
+              tile.setAttribute('stroke', '#ff7a1a');
+              tile.setAttribute('stroke-width', '2.5');
+              if (tab2Mode === 'tile') {
+                tile.style.cursor = 'pointer';
+                tile.onclick = () => { placedTiles.delete(key); playTone(400, 'sine', 0.08); renderTab2(); };
+              }
+              tilesLayer.appendChild(tile);
+
+              const numTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+              numTxt.setAttribute('x', x + t2Cell / 2);
+              numTxt.setAttribute('y', y + t2Cell / 2 + 6);
+              numTxt.setAttribute('font-size', '18');
+              numTxt.setAttribute('font-weight', 'bold');
+              numTxt.setAttribute('fill', '#d84315');
+              numTxt.setAttribute('text-anchor', 'middle');
+              numTxt.style.pointerEvents = 'none';
+              numTxt.textContent = seq;
+              tilesLayer.appendChild(numTxt);
+            }
+          }
+        }
+
+        const count = placedTiles.size;
+        document.getElementById('tab2-count-display').textContent = `已鋪 ${count} 個 1 cm² ＝ ${count} 平方公分`;
+        const actionBtn = document.getElementById('tab2-action-btn');
+
+        if (tab2Mode === 'tile') {
+          actionBtn.textContent = '⚡ 自動依序鋪滿點數';
+          document.getElementById('tab2-equation-note').textContent =
+            count === totalCells
+              ? `🎉 太棒了！總共鋪滿了 ${totalCells} 個 1 cm²，面積是 ${totalCells} 平方公分！`
+              : '💡 點擊圖形內格子逐塊鋪上白色方瓦，或按右側按鈕自動示範！';
+        } else {
+          actionBtn.textContent = currentRowFilled < shape.rows ? `➕ 鋪第 ${currentRowFilled + 1} 排` : '✅ 已全部鋪滿';
+          if (shape.isRect) {
+            document.getElementById('tab2-equation-note').textContent =
+              currentRowFilled === 0
+                ? `💡 按右側「鋪第 1 排」，看看每排有幾個 1 cm²！`
+                : `一排有 ${shape.cols} 個 1 cm² × 共 ${currentRowFilled} 排 ＝ ${shape.cols * currentRowFilled} 個 1 cm²（不是邊長乘邊長喔！）`;
+          } else {
+            document.getElementById('tab2-equation-note').textContent =
+              `階梯形每排個數不同，逐排點數累加：目前共 ${count} 個 1 cm²！`;
+          }
+        }
+      } else {
+        // 透明平方公分板模式
+        boardGroup.style.display = 'block';
+        const bw = Math.max(shape.cols, 6) * t2Cell;
+        const bh = Math.max(shape.rows, 4) * t2Cell;
+        boardGroup.setAttribute('transform', `translate(${boardPos.x}, ${boardPos.y})`);
+
+        // 透明底板
+        const plate = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        plate.setAttribute('x', 0);
+        plate.setAttribute('y', 0);
+        plate.setAttribute('width', bw);
+        plate.setAttribute('height', bh);
+        plate.setAttribute('rx', 6);
+        plate.setAttribute('fill', 'rgba(0, 229, 255, 0.14)');
+        plate.setAttribute('stroke', isBoardSnapped ? '#00e676' : '#00e5ff');
+        plate.setAttribute('stroke-width', '4');
+        boardGroup.appendChild(plate);
+
+        // 透明板上的格線
+        for (let c = 1; c < bw / t2Cell; c++) {
+          const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          ln.setAttribute('x1', c * t2Cell); ln.setAttribute('y1', 0);
+          ln.setAttribute('x2', c * t2Cell); ln.setAttribute('y2', bh);
+          ln.setAttribute('stroke', 'rgba(255, 255, 255, 0.55)');
+          ln.setAttribute('stroke-width', '1.5');
+          boardGroup.appendChild(ln);
+        }
+        for (let r = 1; r < bh / t2Cell; r++) {
+          const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          ln.setAttribute('x1', 0); ln.setAttribute('y1', r * t2Cell);
+          ln.setAttribute('x2', bw); ln.setAttribute('y2', r * t2Cell);
+          ln.setAttribute('stroke', 'rgba(255, 255, 255, 0.55)');
+          ln.setAttribute('stroke-width', '1.5');
+          boardGroup.appendChild(ln);
+        }
+
+        // 標籤：透明平方公分板
+        const bLbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        bLbl.setAttribute('x', bw / 2);
+        bLbl.setAttribute('y', -12);
+        bLbl.setAttribute('font-size', '18');
+        bLbl.setAttribute('font-weight', 'bold');
+        bLbl.setAttribute('fill', isBoardSnapped ? '#00e676' : '#00e5ff');
+        bLbl.setAttribute('text-anchor', 'middle');
+        bLbl.textContent = isBoardSnapped ? '✅ 已對齊邊線！' : '✋ 拖曳透明平方公分板蓋上左側卡片';
+        boardGroup.appendChild(bLbl);
+
+        // 若已磁吸對齊且點擊過點數，顯示格子編號
+        if (isBoardSnapped && boardCounted) {
+          let seq = 0;
+          for (let r = 0; r < shape.rows; r++) {
+            for (let c = 0; c < shape.cols; c++) {
+              if (!shape.mask[r][c]) continue;
+              seq++;
+              const cx = t2Origin.x + c * t2Cell + t2Cell / 2;
+              const cy = t2Origin.y + r * t2Cell + t2Cell / 2 + 6;
+              const num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+              num.setAttribute('x', cx);
+              num.setAttribute('y', cy);
+              num.setAttribute('font-size', '20');
+              num.setAttribute('font-weight', 'bold');
+              num.setAttribute('fill', '#fbc02d');
+              num.setAttribute('text-anchor', 'middle');
+              num.textContent = seq;
+              tilesLayer.appendChild(num);
+            }
+          }
+        }
+
+        const actionBtn = document.getElementById('tab2-action-btn');
+        actionBtn.textContent = '🔢 點數覆蓋的格子數';
+        if (isBoardSnapped) {
+          document.getElementById('tab2-count-display').textContent = boardCounted
+            ? `對齊點數完成：共 ${totalCells} 個 1 cm² ＝ ${totalCells} 平方公分`
+            : '平方公分板已對齊！請按「🔢 點數覆蓋的格子數」';
+          document.getElementById('tab2-equation-note').textContent = '💡 看！每格都是 1 cm²，透明板幫我們一次把所有方格都框出來了！';
+        } else {
+          document.getElementById('tab2-count-display').textContent = '請將右側透明「平方公分板」拖曳過去蓋住左側卡片';
+          document.getElementById('tab2-equation-note').textContent = '💡 課本 P.90：平方公分板的格線要和圖形的邊線對齊喔！';
+        }
+      }
+    }
+
+    function runTab2Action() {
+      const shape = tab2Shapes[curShapeIdx];
+      if (tab2Mode === 'tile') {
+        if (tab2AnimTimer) return;
+        placedTiles.clear();
+        const coords = [];
+        for (let r = 0; r < shape.rows; r++) {
+          for (let c = 0; c < shape.cols; c++) {
+            if (shape.mask[r][c]) coords.push(`${r},${c}`);
+          }
+        }
+        let i = 0;
+        tab2AnimTimer = setInterval(() => {
+          if (i < coords.length) {
+            placedTiles.add(coords[i]);
+            playTone(500 + i * 18, 'sine', 0.06);
+            i++;
+            renderTab2();
+          } else {
+            clearInterval(tab2AnimTimer);
+            tab2AnimTimer = null;
+            playTone(1046, 'sine', 0.25);
+          }
+        }, 120);
+      } else if (tab2Mode === 'row') {
+        if (currentRowFilled < shape.rows) {
+          for (let c = 0; c < shape.cols; c++) {
+            if (shape.mask[currentRowFilled][c]) placedTiles.add(`${currentRowFilled},${c}`);
+          }
+          currentRowFilled++;
+          playTone(587 + currentRowFilled * 80, 'triangle', 0.14);
+          renderTab2();
+        }
+      } else if (tab2Mode === 'board') {
+        if (!isBoardSnapped) {
+          // 自動幫忙移過去對齊
+          boardPos = { x: t2Origin.x, y: t2Origin.y };
+          isBoardSnapped = true;
+        }
+        boardCounted = true;
+        playTone(987, 'sine', 0.22);
+        renderTab2();
+      }
+    }
+
+    // Tab 2 透明平方公分板拖曳邏輯
+    let isDraggingBoard = false;
+    let boardDragStart = { x: 0, y: 0 };
+    const svgTab2 = document.getElementById('svg-tab2');
+    const transparentBoardEl = document.getElementById('transparent-board');
+
+    transparentBoardEl.addEventListener('pointerdown', (e) => {
+      isDraggingBoard = true;
+      transparentBoardEl.setPointerCapture(e.pointerId);
+      const rect = svgTab2.getBoundingClientRect();
+      const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+      const ptY = (e.clientY - rect.top) * (480 / rect.height);
+      boardDragStart = { x: ptX - boardPos.x, y: ptY - boardPos.y };
+      playTone(440, 'sine', 0.05);
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDraggingBoard) return;
+      const rect = svgTab2.getBoundingClientRect();
+      const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+      const ptY = (e.clientY - rect.top) * (480 / rect.height);
+      let nx = ptX - boardDragStart.x;
+      let ny = ptY - boardDragStart.y;
+
+      const dist = Math.hypot(nx - t2Origin.x, ny - t2Origin.y);
+      if (dist < 45) {
+        nx = t2Origin.x;
+        ny = t2Origin.y;
+        if (!isBoardSnapped) {
+          isBoardSnapped = true;
+          playTone(880, 'sine', 0.15);
+        }
+      } else {
+        isBoardSnapped = false;
+        boardCounted = false;
+      }
+      boardPos = { x: nx, y: ny };
+      renderTab2();
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDraggingBoard = false;
+    });
+
+    /* ==================== TAB 3：切割・旋轉・翻轉算面積 ==================== */
+    // 網格一格 = 60px × 60px，代表 1 cm²
+    // 三角形幾何輔助：以局部網格單位 (0~1 或 0~2) 定義多邊形頂點，並計算旋轉與翻轉後的規格化形狀
+    const G = 60;
+    const GRID_OX = 260;
+    const GRID_OY = 120;
+
+    // 預定義標準半格類型（相對於單一 1x1 方格，便於精確判斷拼合）
+    // 類型命名（缺口與對應碎片方向）：
+    // 'BL': (0,0),(0,1),(1,1) [直角在左下]
+    // 'TR': (0,0),(1,0),(1,1) [直角在右上]
+    // 'BR': (1,0),(0,1),(1,1) [直角在右下]
+    // 'TL': (0,0),(1,0),(0,1) [直角在左上]
+    // 雙格大三角形 (1x2)：
+    // 'D2_BL': (0,0),(0,2),(1,2)
+    // 'D2_TR': (0,0),(1,0),(1,2)
+    const TRI_VERTS = {
+      'BL': [[0,0], [0,1], [1,1]],
+      'TR': [[0,0], [1,0], [1,1]],
+      'BR': [[1,0], [0,1], [1,1]],
+      'TL': [[0,0], [1,0], [0,1]],
+      'D2_BL': [[0,0], [0,2], [1,2]],
+      'D2_TR': [[0,0], [1,0], [1,2]]
+    };
+
+    const cutLevels = [
+      {
+        name: '斜角梯形 (4 cm²)',
+        totalExpected: 4,
+        fullCells: [[1,2], [2,2], [3,2]], // 3 個完整格
+        fixedHalves: [{ c: 0, r: 2, shape: 'BR', need: 'TL' }], // 第 (0,2) 格固定了右下，需要左上來拼滿
+        pieces: [
+          {
+            id: 'p1',
+            origC: 4, origR: 2,
+            baseShape: 'BL', // 一開始在右側是左下三角形，需要「垂直翻轉」或「順時針轉90度」才能變成 TL!
+            targetC: 0, targetR: 2, targetNeed: 'TL'
+          }
+        ]
+      },
+      {
+        name: '火箭造型 (5 cm²)',
+        totalExpected: 5,
+        fullCells: [[2,1], [1,2], [2,2], [3,2]], // 4 格
+        fixedHalves: [{ c: 1, r: 1, shape: 'BR', need: 'TL' }],
+        pieces: [
+          {
+            id: 'p1',
+            origC: 3, origR: 1,
+            baseShape: 'BL', // 需旋轉或垂直翻轉變成 TL 拼進 (1,1)
+            targetC: 1, targetR: 1, targetNeed: 'TL'
+          }
+        ]
+      },
+      {
+        name: '跨兩格大三角形 (總面積 2 cm²)',
+        totalExpected: 2,
+        fullCells: [],
+        fixedHalves: [{ c: 1, r: 1, shape: 'D2_BL', need: 'D2_TR', spanR: 2 }], // (1,1)+(1,2) 的左下大三角形
+        pieces: [
+          {
+            id: 'p1',
+            origC: 4, origR: 1, spanR: 2,
+            baseShape: 'D2_BL', // 必須旋轉 180° 才會變成 D2_TR，與左邊拼成 1x2 長方形(2格)!
+            targetC: 1, targetR: 1, targetNeed: 'D2_TR'
+          }
+        ]
+      },
+      {
+        name: '雙翻轉綜合 (5 cm²)',
+        totalExpected: 5,
+        fullCells: [[1,2], [2,2], [3,2]], // 3 格
+        fixedHalves: [
+          { c: 0, r: 2, shape: 'BR', need: 'TL' },
+          { c: 4, r: 2, shape: 'TL', need: 'BR' }
+        ],
+        pieces: [
+          {
+            id: 'p1',
+            origC: 2, origR: 1,
+            baseShape: 'TR', // 需要水平翻轉(或轉180?) 變成 TL
+            targetC: 0, targetR: 2, targetNeed: 'TL'
+          },
+          {
+            id: 'p2',
+            origC: 3, origR: 1,
+            baseShape: 'TL', // 與目標一樣朝向 TL，必須旋轉 180° 才會變成 BR！
+            targetC: 4, targetR: 2, targetNeed: 'BR'
+          }
+        ]
+      }
+    ];
+
+    let curCutLvlIdx = 0;
+    let isCutDone = false;
+    let activePieces = [];
+    let selectedPieceId = null;
+    let isRecounted = false;
+    let toastTimer = null;
+
+    function showToast(msg) {
+      const el = document.getElementById('tab3-toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    function loadCutLevel(idx) {
+      curCutLvlIdx = idx;
+      document.querySelectorAll('[id^="cut-lvl-"]').forEach((b, i) => {
+        b.classList.toggle('btn-active-mode', i === idx);
+      });
+      playTone(587, 'sine', 0.08);
+      resetCutLevel();
+    }
+
+    function resetCutLevel() {
+      isCutDone = false;
+      isRecounted = false;
+      const lvl = cutLevels[curCutLvlIdx];
+      activePieces = lvl.pieces.map(p => ({
+        ...p,
+        x: GRID_OX + p.origC * G,
+        y: GRID_OY + p.origR * G,
+        rot: 0,      // 0, 90, 180, 270
+        flipH: false,
+        flipV: false,
+        snapped: false,
+        spanR: p.spanR || 1
+      }));
+      selectedPieceId = null;
+      document.getElementById('btn-cut-start').disabled = false;
+      document.getElementById('tab3-status-text').textContent = '請先按「✂️ 1. 切割斜角」，把多出來的三角形切下來！';
+      document.getElementById('tab3-area-result').textContent = '目前總面積：待切割拼湊點數';
+      renderCutLevel();
+    }
+
+    function performCut() {
+      if (isCutDone) return;
+      isCutDone = true;
+      playTone(784, 'triangle', 0.12);
+      setTimeout(() => playTone(987, 'triangle', 0.14), 100);
+      // 切割後碎片自動微幅向外跳開，提示可拖曳操作
+      activePieces.forEach((p, idx) => {
+        p.x += (idx === 0 ? 50 : 90);
+        p.y -= 20;
+      });
+      if (activePieces.length > 0) selectedPieceId = activePieces[0].id;
+      document.getElementById('btn-cut-start').disabled = true;
+      document.getElementById('tab3-status-text').textContent = '✂️ 切割成功！點選橘色碎片，按上方【旋轉 / 翻轉】並拖曳到透明虛線缺角處！';
+      renderCutLevel();
+    }
+
+    // 計算經過旋轉和翻轉後的幾何頂點類型 (精準判斷形狀是否與目標缺口吻合)
+    function getTransformedVertices(piece) {
+      const w = 1;
+      const h = piece.spanR || 1;
+      const cx = w / 2;
+      const cy = h / 2;
+      const basePts = TRI_VERTS[piece.baseShape];
+      return basePts.map(([px, py]) => {
+        let nx = px - cx;
+        let ny = py - cy;
+        if (piece.flipH) nx = -nx;
+        if (piece.flipV) ny = -ny;
+        const rad = (piece.rot * Math.PI) / 180;
+        const rx = nx * Math.cos(rad) - ny * Math.sin(rad);
+        const ry = nx * Math.sin(rad) + ny * Math.cos(rad);
+        return [Math.round((rx + cx) * 10) / 10, Math.round((ry + cy) * 10) / 10];
+      });
+    }
+
+    function checkVerticesMatch(ptsA, ptsB) {
+      // 比較兩個頂點集合是否重合（無順序限制）
+      for (const a of ptsA) {
+        const found = ptsB.some(b => Math.abs(a[0] - b[0]) < 0.05 && Math.abs(a[1] - b[1]) < 0.05);
+        if (!found) return false;
+      }
+      return true;
+    }
+
+    function transformSelected(op) {
+      if (!isCutDone) {
+        showToast('請先按「✂️ 1. 切割斜角」再操作碎片喔！');
+        return;
+      }
+      const p = activePieces.find(item => item.id === selectedPieceId && !item.snapped);
+      if (!p) {
+        showToast('請先點選一塊橘色可移動碎片！');
+        return;
+      }
+      playTone(622, 'sine', 0.08);
+      if (op === 'rotCW') p.rot = (p.rot + 90) % 360;
+      if (op === 'rotCCW') p.rot = (p.rot + 270) % 360;
+      if (op === 'flipH') p.flipH = !p.flipH;
+      if (op === 'flipV') p.flipV = !p.flipV;
+      renderCutLevel();
+    }
+
+    function renderCutLevel() {
+      const lvl = cutLevels[curCutLvlIdx];
+      const baseLayer = document.getElementById('tab3-base-layer');
+      const piecesLayer = document.getElementById('tab3-pieces-layer');
+      const numsLayer = document.getElementById('tab3-numbers-layer');
+      baseLayer.innerHTML = '';
+      piecesLayer.innerHTML = '';
+      if (!isRecounted) numsLayer.innerHTML = '';
+
+      // 1. 畫完整固定方格
+      lvl.fullCells.forEach(([c, r]) => {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', GRID_OX + c * G);
+        rect.setAttribute('y', GRID_OY + r * G);
+        rect.setAttribute('width', G);
+        rect.setAttribute('height', G);
+        rect.setAttribute('fill', 'rgba(0, 229, 255, 0.38)');
+        rect.setAttribute('stroke', '#00e5ff');
+        rect.setAttribute('stroke-width', '2.5');
+        baseLayer.appendChild(rect);
+      });
+
+      // 2. 畫固定半格與目標虛線提示缺口
+      lvl.fixedHalves.forEach(fh => {
+        const x0 = GRID_OX + fh.c * G;
+        const y0 = GRID_OY + fh.r * G;
+        const spanR = fh.spanR || 1;
+        const ptsFixed = TRI_VERTS[fh.shape].map(([vx, vy]) => `${x0 + vx * G},${y0 + vy * G}`).join(' ');
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        poly.setAttribute('points', ptsFixed);
+        poly.setAttribute('fill', 'rgba(0, 229, 255, 0.38)');
+        poly.setAttribute('stroke', '#00e5ff');
+        poly.setAttribute('stroke-width', '2.5');
+        baseLayer.appendChild(poly);
+
+        // 畫出拼湊所需的缺口虛線輪廓
+        if (isCutDone) {
+          const ptsNeed = TRI_VERTS[fh.need].map(([vx, vy]) => `${x0 + vx * G},${y0 + vy * G}`).join(' ');
+          const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          ghost.setAttribute('points', ptsNeed);
+          ghost.setAttribute('fill', 'rgba(251, 192, 45, 0.08)');
+          ghost.setAttribute('stroke', '#fbc02d');
+          ghost.setAttribute('stroke-width', '2');
+          ghost.setAttribute('stroke-dasharray', '6 4');
+          baseLayer.appendChild(ghost);
+        }
+      });
+
+      // 3. 畫可切割與操作之碎片
+      activePieces.forEach(p => {
+        const pts = getTransformedVertices(p).map(([vx, vy]) => `${p.x + vx * G},${p.y + vy * G}`).join(' ');
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        poly.setAttribute('points', pts);
+        if (p.snapped) {
+          poly.setAttribute('fill', 'rgba(0, 230, 118, 0.55)');
+          poly.setAttribute('stroke', '#00e676');
+          poly.setAttribute('stroke-width', '3');
+        } else if (!isCutDone) {
+          poly.setAttribute('fill', 'rgba(0, 229, 255, 0.38)');
+          poly.setAttribute('stroke', '#00e5ff');
+          poly.setAttribute('stroke-width', '2.5');
+        } else {
+          const isSel = (p.id === selectedPieceId);
+          poly.setAttribute('fill', isSel ? 'rgba(255, 122, 26, 0.72)' : 'rgba(255, 122, 26, 0.45)');
+          poly.setAttribute('stroke', isSel ? '#fbc02d' : '#ff7a1a');
+          poly.setAttribute('stroke-width', isSel ? '4' : '2.5');
+          poly.style.cursor = 'grab';
+        }
+
+        if (isCutDone && !p.snapped) {
+          poly.addEventListener('pointerdown', (e) => startDragPiece(e, p.id));
+        }
+        piecesLayer.appendChild(poly);
+      });
+    }
+
+    // Tab 3 碎片拖曳與磁吸判斷
+    let draggingPieceId = null;
+    let pieceDragOffset = { x: 0, y: 0 };
+    const svgTab3 = document.getElementById('svg-tab3');
+
+    function startDragPiece(e, pid) {
+      selectedPieceId = pid;
+      draggingPieceId = pid;
+      e.target.setPointerCapture(e.pointerId);
+      const rect = svgTab3.getBoundingClientRect();
+      const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+      const ptY = (e.clientY - rect.top) * (480 / rect.height);
+      const p = activePieces.find(item => item.id === pid);
+      pieceDragOffset = { x: ptX - p.x, y: ptY - p.y };
+      playTone(480, 'sine', 0.05);
+      renderCutLevel();
+    }
+
+    window.addEventListener('pointermove', (e) => {
+      if (!draggingPieceId) return;
+      const rect = svgTab3.getBoundingClientRect();
+      const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+      const ptY = (e.clientY - rect.top) * (480 / rect.height);
+      const p = activePieces.find(item => item.id === draggingPieceId);
+      if (!p) return;
+      p.x = ptX - pieceDragOffset.x;
+      p.y = ptY - pieceDragOffset.y;
+      renderCutLevel();
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (!draggingPieceId) return;
+      const p = activePieces.find(item => item.id === draggingPieceId);
+      draggingPieceId = null;
+      if (!p) return;
+
+      // 檢查是否靠近任意尚未拼合的目標缺口
+      const targetX = GRID_OX + p.targetC * G;
+      const targetY = GRID_OY + p.targetR * G;
+      const dist = Math.hypot(p.x - targetX, p.y - targetY);
+
+      if (dist < 42) {
+        const curPts = getTransformedVertices(p);
+        const targetPts = TRI_VERTS[p.targetNeed];
+        if (checkVerticesMatch(curPts, targetPts)) {
+          p.x = targetX;
+          p.y = targetY;
+          p.snapped = true;
+          playTone(880, 'sine', 0.18);
+          setTimeout(() => playTone(1174, 'sine', 0.2), 110);
+          showToast('✅ 太棒了！成功拼合成完整整格！');
+          // 選取下一塊尚未拼合的碎片
+          const next = activePieces.find(item => !item.snapped);
+          selectedPieceId = next ? next.id : null;
+          if (!next) {
+            document.getElementById('tab3-status-text').textContent = '🎉 全部拼合完成！請按「🔢 2. 重新點數面積」數出共有幾個 1 cm²！';
+          }
+          renderCutLevel();
+        } else {
+          playTone(260, 'sawtooth', 0.15);
+          showToast('💡 位置對了，但方向還沒對齊喔！請試試看按上方【旋轉】或【翻轉】！');
+        }
+      }
+    });
+
+    function recountCutArea() {
+      const lvl = cutLevels[curCutLvlIdx];
+      const allSnapped = activePieces.every(p => p.snapped);
+      if (!allSnapped) {
+        showToast('請先把所有切割碎片旋轉/翻轉並拼回缺角成為完整方格，再重新點數喔！');
+        playTone(300, 'sine', 0.12);
+        return;
+      }
+
+      isRecounted = true;
+      const numsLayer = document.getElementById('tab3-numbers-layer');
+      numsLayer.innerHTML = '';
+
+      // 收集所有完整的 1cm² 方格座標
+      const cells = [...lvl.fullCells];
+      lvl.fixedHalves.forEach(fh => {
+        if (fh.spanR === 2) {
+          cells.push([fh.c, fh.r]);
+          cells.push([fh.c, fh.r + 1]);
+        } else {
+          cells.push([fh.c, fh.r]);
+        }
+      });
+
+      let idx = 0;
+      const timer = setInterval(() => {
+        if (idx < cells.length) {
+          const [c, r] = cells[idx];
+          const cx = GRID_OX + c * G + G / 2;
+          const cy = GRID_OY + r * G + G / 2;
+          const badge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          badge.setAttribute('cx', cx);
+          badge.setAttribute('cy', cy);
+          badge.setAttribute('r', 18);
+          badge.setAttribute('fill', '#fbc02d');
+          numsLayer.appendChild(badge);
+
+          const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          txt.setAttribute('x', cx);
+          txt.setAttribute('y', cy + 7);
+          txt.setAttribute('font-size', '20');
+          txt.setAttribute('font-weight', 'bold');
+          txt.setAttribute('fill', '#12161f');
+          txt.setAttribute('text-anchor', 'middle');
+          txt.textContent = idx + 1;
+          numsLayer.appendChild(txt);
+
+          playTone(550 + idx * 70, 'sine', 0.1);
+          idx++;
+        } else {
+          clearInterval(timer);
+          playTone(1046, 'sine', 0.3);
+          const msg = lvl.name.includes('大三角形')
+            ? `🎉 拼成長方形共 2 個 1 cm² ＝ 2 cm²，所以 1 個大三角形 ＝ 1 cm²！`
+            : `🎉 重新點數完成！共有 ${cells.length} 個 1 cm² ＝ ${cells.length} 平方公分`;
+          document.getElementById('tab3-area-result').textContent = msg;
+        }
+      }, 280);
+    }
+
+    // 初始化所有頁面
+    renderSandboxGrid();
+    renderTab2();
+    loadCutLevel(0);
+  </script>
+</body>
+</html>
