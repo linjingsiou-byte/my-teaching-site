@@ -561,6 +561,7 @@
     }
 
     body.real-cm-mode svg.canvas-svg {
+      box-sizing: content-box;
       min-height: 0;
       flex-shrink: 0;
       border: 2px solid var(--accent-green);
@@ -2044,7 +2045,7 @@
 
       // 更新 0~5 cm 實體校準 SVG 尺規
       const rulerSvg = document.getElementById('cal-ruler-svg');
-      const padL = 14;
+      const padL = 22;
       const totalW = padL * 2 + 5 * val;
       rulerSvg.setAttribute('width', totalW.toFixed(1));
       rulerSvg.innerHTML = '';
@@ -2069,10 +2070,10 @@
 
         if (isWhole) {
           const tx = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          tx.setAttribute('x', x); tx.setAttribute('y', 52);
+          tx.setAttribute('x', x); tx.setAttribute('y', 53);
           tx.setAttribute('font-size', '16'); tx.setAttribute('font-weight', 'bold');
           tx.setAttribute('fill', '#12161f'); tx.setAttribute('text-anchor', 'middle');
-          tx.textContent = cmVal === 0 ? '0' : `${cmVal}cm`;
+          tx.textContent = cmVal === 5 ? '5cm' : `${cmVal}`;
           rulerSvg.appendChild(tx);
         }
       }
