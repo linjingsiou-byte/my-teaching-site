@@ -487,6 +487,149 @@
       opacity: 1;
     }
 
+    /* 畫面比例切換（大螢幕放大 vs 實體 1cm × 1cm） */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .scale-switch-group {
+      display: inline-flex;
+      background: #0e1118;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .scale-btn {
+      background: transparent;
+      color: var(--text-sub);
+      border: none;
+      padding: 7px 12px;
+      border-radius: 7px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: all 0.18s ease;
+    }
+
+    .scale-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .scale-btn.active-zoom {
+      background: #00838f;
+      color: #fff;
+    }
+
+    .scale-btn.active-real {
+      background: #00a152;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.35);
+    }
+
+    .real-cm-banner {
+      display: none;
+      background: rgba(0, 230, 118, 0.12);
+      border: 1.5px solid var(--accent-green);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 16px;
+      color: #e8f5e9;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    body.real-cm-mode .real-cm-banner {
+      display: flex;
+    }
+
+    body.real-cm-mode .board-container {
+      overflow: auto;
+      padding: 18px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    body.real-cm-mode svg.canvas-svg {
+      min-height: 0;
+      flex-shrink: 0;
+      border: 2px solid var(--accent-green);
+      border-radius: 8px;
+      box-shadow: 0 0 22px rgba(0, 230, 118, 0.2);
+    }
+
+    /* 實體直尺校準彈窗 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 11, 18, 0.82);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      border: 2px solid var(--accent-cyan);
+      border-radius: 16px;
+      max-width: 680px;
+      width: 100%;
+      padding: 22px 24px;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-card h2 {
+      font-size: 22px;
+      color: var(--accent-cyan);
+    }
+
+    .cal-stage {
+      background: #101520;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-x: auto;
+    }
+
+    .cal-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 16px;
+    }
+
+    .cal-slider-row input[type="range"] {
+      flex: 1;
+      min-width: 180px;
+      accent-color: var(--accent-green);
+      height: 28px;
+      cursor: pointer;
+    }
+
     /* RWD 響應式斷點 */
     @media (max-width: 900px) {
       header {
@@ -541,12 +684,30 @@
       <button class="tab-btn" onclick="switchTab(2)">3. 切割・旋轉・翻轉算面積</button>
     </div>
 
-    <button class="audio-toggle" id="soundBtn" onclick="toggleSound()">
-      <span>🔊 音效：開</span>
-    </button>
+    <div class="header-actions">
+      <div class="scale-switch-group" role="group" aria-label="畫面尺寸模式切換">
+        <button class="scale-btn active-zoom" id="btn-scale-zoom" onclick="setScaleMode('zoom')">🖥️ 大螢幕教學</button>
+        <button class="scale-btn" id="btn-scale-real" onclick="setScaleMode('real')">📏 實體 1cm × 1cm</button>
+        <button class="scale-btn" id="btn-calibrate" onclick="openCalibrateModal()" title="用真實直尺或悠遊卡校準螢幕真實 1 公分">📐 校準</button>
+      </div>
+
+      <button class="audio-toggle" id="soundBtn" onclick="toggleSound()">
+        <span>🔊 音效：開</span>
+      </button>
+    </div>
   </header>
 
   <main>
+    <div class="real-cm-banner" id="real-cm-banner">
+      <div>
+        <strong style="color: var(--accent-green);">✅ 目前為「實體 1cm × 1cm 模式」</strong>
+        <span id="real-cm-info">（每格邊長鎖定為真實 1 公分，目前校準：37.8 px/cm）— 可直接拿真實直尺或課本 1cm² 白色方瓦靠在螢幕上比對！</span>
+      </div>
+      <div class="btn-group">
+        <button class="btn" style="padding: 6px 12px; min-height: 36px; border-color: var(--accent-green);" onclick="openCalibrateModal()">📐 微調直尺校準</button>
+        <button class="btn" style="padding: 6px 12px; min-height: 36px;" onclick="setScaleMode('zoom')">🖥️ 切回放大投影</button>
+      </div>
+    </div>
     <!-- ==================== TAB 1：觀念澄清室 ==================== -->
     <section class="view-panel active" id="panel-0">
       <div class="toolbar-panel">
@@ -576,8 +737,8 @@
             <rect x="0" y="0" width="410" height="380" rx="16" fill="#18202e" stroke="#2e384d" stroke-width="2" />
             <text x="205" y="34" font-size="19" font-weight="bold" fill="#00e5ff" text-anchor="middle">🔍 白色方瓦放大鏡（邊長 1 公分正方形）</text>
 
-            <!-- 正方形方瓦本體 -->
-            <rect id="tile-main" x="135" y="105" width="140" height="140" rx="4" fill="#f5f7fa" stroke="#90a4ae" stroke-width="4" />
+            <!-- 正方形方瓦本體（直角無圓角） -->
+            <rect id="tile-main" x="135" y="105" width="140" height="140" rx="0" fill="#f5f7fa" stroke="#90a4ae" stroke-width="4" />
 
             <!-- 直角記號 -->
             <g id="tile-right-angles" opacity="0">
@@ -615,7 +776,7 @@
 
             <!-- 正確數學定義印章 -->
             <g id="def-stamp" opacity="0" style="transition: opacity 0.25s;">
-              <rect x="135" y="105" width="140" height="140" rx="4" fill="rgba(255, 122, 26, 0.22)" stroke="#ff7a1a" stroke-width="4" />
+              <rect x="135" y="105" width="140" height="140" rx="0" fill="rgba(255, 122, 26, 0.22)" stroke="#ff7a1a" stroke-width="4" />
               <text x="205" y="168" font-size="22" font-weight="bold" fill="#12161f" text-anchor="middle">1 平方公分</text>
               <text x="205" y="198" font-size="20" font-weight="bold" fill="#d84315" text-anchor="middle">(1 cm²)</text>
 
@@ -629,7 +790,7 @@
           <!-- 右側互動實驗：點數 1cm² 的合體體驗（排法不同，只要個數一樣，面積就一樣） -->
           <g transform="translate(520, 50)">
             <rect x="0" y="0" width="420" height="300" rx="16" fill="#18202e" stroke="#2e384d" stroke-width="2" />
-            <text x="210" y="34" font-size="19" font-weight="bold" fill="#fbc02d" text-anchor="middle">🧩 動手點數：點選格子排排看（共幾個 1 cm²？）</text>
+            <text id="tab1-sandbox-title" x="210" y="34" font-size="19" font-weight="bold" fill="#fbc02d" text-anchor="middle">🧩 動手點數：點選格子排排看（共幾個 1 cm²？）</text>
             <text x="210" y="60" font-size="16" fill="#9ea9bf" text-anchor="middle">點擊下方網格加入或拿掉 1 cm² 白色方瓦，觀察面積變化</text>
 
             <!-- 4x2 可點選小網格 (每格 60x60) -->
@@ -689,6 +850,7 @@
           <button class="btn" id="shape-btn-1" onclick="selectTab2Shape(1)">課本 P.91 卡片 (6×4)</button>
           <button class="btn" id="shape-btn-2" onclick="selectTab2Shape(2)">正方形 (5×5)</button>
           <button class="btn" id="shape-btn-3" onclick="selectTab2Shape(3)">階梯 L 形 (14格)</button>
+          <button class="btn" id="shape-btn-4" onclick="selectTab2Shape(4)">✏️ 自由鋪排 (8×5)</button>
         </div>
 
         <div class="btn-group">
@@ -792,11 +954,65 @@
     </section>
   </main>
 
+  <!-- 實體直尺校準彈窗 -->
+  <div class="modal-backdrop" id="calibrate-modal" role="dialog" aria-modal="true" aria-labelledby="cal-modal-title">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+        <h2 id="cal-modal-title">📐 實體 1 公分（1 cm）螢幕校準精靈</h2>
+        <button class="btn" style="padding: 6px 12px; min-height: 36px;" onclick="closeCalibrateModal()">✖ 關閉</button>
+      </div>
+      <p style="font-size: 16px; color: var(--text-sub); line-height: 1.55;">
+        不同電腦、平板或大觸控螢幕的解析度與系統縮放不同。請拿一把<strong>真實直尺</strong>（或一張<strong>悠遊卡／信用卡</strong>）直接靠上螢幕調整滑桿，即可讓「實體 1cm × 1cm 模式」的每個方格完全等於真實 1 公分！
+      </p>
+
+      <div class="cal-stage">
+        <div>
+          <div style="font-size: 16px; font-weight: 700; color: var(--accent-yellow); margin-bottom: 8px;">📏 校準區 A：0 ~ 5 公分實體直尺 ＆ 1cm² 方瓦預覽</div>
+          <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+            <svg id="cal-ruler-svg" height="68" style="display: block; flex-shrink: 0;"></svg>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              <div id="cal-tile-preview" style="background: #f5f7fa; border: 2px solid #ff7a1a; color: #d84315; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">1cm²</div>
+              <span style="font-size: 16px; color: var(--text-sub);">實尺寸方瓦</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 16px; font-weight: 700; color: var(--accent-cyan); margin-bottom: 8px;">💳 校準區 B：手邊沒有直尺？拿悠遊卡／信用卡寬邊對齊（標準 8.56 cm）</div>
+          <div id="cal-card-bar" style="height: 34px; background: rgba(0, 229, 255, 0.18); border: 2px solid #00e5ff; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: #00e5ff; white-space: nowrap; overflow: hidden;">
+            ← 悠遊卡 / 信用卡寬度 (8.56 cm) →
+          </div>
+        </div>
+      </div>
+
+      <div class="cal-slider-row">
+        <button class="btn" style="padding: 6px 12px; min-height: 38px;" onclick="nudgeCalPx(-0.5)">－ 0.5px</button>
+        <input type="range" id="cal-px-slider" min="20" max="90" step="0.5" value="37.8" oninput="updateCalPreview(parseFloat(this.value))" />
+        <button class="btn" style="padding: 6px 12px; min-height: 38px;" onclick="nudgeCalPx(0.5)">＋ 0.5px</button>
+        <span id="cal-px-readout" style="font-weight: 800; color: var(--accent-green); min-width: 120px;">37.8 px / cm</span>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="btn" onclick="updateCalPreview(37.8)">🔄 恢復瀏覽器標準 (37.8px)</button>
+        <div class="btn-group">
+          <button class="btn" onclick="closeCalibrateModal()">取消</button>
+          <button class="btn btn-green" onclick="saveAndApplyCalibration()">✅ 儲存並開啟「實體 1cm × 1cm 模式」</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* ==================== 全域音效系統 ==================== */
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     let soundEnabled = true;
+
+    /* ==================== 畫面比例與實體 1cm × 1cm 校準設定 ==================== */
+    let scaleMode = 'zoom'; // 'zoom' (大螢幕放大) | 'real' (實體 1cm × 1cm)
+    let pxPerCm = parseFloat(localStorage.getItem('areaLab_pxPerCm') || '37.8');
+    if (!Number.isFinite(pxPerCm) || pxPerCm < 20 || pxPerCm > 95) pxPerCm = 37.8;
+    let tempCalPx = pxPerCm;
 
     function initAudio() {
       if (!audioCtx) audioCtx = new AudioCtx();
@@ -900,14 +1116,15 @@
           const active = sandboxState[r][c];
           if (active) count++;
           const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          rect.setAttribute('x', c * cellSize + 2);
-          rect.setAttribute('y', r * cellSize + 2);
-          rect.setAttribute('width', cellSize - 4);
-          rect.setAttribute('height', cellSize - 4);
-          rect.setAttribute('rx', 6);
+          rect.setAttribute('x', c * cellSize);
+          rect.setAttribute('y', r * cellSize);
+          rect.setAttribute('width', cellSize);
+          rect.setAttribute('height', cellSize);
+          rect.setAttribute('rx', 0);
+          rect.setAttribute('shape-rendering', 'crispEdges');
           rect.setAttribute('fill', active ? '#f5f7fa' : '#232c3d');
           rect.setAttribute('stroke', active ? '#ff7a1a' : '#3a4761');
-          rect.setAttribute('stroke-width', active ? '3' : '1.5');
+          rect.setAttribute('stroke-width', active ? '2' : '1.5');
           rect.style.cursor = 'pointer';
           rect.onclick = () => {
             sandboxState[r][c] = !sandboxState[r][c];
@@ -956,7 +1173,8 @@
       { name: '卡片 A (4×3)', cols: 4, rows: 3, isRect: true, mask: [[1,1,1,1],[1,1,1,1],[1,1,1,1]] },
       { name: '課本 P.91 卡片 (6×4)', cols: 6, rows: 4, isRect: true, mask: [[1,1,1,1,1,1],[1,1,1,1,1,1],[1,1,1,1,1,1],[1,1,1,1,1,1]] },
       { name: '正方形 (5×5)', cols: 5, rows: 5, isRect: true, mask: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]] },
-      { name: '階梯 L 形', cols: 5, rows: 4, isRect: false, mask: [[1,1,0,0,0],[1,1,1,0,0],[1,1,1,1,0],[1,1,1,1,1]] }
+      { name: '階梯 L 形', cols: 5, rows: 4, isRect: false, mask: [[1,1,0,0,0],[1,1,1,0,0],[1,1,1,1,0],[1,1,1,1,1]] },
+      { name: '✏️ 自由鋪排 (8×5)', cols: 8, rows: 5, isRect: true, isFree: true, mask: Array.from({ length: 5 }, () => Array(8).fill(1)) }
     ];
 
     let curShapeIdx = 0;
@@ -964,7 +1182,7 @@
     let placedTiles = new Set();
     let currentRowFilled = 0;
     let tab2AnimTimer = null;
-    const t2Cell = 58;
+    const t2Cell = 60; // 與 Tab 1 / Tab 3 統一為 60 SVG 單位 = 1 格 (1cm)
     let t2Origin = { x: 240, y: 100 };
 
     // 透明平方公分板位置
@@ -1069,7 +1287,36 @@
         cardGroup.appendChild(outline);
       }
 
-      // 在 tile 或 row 模式下，繪製已鋪放的方瓦並依序編號
+      // 在實體 1cm × 1cm 模式下，為圖形上方與左側加上「1 公分刻度尺」方便直接比對
+      if (scaleMode === 'real') {
+        const rulerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        rulerG.style.pointerEvents = 'none';
+        const topY = t2Origin.y - 10;
+        const baseL = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        baseL.setAttribute('x1', t2Origin.x); baseL.setAttribute('y1', topY);
+        baseL.setAttribute('x2', t2Origin.x + shape.cols * t2Cell); baseL.setAttribute('y2', topY);
+        baseL.setAttribute('stroke', '#fbc02d'); baseL.setAttribute('stroke-width', '2');
+        rulerG.appendChild(baseL);
+        for (let c = 0; c <= shape.cols; c++) {
+          const tx = t2Origin.x + c * t2Cell;
+          const tk = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          tk.setAttribute('x1', tx); tk.setAttribute('y1', topY - 8);
+          tk.setAttribute('x2', tx); tk.setAttribute('y2', topY);
+          tk.setAttribute('stroke', '#fbc02d'); tk.setAttribute('stroke-width', '2');
+          rulerG.appendChild(tk);
+          if (c > 0) {
+            const lb = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            lb.setAttribute('x', tx - t2Cell / 2); lb.setAttribute('y', topY - 12);
+            lb.setAttribute('font-size', '18'); lb.setAttribute('font-weight', 'bold');
+            lb.setAttribute('fill', '#fbc02d'); lb.setAttribute('text-anchor', 'middle');
+            lb.textContent = '1cm';
+            rulerG.appendChild(lb);
+          }
+        }
+        cardGroup.appendChild(rulerG);
+      }
+
+      // 在 tile 或 row 模式下，繪製已鋪放的方瓦（零縫隙直角緊密貼合）並依序編號
       if (tab2Mode !== 'board') {
         boardGroup.style.display = 'none';
         let seq = 0;
@@ -1081,14 +1328,15 @@
               const x = t2Origin.x + c * t2Cell;
               const y = t2Origin.y + r * t2Cell;
               const tile = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-              tile.setAttribute('x', x + 2);
-              tile.setAttribute('y', y + 2);
-              tile.setAttribute('width', t2Cell - 4);
-              tile.setAttribute('height', t2Cell - 4);
-              tile.setAttribute('rx', 4);
+              tile.setAttribute('x', x);
+              tile.setAttribute('y', y);
+              tile.setAttribute('width', t2Cell);
+              tile.setAttribute('height', t2Cell);
+              tile.setAttribute('rx', 0);
+              tile.setAttribute('shape-rendering', 'crispEdges');
               tile.setAttribute('fill', '#f5f7fa');
               tile.setAttribute('stroke', '#ff7a1a');
-              tile.setAttribute('stroke-width', '2.5');
+              tile.setAttribute('stroke-width', '2');
               if (tab2Mode === 'tile') {
                 tile.style.cursor = 'pointer';
                 tile.onclick = () => { placedTiles.delete(key); playTone(400, 'sine', 0.08); renderTab2(); };
@@ -1097,8 +1345,8 @@
 
               const numTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
               numTxt.setAttribute('x', x + t2Cell / 2);
-              numTxt.setAttribute('y', y + t2Cell / 2 + 6);
-              numTxt.setAttribute('font-size', '18');
+              numTxt.setAttribute('y', y + t2Cell / 2 + 7);
+              numTxt.setAttribute('font-size', '20');
               numTxt.setAttribute('font-weight', 'bold');
               numTxt.setAttribute('fill', '#d84315');
               numTxt.setAttribute('text-anchor', 'middle');
@@ -1109,16 +1357,37 @@
           }
         }
 
+        // 外框青線重繪於鋪排磚最上層，讓卡片外圍齊平明確
+        if (shape.isRect) {
+          const topOutline = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          topOutline.setAttribute('x', t2Origin.x);
+          topOutline.setAttribute('y', t2Origin.y);
+          topOutline.setAttribute('width', shape.cols * t2Cell);
+          topOutline.setAttribute('height', shape.rows * t2Cell);
+          topOutline.setAttribute('fill', 'none');
+          topOutline.setAttribute('stroke', '#00e5ff');
+          topOutline.setAttribute('stroke-width', '3.5');
+          topOutline.style.pointerEvents = 'none';
+          tilesLayer.appendChild(topOutline);
+        }
+
         const count = placedTiles.size;
         document.getElementById('tab2-count-display').textContent = `已鋪 ${count} 個 1 cm² ＝ ${count} 平方公分`;
         const actionBtn = document.getElementById('tab2-action-btn');
 
         if (tab2Mode === 'tile') {
           actionBtn.textContent = '⚡ 自動依序鋪滿點數';
-          document.getElementById('tab2-equation-note').textContent =
-            count === totalCells
-              ? `🎉 太棒了！總共鋪滿了 ${totalCells} 個 1 cm²，面積是 ${totalCells} 平方公分！`
-              : '💡 點擊圖形內格子逐塊鋪上白色方瓦，或按右側按鈕自動示範！';
+          if (shape.isFree) {
+            document.getElementById('tab2-equation-note').textContent =
+              count === 0
+                ? '✏️ 自由鋪排區：點擊上方格子緊密鋪出自己的圖形（再點一次可拿掉）！'
+                : `✏️ 你自由鋪出了 ${count} 個 1 cm²，面積 ＝ ${count} 平方公分！`;
+          } else {
+            document.getElementById('tab2-equation-note').textContent =
+              count === totalCells
+                ? `🎉 太棒了！總共鋪滿了 ${totalCells} 個 1 cm²，面積是 ${totalCells} 平方公分！`
+                : '💡 點擊圖形內格子逐塊鋪上白色方瓦，或按右側按鈕自動示範！';
+          }
         } else {
           actionBtn.textContent = currentRowFilled < shape.rows ? `➕ 鋪第 ${currentRowFilled + 1} 排` : '✅ 已全部鋪滿';
           if (shape.isRect) {
@@ -1705,10 +1974,134 @@
       }, 280);
     }
 
+    /* ==================== 實體 1cm × 1cm 模式切換與校準控制 ==================== */
+    function applyScaleMode() {
+      const isReal = scaleMode === 'real';
+      document.body.classList.toggle('real-cm-mode', isReal);
+      document.getElementById('btn-scale-zoom').classList.toggle('active-zoom', !isReal);
+      document.getElementById('btn-scale-real').classList.toggle('active-real', isReal);
+
+      const svgs = ['svg-tab1', 'svg-tab2', 'svg-tab3'];
+      // 所有格線皆統一為 60 SVG 單位 ＝ 1 格；因此將 1000×480 SVG 設為 (1000/60)*pxPerCm × (480/60)*pxPerCm
+      const realW = (1000 / 60) * pxPerCm;
+      const realH = (480 / 60) * pxPerCm;
+
+      svgs.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (isReal) {
+          el.style.width = `${realW.toFixed(1)}px`;
+          el.style.height = `${realH.toFixed(1)}px`;
+        } else {
+          el.style.width = '100%';
+          el.style.height = '100%';
+        }
+      });
+
+      const infoEl = document.getElementById('real-cm-info');
+      if (infoEl) {
+        infoEl.textContent = `（1 格邊長 ＝ 真實 1 公分，目前校準：${pxPerCm.toFixed(1)} px/cm）— 請拿真實直尺或課本 1cm² 白色方瓦靠上螢幕比對！`;
+      }
+      const tab1Title = document.getElementById('tab1-sandbox-title');
+      if (tab1Title) {
+        tab1Title.textContent = isReal
+          ? '📏 實體 1cm × 1cm 排排看（每格剛好邊長 1 公分！）'
+          : '🧩 動手點數：點選格子排排看（共幾個 1 cm²？）';
+      }
+
+      renderSandboxGrid();
+      renderTab2();
+      renderCutLevel();
+    }
+
+    function setScaleMode(mode) {
+      scaleMode = mode;
+      playTone(mode === 'real' ? 784 : 523, 'sine', 0.12);
+      applyScaleMode();
+    }
+
+    function openCalibrateModal() {
+      tempCalPx = pxPerCm;
+      document.getElementById('cal-px-slider').value = tempCalPx;
+      updateCalPreview(tempCalPx);
+      document.getElementById('calibrate-modal').classList.add('open');
+      playTone(659, 'sine', 0.1);
+    }
+
+    function closeCalibrateModal() {
+      document.getElementById('calibrate-modal').classList.remove('open');
+    }
+
+    function nudgeCalPx(delta) {
+      const next = Math.min(90, Math.max(20, +(tempCalPx + delta).toFixed(1)));
+      document.getElementById('cal-px-slider').value = next;
+      updateCalPreview(next);
+    }
+
+    function updateCalPreview(val) {
+      tempCalPx = val;
+      document.getElementById('cal-px-readout').textContent = `${val.toFixed(1)} px / cm`;
+
+      // 更新 0~5 cm 實體校準 SVG 尺規
+      const rulerSvg = document.getElementById('cal-ruler-svg');
+      const padL = 14;
+      const totalW = padL * 2 + 5 * val;
+      rulerSvg.setAttribute('width', totalW.toFixed(1));
+      rulerSvg.innerHTML = '';
+
+      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      bg.setAttribute('x', 0); bg.setAttribute('y', 0);
+      bg.setAttribute('width', totalW); bg.setAttribute('height', 68);
+      bg.setAttribute('rx', 4);
+      bg.setAttribute('fill', '#fbc02d'); bg.setAttribute('stroke', '#f57f17'); bg.setAttribute('stroke-width', '2');
+      rulerSvg.appendChild(bg);
+
+      for (let i = 0; i <= 10; i++) {
+        const cmVal = i * 0.5;
+        const x = padL + cmVal * val;
+        const isWhole = i % 2 === 0;
+        const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        ln.setAttribute('x1', x); ln.setAttribute('y1', 0);
+        ln.setAttribute('x2', x); ln.setAttribute('y2', isWhole ? 30 : 18);
+        ln.setAttribute('stroke', '#12161f');
+        ln.setAttribute('stroke-width', isWhole ? '2.5' : '1.5');
+        rulerSvg.appendChild(ln);
+
+        if (isWhole) {
+          const tx = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          tx.setAttribute('x', x); tx.setAttribute('y', 52);
+          tx.setAttribute('font-size', '16'); tx.setAttribute('font-weight', 'bold');
+          tx.setAttribute('fill', '#12161f'); tx.setAttribute('text-anchor', 'middle');
+          tx.textContent = cmVal === 0 ? '0' : `${cmVal}cm`;
+          rulerSvg.appendChild(tx);
+        }
+      }
+
+      // 更新 1cm² 方瓦實體預覽（字體維持 16px 以上）
+      const tilePrev = document.getElementById('cal-tile-preview');
+      tilePrev.style.width = `${val.toFixed(1)}px`;
+      tilePrev.style.height = `${val.toFixed(1)}px`;
+      tilePrev.style.fontSize = '16px';
+      tilePrev.textContent = val < 42 ? '1' : '1cm²';
+
+      // 更新悠遊卡 8.56cm 寬度對齊條
+      const cardBar = document.getElementById('cal-card-bar');
+      cardBar.style.width = `${(8.56 * val).toFixed(1)}px`;
+    }
+
+    function saveAndApplyCalibration() {
+      pxPerCm = tempCalPx;
+      localStorage.setItem('areaLab_pxPerCm', pxPerCm.toFixed(1));
+      closeCalibrateModal();
+      setScaleMode('real');
+      playTone(880, 'sine', 0.2);
+    }
+
     // 初始化所有頁面
     renderSandboxGrid();
     renderTab2();
     loadCutLevel(0);
+    applyScaleMode();
   </script>
 </body>
 </html>
