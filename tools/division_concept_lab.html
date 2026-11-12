@@ -776,11 +776,9 @@
           </div>
 
           <div class="tip-bubble">
-            <div><strong>💡 定位重點問答</strong>：「為什麼 29 ÷ 6 的商 4 要寫在個位 9 的上面？」</div>
+            <div id="t3-tip-q"><strong>💡 定位重點問答</strong>：「為什麼 7 ÷ 3 的商 2 要寫在個位 7 的上面？」</div>
             <button class="finger-btn" onclick="toggleFinger('t3-ans')">👉 點按手指看重點解答</button>
-            <div id="t3-ans" style="display: none;">
-              因為十位的 2（20 個）先不拆開不夠 6 人各拿一包十個，合起來 29 個分給 6 人，每人只能分到 <strong style="color: var(--c-quotient);">4 個（個位）</strong>，所以商 4 要對齊個位！
-            </div>
+            <div id="t3-ans" style="display: none;"></div>
           </div>
         </div>
       </div>
@@ -1223,10 +1221,42 @@
 
     /* ==================== TAB 3：除法直式定位板 ==================== */
     const t3Problems = [
-      { title: '1. 7 個點心，每人分 3 個，最多分幾人？剩幾個？', divd: 7, divs: 3, q: 2, prod: 6, rem: 1, isExact: false },
-      { title: '2. 29 顆小番茄，每人分 6 顆，最多分幾人？剩幾顆？', divd: 29, divs: 6, q: 4, prod: 24, rem: 5, isExact: false },
-      { title: '3. 40 片餅乾平分到 5 個盤子，每盤幾片？（整除）', divd: 40, divs: 5, q: 8, prod: 40, rem: 0, isExact: true },
-      { title: '4. 50 公分緞帶每 8 公分剪一段，最多剪幾段？剩幾公分？', divd: 50, divs: 8, q: 6, prod: 48, rem: 2, isExact: false }
+      {
+        title: '1. 7 個點心，每人分 3 個，最多分幾人？剩幾個？',
+        divd: 7, divs: 3, q: 2, prod: 6, rem: 1, isExact: false, itemUnit: '個點心',
+        qDesc: '表示最多可分給 2 個人',
+        prodDesc: '表示共分掉 6 個點心',
+        remDesc: '表示還剩下 1 個點心（比除數 3 小，不能再分！）',
+        tipQ: '「為什麼 7 ÷ 3 的商 2 要寫在個位 7 的上面？」',
+        tipAns: '因為 7 個點心就是 7 個「一」（個位），最多只能分給 <strong style="color: var(--c-quotient);">2 個人（個位數）</strong>，所以商 2 要對齊個位 7 的上面！'
+      },
+      {
+        title: '2. 29 顆小番茄，每人分 6 顆，最多分幾人？剩幾顆？',
+        divd: 29, divs: 6, q: 4, prod: 24, rem: 5, isExact: false, itemUnit: '顆小番茄',
+        qDesc: '表示最多可分給 4 個人',
+        prodDesc: '表示共分掉 24 顆小番茄',
+        remDesc: '表示還剩下 5 顆小番茄（比除數 6 小，不能再分！）',
+        tipQ: '「為什麼 29 ÷ 6 的商 4 要寫在個位 9 的上面？」',
+        tipAns: '因為十位的 2（20 顆）不拆開時，不夠每人分 10 顆（6 × 10 ＝ 60 ＞ 29），合起來 29 顆最多只能分給 <strong style="color: var(--c-quotient);">4 個人（個位）</strong>，所以商 4 要對齊個位 9！'
+      },
+      {
+        title: '3. 40 片餅乾平分到 5 個盤子，每盤幾片？（整除）',
+        divd: 40, divs: 5, q: 8, prod: 40, rem: 0, isExact: true, itemUnit: '片餅乾',
+        qDesc: '表示每盤可以分到 8 片餅乾',
+        prodDesc: '表示 5 盤共分掉 40 片餅乾',
+        remDesc: '表示剛好分完，剩下 0 片餅乾（餘數為 0 就是整除！）',
+        tipQ: '「為什麼 40 ÷ 5 的商 8 要寫在個位 0 的上面，而且橫式不用寫 … 0？」',
+        tipAns: '十位的 4（40 片）平分到 5 盤，每盤不夠分 10 片，合起來 40 片平分到 5 盤，每盤分到 <strong style="color: var(--c-quotient);">8 片（個位）</strong>，所以商 8 對齊個位 0；直式最下面寫 0 表示分完，橫式則記成 40 ÷ 5 ＝ 8（省略 … 0）。'
+      },
+      {
+        title: '4. 50 公分緞帶每 8 公分剪一段，最多剪幾段？剩幾公分？',
+        divd: 50, divs: 8, q: 6, prod: 48, rem: 2, isExact: false, itemUnit: '公分緞帶',
+        qDesc: '表示最多可以剪成 6 段',
+        prodDesc: '表示 6 段共用掉 48 公分緞帶',
+        remDesc: '表示還剩下 2 公分緞帶（比除數 8 公分短，不能再剪！）',
+        tipQ: '「為什麼 50 ÷ 8 的商 6 要寫在個位 0 的上面？」',
+        tipAns: '50 公分每 8 公分剪一段，十位的 5 不夠剪出 10 段（8 × 10 ＝ 80 ＞ 50），合起來看 50 ÷ 8 最多只能剪出 <strong style="color: var(--c-quotient);">6 段（個位）</strong>，所以商 6 要對齊個位 0！'
+      }
     ];
     let curT3Idx = 0;
     let t3Stage = 0; // 0:選位置, 1:選商, 2:選相減餘數
@@ -1252,6 +1282,10 @@
       document.getElementById('t3-step-msg').textContent = '步驟 1：商應該寫在哪一位？請點擊直式上方的「十位」或「個位」空格！';
       document.getElementById('t3-controls-area').innerHTML = '<div style="color: var(--text-sub); font-size: 16px;">👈 請先點擊左側直式的「十位」或「個位」空格來決定商的位置。</div>';
       document.getElementById('t3-meaning-lines').textContent = '完成步驟後將逐行顯示意義解析。';
+      document.getElementById('t3-tip-q').innerHTML = `<strong>💡 定位重點問答</strong>：${p.tipQ}`;
+      const ansEl = document.getElementById('t3-ans');
+      ansEl.innerHTML = p.tipAns;
+      ansEl.style.display = 'none';
     }
 
     function clickQuotientPos(pos) {
@@ -1300,7 +1334,7 @@
       document.getElementById('v-prod-ones').textContent = p.prod % 10;
 
       document.getElementById('t3-step-msg').style.color = 'var(--c-yellow)';
-      document.getElementById('t3-step-msg').textContent = `步驟 3：一共分掉了 ${p.prod}，最後相減剩下多少（餘數）？`;
+      document.getElementById('t3-step-msg').textContent = `步驟 3：一共分掉了 ${p.prod} ${p.itemUnit}，最後相減剩下多少（餘數）？`;
 
       const remCands = [...new Set([p.rem, p.rem + 1, Math.max(0, p.rem - 1)])].sort((a,b) => a - b);
       document.getElementById('t3-controls-area').innerHTML = `
@@ -1328,9 +1362,9 @@
 
       document.getElementById('t3-controls-area').innerHTML = `<div style="color:#4ade80; font-size:17px; font-weight:800;">✅ 四步驟（定位 → 估商 → 乘積 → 相減）完成！</div>`;
       document.getElementById('t3-meaning-lines').innerHTML = `
-        • <span style="color:var(--c-quotient)">商 ${p.q}</span>：最多可以分給 ${p.q} 份<br/>
-        • 乘積 ${p.prod}：${p.divs} × ${p.q} ＝ ${p.prod}，代表共分掉 ${p.prod}<br/>
-        • <span style="color:var(--c-rem)">餘數 ${p.rem}</span>：${p.divd} － ${p.prod} ＝ ${p.rem}${p.isExact ? '（餘數為 0 就是整除！）' : '（比除數小，不能再分！）'}
+        • <span style="color:var(--c-quotient)">商是 ${p.q}</span>：${p.qDesc}<br/>
+        • 乘積是 ${p.prod}：${p.divs} × ${p.q} ＝ ${p.prod}，${p.prodDesc}<br/>
+        • <span style="color:var(--c-rem)">餘數是 ${p.rem}</span>：${p.divd} － ${p.prod} ＝ ${p.rem}，${p.remDesc}
       `;
     }
 
