@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>第 7 單元：認識除法與直式計算｜互動教學實驗室</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --panel-border: #334155;
+      --text-main: #f8fafc;
+      --text-sub: #cbd5e1;
+      /* 四色除法口訣編碼 */
+      --c-dividend: #38bdf8; /* 🟦 誰被分（被除數） */
+      --c-divisor:  #4ade80; /* 🟩 怎麼分（除數） */
+      --c-quotient: #fb923c; /* 🟧 分的結果（商） */
+      --c-rem:      #c084fc; /* 🟪 剩什麼（餘數） */
+      --c-yellow:   #facc15;
+      --c-red:      #f87171;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: "Microsoft JhengHei", "PingFang TC", system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* 頂部導覽列 */
+    header {
+      background: #0b1120;
+      border-bottom: 2px solid var(--panel-border);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #f97316, #fb923c);
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 16px;
+      padding: 4px 12px;
+      border-radius: 8px;
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: #131c31;
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--text-sub);
+      border: none;
+      padding: 9px 14px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .tab-btn.active {
+      background: #f97316;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(249,115,22,0.38);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .star-pill {
+      background: rgba(250,204,21,0.14);
+      border: 1.5px solid var(--c-yellow);
+      color: var(--c-yellow);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    .audio-btn {
+      background: var(--panel-bg);
+      border: 1.5px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      min-height: 42px;
+    }
+
+    /* 四色口訣常駐列 */
+    .legend-bar {
+      background: #162033;
+      border-bottom: 1.5px solid var(--panel-border);
+      padding: 8px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .leg-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: rgba(15,23,42,0.75);
+      border: 1.5px solid;
+    }
+
+    main {
+      flex: 1;
+      padding: 16px 20px;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .view-panel { display: none; flex-direction: column; gap: 14px; }
+    .view-panel.active { display: flex; }
+
+    .card-box {
+      background: var(--panel-bg);
+      border: 1.5px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: var(--panel-bg);
+      border: 1.5px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 12px 16px;
+    }
+
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .btn {
+      background: #273549;
+      color: var(--text-main);
+      border: 1.5px solid #475569;
+      padding: 9px 15px;
+      border-radius: 9px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      min-height: 44px;
+      transition: all 0.16s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover:not(:disabled) { background: #334155; border-color: #64748b; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-orange { background: #ea580c; border-color: #fb923c; color: #fff; }
+    .btn-orange:hover:not(:disabled) { background: #f97316; }
+    .btn-blue { background: #0284c7; border-color: #38bdf8; color: #fff; }
+    .btn-green { background: #15803d; border-color: #4ade80; color: #fff; }
+    .btn-purple { background: #7e22ce; border-color: #c084fc; color: #fff; }
+    .btn-active {
+      background: #f97316 !important;
+      border-color: #facc15 !important;
+      color: #fff !important;
+      box-shadow: 0 0 12px rgba(249,115,22,0.45);
+    }
+
+    /* Tab 1 工作台與算式翻譯 */
+    .split-2 {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 14px;
+    }
+
+    .stage-box {
+      background: #131c2e;
+      border: 2px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 360px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+    }
+
+    .items-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      background: rgba(15,23,42,0.65);
+      border-radius: 10px;
+      border: 1.5px dashed var(--c-dividend);
+      min-height: 82px;
+      align-items: center;
+    }
+
+    .token-chip {
+      font-size: 26px;
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(56,189,248,0.14);
+      border: 1.5px solid var(--c-dividend);
+      border-radius: 10px;
+      transition: transform 0.2s;
+    }
+
+    .groups-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: 110px;
+      align-items: flex-start;
+    }
+
+    .plate-card {
+      background: rgba(74,222,128,0.1);
+      border: 2px solid var(--c-divisor);
+      border-radius: 12px;
+      padding: 8px 10px;
+      min-width: 112px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .plate-label {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--c-divisor);
+    }
+
+    .plate-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    .rem-tray {
+      background: rgba(192,132,252,0.14);
+      border: 2px dashed var(--c-rem);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* 四色算式翻譯卡 */
+    .eq-builder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #0f172a;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1.5px solid var(--panel-border);
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .slot-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .slot-tag { font-size: 16px; font-weight: 700; }
+
+    select.num-sel {
+      background: #1e293b;
+      color: #fff;
+      border: 2px solid;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 18px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      min-height: 42px;
+    }
+
+    /* 指針提示氣泡 */
+    .tip-bubble {
+      background: rgba(15,23,42,0.95);
+      border: 2px solid var(--c-yellow);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .finger-btn {
+      background: rgba(250,204,21,0.15);
+      border: 1.5px solid var(--c-yellow);
+      color: var(--c-yellow);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      align-self: flex-start;
+    }
+
+    /* Tab 2 幽靈盤與迷思對決 */
+    .ghost-plate {
+      border: 2.5px dashed var(--c-yellow);
+      background: rgba(250,204,21,0.08);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .ghost-slot {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      border: 2px dashed #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .ghost-slot.filled {
+      border: 2px solid var(--c-rem);
+      background: rgba(192,132,252,0.2);
+    }
+
+    .ghost-slot.added {
+      border: 2px solid var(--c-divisor);
+      background: rgba(74,222,128,0.22);
+    }
+
+    .quiz-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .myth-card {
+      background: #131c2e;
+      border: 2px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 16px;
+    }
+    .myth-card:hover { border-color: var(--c-dividend); }
+    .myth-card.ok { border-color: var(--c-divisor); background: rgba(74,222,128,0.1); }
+    .myth-card.bad { border-color: var(--c-red); background: rgba(248,113,113,0.1); }
+
+    /* Tab 3 除法直式定位板 */
+    .vdiv-board {
+      display: inline-grid;
+      grid-template-columns: 56px 22px 56px 56px;
+      grid-template-rows: 34px 56px 56px 56px 56px;
+      align-items: center;
+      justify-items: center;
+      background: #0f172a;
+      padding: 20px 26px;
+      border-radius: 14px;
+      border: 2px solid var(--panel-border);
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .v-pos-lbl { font-size: 16px; color: var(--text-sub); font-weight: 700; }
+    .v-cell {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px dashed #475569;
+      cursor: pointer;
+    }
+    .v-cell.locked { border: none; cursor: default; }
+    .v-bar-top { border-top: 3.5px solid #f8fafc; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    .v-bar-left { border-left: 3.5px solid #f8fafc; border-top-left-radius: 12px; }
+    .v-sub-line { grid-column: 3 / 5; width: 100%; border-bottom: 3px solid #f8fafc; height: 100%; display: flex; align-items: center; justify-content: space-around; }
+
+    /* Tab 4 企鵝圍圈 */
+    .penguin-ring {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px;
+      background: #0f172a;
+      border-radius: 12px;
+      border: 1.5px solid var(--panel-border);
+    }
+
+    .penguin-box {
+      background: #1e293b;
+      border: 2px solid var(--c-dividend);
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-width: 120px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .penguin-box.top-winner {
+      border-color: var(--c-yellow);
+      background: rgba(250,204,21,0.14);
+      box-shadow: 0 0 14px rgba(250,204,21,0.28);
+    }
+
+    @media (max-width: 920px) {
+      .split-2 { grid-template-columns: 1fr; }
+      .quiz-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-badge">單元 7</span>
+      <h1>認識除法與直式計算 🍰</h1>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(0)">1. 算式翻譯機</button>
+      <button class="tab-btn" onclick="switchTab(1)">2. 餘數鐵則與幽靈盤</button>
+      <button class="tab-btn" onclick="switchTab(2)">3. 除法直式定位板</button>
+      <button class="tab-btn" onclick="switchTab(3)">4. 應用決策王</button>
+    </div>
+
+    <div class="header-right">
+      <div class="star-pill" id="star-display">⭐ 闖關星星：0 顆</div>
+      <button class="audio-btn" id="soundBtn" onclick="toggleSound()">🔊 音效：開</button>
+    </div>
+  </header>
+
+  <!-- 四色口訣常駐列 -->
+  <div class="legend-bar">
+    <span class="leg-item" style="border-color: var(--c-dividend); color: var(--c-dividend);">🟦 誰被分（被除數）</span>
+    <span>÷</span>
+    <span class="leg-item" style="border-color: var(--c-divisor); color: var(--c-divisor);">🟩 怎麼分（除數）</span>
+    <span>＝</span>
+    <span class="leg-item" style="border-color: var(--c-quotient); color: var(--c-quotient);">🟧 分的結果（商）</span>
+    <span>…</span>
+    <span class="leg-item" style="border-color: var(--c-rem); color: var(--c-rem);">🟪 剩什麼（餘數）</span>
+  </div>
+
+  <main>
+    <!-- ==================== TAB 1：算式翻譯機 ==================== -->
+    <section class="view-panel active" id="panel-0">
+      <div class="toolbar">
+        <div class="btn-group">
+          <button class="btn btn-active" id="t1-q0" onclick="loadT1Problem(0)">題目 1：12 個蛋糕每 3 個裝一盤</button>
+          <button class="btn" id="t1-q1" onclick="loadT1Problem(1)">題目 2：15 片餅乾平分給 5 人</button>
+          <button class="btn" id="t1-q2" onclick="loadT1Problem(2)">題目 3：13 顆草莓每 3 顆裝一盤</button>
+          <button class="btn" id="t1-q3" onclick="loadT1Problem(3)">題目 4：P.102 雙胞胎水餃對照</button>
+        </div>
+        <button class="btn" onclick="resetT1Problem()">🔄 重設分發</button>
+      </div>
+
+      <div class="split-2">
+        <div class="stage-box">
+          <div>
+            <div style="font-size: 18px; font-weight: 800; color: var(--c-yellow); margin-bottom: 8px;" id="t1-story">題目載入中…</div>
+            <div style="font-size: 16px; color: var(--c-dividend); font-weight: 700; margin-bottom: 6px;">🟦 還沒分出去的點心（誰被分）：</div>
+            <div class="items-pool" id="t1-pool"></div>
+          </div>
+
+          <div>
+            <div style="font-size: 16px; color: var(--c-divisor); font-weight: 700; margin-bottom: 6px;" id="t1-action-hint">🟩 分組／平分盤子：</div>
+            <div class="groups-area" id="t1-groups"></div>
+          </div>
+
+          <div class="rem-tray" id="t1-rem-box" style="display: none;">
+            <span style="font-weight: 800; color: var(--c-rem);">🟪 剩下來不夠分：</span>
+            <div id="t1-rem-items" style="display: flex; gap: 6px;"></div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-green" id="t1-step-btn" onclick="stepT1Distribute()">📦 點擊分一次</button>
+            <button class="btn btn-blue" onclick="autoT1Distribute()">⚡ 一鍵全部分完</button>
+          </div>
+        </div>
+
+        <div class="card-box" style="display: flex; flex-direction: column; justify-content: space-between; gap: 14px;">
+          <div>
+            <h2 style="font-size: 20px; color: var(--c-yellow); margin-bottom: 10px;">🧩 把操作過程翻譯成四色算式（數字＋單位）</h2>
+            <p style="font-size: 16px; color: var(--text-sub); margin-bottom: 12px;" id="t1-guide-text">請先在左邊點擊「分一次」，觀察怎麼分，再選出正確數字與單位！</p>
+
+            <div class="eq-builder">
+              <div class="slot-wrap">
+                <span class="slot-tag" style="color: var(--c-dividend);">🟦 誰被分</span>
+                <select class="num-sel" id="t1-s-divd" style="border-color: var(--c-dividend);"></select>
+                <select class="num-sel" id="t1-u-divd" style="border-color: var(--c-dividend);"></select>
+              </div>
+              <span>÷</span>
+              <div class="slot-wrap">
+                <span class="slot-tag" style="color: var(--c-divisor);">🟩 怎麼分</span>
+                <select class="num-sel" id="t1-s-divs" style="border-color: var(--c-divisor);"></select>
+                <select class="num-sel" id="t1-u-divs" style="border-color: var(--c-divisor);"></select>
+              </div>
+              <span>＝</span>
+              <div class="slot-wrap">
+                <span class="slot-tag" style="color: var(--c-quotient);">🟧 結果</span>
+                <select class="num-sel" id="t1-s-quot" style="border-color: var(--c-quotient);"></select>
+                <select class="num-sel" id="t1-u-quot" style="border-color: var(--c-quotient);"></select>
+              </div>
+              <span>…</span>
+              <div class="slot-wrap">
+                <span class="slot-tag" style="color: var(--c-rem);">🟪 剩多少</span>
+                <select class="num-sel" id="t1-s-rem" style="border-color: var(--c-rem);"></select>
+                <select class="num-sel" id="t1-u-rem" style="border-color: var(--c-rem);"></select>
+              </div>
+            </div>
+
+            <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+              <button class="btn btn-orange" onclick="checkT1Formula()">✅ 檢查算式與單位</button>
+              <span id="t1-feedback" style="font-size: 16px; font-weight: 800;"></span>
+            </div>
+          </div>
+
+          <div id="t1-twin-box" style="display: none; background: #131c2e; border: 1.5px solid var(--c-dividend); border-radius: 10px; padding: 12px;">
+            <strong style="color: var(--c-dividend);">🔍 課本 P.102 雙胞胎比較（28 顆水餃）：</strong>
+            <div style="margin-top: 6px; font-size: 16px;">
+              • <strong>平分成 4 盤</strong>：28 ÷ 4 ＝ 7（每盤有 <strong>7 顆</strong>）<br/>
+              • <strong>每 4 顆裝一盤</strong>：28 ÷ 4 ＝ 7（可以裝 <strong>7 盤</strong>）<br/>
+              <span style="color: var(--c-yellow);">👉 算式長得一樣，但「動作不同」，算出來的 7 單位也不同！</span>
+            </div>
+          </div>
+
+          <div class="tip-bubble">
+            <div><strong>💡 教學重點問答</strong>：「整除時（餘數是 0），橫式要怎麼寫？」</div>
+            <button class="finger-btn" onclick="toggleFinger('t1-ans')">👉 點按手指看重點解答</button>
+            <div id="t1-ans" style="display: none; color: #e2e8f0;">
+              當餘數為 0 時稱為<strong>整除</strong>（課本 P.106），正式橫式可以簡記成 <strong style="color: var(--c-yellow);">12 ÷ 3 ＝ 4</strong>，不用寫「…0」喔！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2：餘數鐵則與幽靈湊盤 ==================== -->
+    <section class="view-panel" id="panel-1">
+      <div class="toolbar">
+        <div class="btn-group">
+          <button class="btn btn-active" id="t2-p0" onclick="loadT2Case(0)">情境 1：14 顆草莓每 3 顆裝一盤（故意剩 5 顆）</button>
+          <button class="btn" id="t2-p1" onclick="loadT2Case(1)">情境 2：課本 P.105 奇奇剪 50cm 緞帶（故意剩 10cm）</button>
+        </div>
+        <button class="btn" onclick="loadT2Case(curT2Idx)">🔄 重設誤區示範</button>
+      </div>
+
+      <div class="split-2">
+        <div class="card-box" style="display: flex; flex-direction: column; gap: 12px;">
+          <h2 style="font-size: 20px; color: var(--c-red);" id="t2-err-title">⚠️ 怪獸抗議啦！這樣分完了嗎？</h2>
+          <p style="font-size: 16px;" id="t2-err-desc"></p>
+
+          <div class="groups-area" id="t2-plates"></div>
+
+          <div style="background: rgba(192,132,252,0.12); border: 2px solid var(--c-rem); border-radius: 12px; padding: 12px;">
+            <div style="font-size: 17px; font-weight: 800; color: var(--c-rem);" id="t2-rem-label">目前還剩下：</div>
+            <div id="t2-rem-visual" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;"></div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-orange" id="t2-more-btn" onclick="t2DistributeMore()">⚡ 還夠分！再分一輪！</button>
+            <span id="t2-rule-badge" style="font-size: 17px; font-weight: 800;"></span>
+          </div>
+        </div>
+
+        <div class="card-box" style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <h2 style="font-size: 20px; color: var(--c-yellow);">👻 虛線「幽靈盤子」：還差多少能再分 1 次？</h2>
+            <p style="font-size: 16px; color: var(--text-sub); margin: 6px 0 10px;">
+              右邊是還未裝滿的幽靈盤（最多可裝 <strong style="color: var(--c-divisor);" id="t2-ghost-cap">3</strong> 單位）。觀察還剩幾個空格！
+            </p>
+            <div class="ghost-plate" id="t2-ghost-plate"></div>
+            <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;" id="t2-ghost-quiz"></div>
+          </div>
+
+          <div style="border-top: 1.5px solid var(--panel-border); padding-top: 12px;">
+            <h3 style="font-size: 18px; color: var(--c-dividend); margin-bottom: 8px;">🏆 課本 P.107 學力檢測挑戰：四十幾個蘋果平分給 8 人，每人分 5 個，最多剩幾個？</h3>
+            <div class="quiz-grid-3">
+              <div class="myth-card" onclick="checkT2Myth(this, false)">
+                <strong>妮妮：</strong><br/>「每人分 5 個，剩下的比 5 少，最多剩 <strong>4 個</strong>。」
+                <div class="myth-ans" style="display:none; margin-top:6px; color:#fca5a5;">❌ 錯！要跟「人數（除數 8）」比，不是跟每人分到的 5 比喔！</div>
+              </div>
+              <div class="myth-card" onclick="checkT2Myth(this, true)">
+                <strong>奇奇：</strong><br/>「平分給 8 人，剩下的比 8 少，最多剩 <strong>7 個</strong>。」
+                <div class="myth-ans" style="display:none; margin-top:6px; color:#86efac;">✅ 答對！除數是 8，剩 8 個就能每人再發 1 個，所以最多剩 7 個！</div>
+              </div>
+              <div class="myth-card" onclick="checkT2Myth(this, false)">
+                <strong>妙妙：</strong><br/>「四十幾個蘋果減 40，最多會剩下 <strong>9 個</strong>。」
+                <div class="myth-ans" style="display:none; margin-top:6px; color:#fca5a5;">❌ 錯！如果剩 9 個，還可以再給 8 個人一人 1 個！</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3：除法直式定位板 ==================== -->
+    <section class="view-panel" id="panel-2">
+      <div class="toolbar">
+        <div class="btn-group">
+          <button class="btn btn-active" id="t3-q0" onclick="loadT3Problem(0)">1. 7 ÷ 3（一位除以一位）</button>
+          <button class="btn" id="t3-q1" onclick="loadT3Problem(1)">2. 29 ÷ 6（商要對齊個位）</button>
+          <button class="btn" id="t3-q2" onclick="loadT3Problem(2)">3. 40 ÷ 5（整除餘 0 規範）</button>
+          <button class="btn" id="t3-q3" onclick="loadT3Problem(3)">4. 50 ÷ 8（課本 P.105 例題）</button>
+        </div>
+        <button class="btn" onclick="loadT3Problem(curT3Idx)">🔄 重新練習</button>
+      </div>
+
+      <div class="split-2">
+        <div class="card-box" style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+          <div style="font-size: 18px; font-weight: 800; color: var(--c-yellow); align-self: flex-start;" id="t3-title">題目：</div>
+
+          <div class="vdiv-board" id="t3-board">
+            <!-- Row 0: 位值標題 -->
+            <div></div><div></div>
+            <div class="v-pos-lbl">十位</div>
+            <div class="v-pos-lbl">個位</div>
+
+            <!-- Row 1: 商 -->
+            <div></div><div></div>
+            <div class="v-cell" id="v-q-tens" onclick="clickQuotientPos('tens')"></div>
+            <div class="v-cell" id="v-q-ones" onclick="clickQuotientPos('ones')"></div>
+
+            <!-- Row 2: 除數 ) 被除數 -->
+            <div class="v-cell locked" style="color: var(--c-divisor);" id="v-divisor"></div>
+            <div class="v-bar-left" style="width: 100%; height: 100%;"></div>
+            <div class="v-bar-top" style="color: var(--c-dividend);" id="v-divd-tens"></div>
+            <div class="v-bar-top" style="color: var(--c-dividend);" id="v-divd-ones"></div>
+
+            <!-- Row 3: 乘積 -->
+            <div></div><div style="font-size:20px; color: var(--text-sub);">－</div>
+            <div class="v-sub-line">
+              <span id="v-prod-tens" style="min-width: 36px; text-align: center;"></span>
+              <span id="v-prod-ones" style="min-width: 36px; text-align: center;"></span>
+            </div>
+
+            <!-- Row 4: 餘數 -->
+            <div></div><div></div>
+            <div class="v-cell locked" id="v-rem-tens" style="color: var(--c-rem);"></div>
+            <div class="v-cell locked" id="v-rem-ones" style="color: var(--c-rem);"></div>
+          </div>
+
+          <div id="t3-step-msg" style="font-size: 17px; font-weight: 800; color: var(--c-dividend); text-align: center;">
+            步驟 1：先點選上面直式的「個位」或「十位」格，決定商要寫在哪裡！
+          </div>
+        </div>
+
+        <div class="card-box" style="display: flex; flex-direction: column; justify-content: space-between; gap: 14px;">
+          <div>
+            <h2 style="font-size: 20px; color: var(--c-divisor); margin-bottom: 10px;">🔢 直式四步驟操作台</h2>
+            <div id="t3-controls-area" style="display: flex; flex-direction: column; gap: 12px;"></div>
+          </div>
+
+          <div id="t3-meaning-box" style="background: #131c2e; border: 1.5px solid var(--panel-border); border-radius: 10px; padding: 12px; font-size: 16px; line-height: 1.7;">
+            <strong style="color: var(--c-yellow);">📌 每一層數字代表什麼意思？</strong>
+            <div id="t3-meaning-lines" style="margin-top: 6px; color: var(--text-sub);">完成步驟後將逐行顯示意義解析。</div>
+          </div>
+
+          <div class="tip-bubble">
+            <div><strong>💡 定位重點問答</strong>：「為什麼 29 ÷ 6 的商 4 要寫在個位 9 的上面？」</div>
+            <button class="finger-btn" onclick="toggleFinger('t3-ans')">👉 點按手指看重點解答</button>
+            <div id="t3-ans" style="display: none;">
+              因為十位的 2（20 個）先不拆開不夠 6 人各拿一包十個，合起來 29 個分給 6 人，每人只能分到 <strong style="color: var(--c-quotient);">4 個（個位）</strong>，所以商 4 要對齊個位！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4：應用決策王 ==================== -->
+    <section class="view-panel" id="panel-3">
+      <div class="toolbar">
+        <div class="btn-group">
+          <button class="btn btn-active" id="t4-m0" onclick="switchT4Mode(0)">模式 A：商要不要「加 1」？（左右對照決策）</button>
+          <button class="btn" id="t4-m1" onclick="switchT4Mode(1)">模式 B：課本 P.109 企鵝圍圈分魚素養題</button>
+        </div>
+      </div>
+
+      <!-- 模式 A：左右雙情境對照 -->
+      <div id="t4-mode-a" class="split-2">
+        <div class="card-box" style="border-color: var(--c-quotient); display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-size: 16px; font-weight: 800; color: var(--c-quotient);">🚣 情境 1：天鵝船問題（課本 P.109）</span>
+          <p style="font-size: 18px; font-weight: 700;">有 34 個小朋友要坐天鵝船，1 艘船最多坐 4 人，最少需要幾艘天鵝船才夠坐？</p>
+          <div style="background: #0f172a; padding: 12px; border-radius: 10px; font-size: 18px; font-weight: 800;">
+            算式：34 ÷ 4 ＝ <span style="color: var(--c-quotient);">8</span>（艘）… <span style="color: var(--c-rem);">2</span>（人）
+          </div>
+          <div id="t4-boat-vis" style="background: #131c2e; padding: 12px; border-radius: 10px; font-size: 20px; line-height: 1.6;">
+            🚣×8（已載 32 人） ｜ 岸邊還站著：<span style="color: var(--c-rem); font-weight: 800;">🧒🧒 2 位小朋友</span>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-orange" onclick="answerT4Card('left', true)">✅ 再叫第 9 艘船（商 +1 ＝ 9 艘）</button>
+            <button class="btn" onclick="answerT4Card('left', false)">❌ 只要 8 艘，讓 2 人留岸邊</button>
+          </div>
+          <div id="t4-left-res" style="font-size: 16px; font-weight: 800;"></div>
+        </div>
+
+        <div class="card-box" style="border-color: var(--c-dividend); display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-size: 16px; font-weight: 800; color: var(--c-dividend);">🧁 情境 2：點心裝滿盒（課本 P.108）</span>
+          <p style="font-size: 18px; font-weight: 700;">王媽媽做了 32 個點心，每 6 個裝成一盒，最多可以裝滿幾盒？</p>
+          <div style="background: #0f172a; padding: 12px; border-radius: 10px; font-size: 18px; font-weight: 800;">
+            算式：32 ÷ 6 ＝ <span style="color: var(--c-quotient);">5</span>（盒）… <span style="color: var(--c-rem);">2</span>（個）
+          </div>
+          <div id="t4-box-vis" style="background: #131c2e; padding: 12px; border-radius: 10px; font-size: 20px; line-height: 1.6;">
+            📦×5（裝滿 30 個） ｜ 桌上剩下：<span style="color: var(--c-rem); font-weight: 800;">🧁🧁 2 個（不夠 6 個！）</span>
+          </div>
+          <div class="btn-group">
+            <button class="btn" onclick="answerT4Card('right', false)">❌ 算 6 盒（硬湊成 6 盒）</button>
+            <button class="btn btn-blue" onclick="answerT4Card('right', true)">✅ 維持 5 盒（剩 2 個不夠裝滿 1 盒）</button>
+          </div>
+          <div id="t4-right-res" style="font-size: 16px; font-weight: 800;"></div>
+        </div>
+      </div>
+
+      <!-- 模式 B：企鵝圍圈分魚 -->
+      <div id="t4-mode-b" class="card-box" style="display: none; flex-direction: column; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h2 style="font-size: 20px; color: var(--c-yellow);">🐧 課本 P.109 素養挑戰：18 條魚依序分給 5 隻企鵝</h2>
+            <p style="font-size: 16px; color: var(--text-sub);">從 1 號企鵝開始每次給 1 條魚，直到發完，<strong>哪幾號企鵝會拿到 4 條魚？</strong></p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-green" onclick="stepPenguinFish(1)">🐟 發 1 條魚</button>
+            <button class="btn btn-blue" onclick="stepPenguinFish(5)">⚡ 發一整輪（5 條）</button>
+            <button class="btn" onclick="resetPenguin()">🔄 重新發魚</button>
+          </div>
+        </div>
+
+        <div style="font-size: 18px; font-weight: 800; color: var(--c-dividend);" id="penguin-status">
+          目前剩餘魚數：18 條 ｜ 已發輪數：0 輪
+        </div>
+
+        <div class="penguin-ring" id="penguin-ring"></div>
+
+        <div id="penguin-conclusion" style="display: none; background: rgba(74,222,128,0.12); border: 2px solid var(--c-divisor); border-radius: 12px; padding: 14px; font-size: 17px;">
+          🎉 <strong>發完囉！</strong> <span style="color: var(--c-yellow);">18 ÷ 5 ＝ 3（輪）… 3（條）</span><br/>
+          每隻先拿到 3 條，最後剩下的 <strong>🟪 3 條</strong>依序發給 <strong style="color: var(--c-yellow);">1 號、2 號、3 號企鵝</strong>，所以這 3 隻會拿到 <strong>4 條魚</strong>！
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /* ==================== 音效與星星系統 ==================== */
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let soundOn = true;
+    let stars = 0;
+    const rewardedKeys = new Set();
+
+    function playTone(freq, type = 'sine', dur = 0.12, vol = 0.14) {
+      if (!soundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new AudioCtx();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        g.gain.setValueAtTime(vol, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + dur);
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      document.getElementById('soundBtn').textContent = soundOn ? '🔊 音效：開' : '🔇 音效：關';
+    }
+
+    function addStar(key) {
+      if (rewardedKeys.has(key)) return;
+      rewardedKeys.add(key);
+      stars++;
+      document.getElementById('star-display').textContent = `⭐ 闖關星星：${stars} 顆`;
+    }
+
+    function switchTab(idx) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+      document.querySelectorAll('.view-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+      playTone(587, 'sine', 0.08);
+    }
+
+    function toggleFinger(id) {
+      const el = document.getElementById(id);
+      const show = el.style.display === 'none';
+      el.style.display = show ? 'block' : 'none';
+      playTone(show ? 784 : 440, 'sine', 0.1);
+    }
+
+    /* ==================== TAB 1：算式翻譯機 ==================== */
+    const t1Problems = [
+      {
+        story: '萬聖節點心：12 個蛋糕，每 3 個裝一盤，可以裝成幾盤？',
+        type: 'contain', icon: '🧁', total: 12, divisor: 3, quotient: 4, rem: 0,
+        units: { divd: '個', divs: '個', quot: '盤', rem: '個' },
+        unitOpts: ['個', '盤', '人']
+      },
+      {
+        story: '下午茶平分：15 片餅乾，平分給 5 個小朋友，一個人分到幾片？',
+        type: 'share', icon: '🍪', total: 15, divisor: 5, quotient: 3, rem: 0,
+        units: { divd: '片', divs: '人', quot: '片', rem: '片' },
+        unitOpts: ['片', '人', '盤']
+      },
+      {
+        story: '認識餘數：13 顆草莓，每 3 顆裝一盤，最多可以裝幾盤？剩幾顆？',
+        type: 'contain', icon: '🍓', total: 13, divisor: 3, quotient: 4, rem: 1,
+        units: { divd: '顆', divs: '顆', quot: '盤', rem: '顆' },
+        unitOpts: ['顆', '盤', '人']
+      },
+      {
+        story: '雙胞胎挑戰（P.102）：28 顆水餃，平分成 4 盤，每盤有幾顆水餃？',
+        type: 'share', icon: '🥟', total: 28, divisor: 4, quotient: 7, rem: 0,
+        units: { divd: '顆', divs: '盤', quot: '顆', rem: '顆' },
+        unitOpts: ['顆', '盤', '人'],
+        showTwin: true
+      }
+    ];
+
+    let curT1Idx = 0;
+    let t1Remaining = 12;
+    let t1StepsDone = 0;
+    let t1GroupsData = [];
+
+    function populateSelect(selId, items) {
+      const sel = document.getElementById(selId);
+      sel.innerHTML = '<option value="">選</option>' + items.map(v => `<option value="${v}">${v}</option>`).join('');
+    }
+
+    function loadT1Problem(idx) {
+      curT1Idx = idx;
+      document.querySelectorAll('[id^="t1-q"]').forEach((b, i) => b.classList.toggle('btn-active', i === idx));
+      resetT1Problem();
+      const pr = t1Problems[idx];
+      const nums = Array.from({ length: 29 }, (_, i) => i);
+      ['t1-s-divd', 't1-s-divs', 't1-s-quot', 't1-s-rem'].forEach(id => populateSelect(id, nums));
+      ['t1-u-divd', 't1-u-divs', 't1-u-quot', 't1-u-rem'].forEach(id => populateSelect(id, pr.unitOpts));
+      document.getElementById('t1-twin-box').style.display = pr.showTwin ? 'block' : 'none';
+      document.getElementById('t1-feedback').textContent = '';
+    }
+
+    function resetT1Problem() {
+      const pr = t1Problems[curT1Idx];
+      t1Remaining = pr.total;
+      t1StepsDone = 0;
+      t1GroupsData = pr.type === 'share' ? Array.from({ length: pr.divisor }, () => 0) : [];
+      document.getElementById('t1-story').textContent = pr.story;
+      document.getElementById('t1-action-hint').textContent =
+        pr.type === 'contain' ? `🟩 怎麼分：每 ${pr.divisor} ${pr.units.divd}裝一盤` : `🟩 怎麼分：平分給 ${pr.divisor} ${pr.units.divs}（每次每人發 1 ${pr.units.divd}）`;
+      document.getElementById('t1-step-btn').textContent =
+        pr.type === 'contain' ? `📦 裝一盤（拿走 ${pr.divisor} 個）` : `🍽️ 發一輪（每人拿 1 個）`;
+      document.getElementById('t1-step-btn').disabled = false;
+      renderT1Stage();
+    }
+
+    function renderT1Stage() {
+      const pr = t1Problems[curT1Idx];
+      const pool = document.getElementById('t1-pool');
+      const grp = document.getElementById('t1-groups');
+      const remBox = document.getElementById('t1-rem-box');
+      const remItems = document.getElementById('t1-rem-items');
+
+      const isDone = t1Remaining < pr.divisor;
+      pool.innerHTML = '';
+      remItems.innerHTML = '';
+
+      if (isDone && t1Remaining > 0) {
+        remBox.style.display = 'flex';
+        for (let i = 0; i < t1Remaining; i++) {
+          remItems.innerHTML += `<span class="token-chip" style="border-color: var(--c-rem); background: rgba(192,132,252,0.2);">${pr.icon}</span>`;
+        }
+        pool.innerHTML = '<span style="color: var(--text-sub); font-size: 16px;">已全部能分的都分完了！剩下的移到下方紫色區域。</span>';
+      } else {
+        remBox.style.display = 'none';
+        for (let i = 0; i < t1Remaining; i++) {
+          pool.innerHTML += `<span class="token-chip">${pr.icon}</span>`;
+        }
+        if (t1Remaining === 0) {
+          pool.innerHTML = '<span style="color: var(--c-divisor); font-weight: 800;">✅ 全部剛好分完，沒有剩下！</span>';
+        }
+      }
+
+      grp.innerHTML = '';
+      t1GroupsData.forEach((cnt, i) => {
+        const lbl = pr.type === 'contain' ? `第 ${i + 1} 盤` : `第 ${i + 1} ${pr.units.divs === '人' ? '人' : '盤'}`;
+        let icons = '';
+        for (let k = 0; k < cnt; k++) icons += `<span style="font-size: 22px;">${pr.icon}</span>`;
+        grp.innerHTML += `<div class="plate-card"><span class="plate-label">${lbl} (${cnt})</span><div class="plate-items">${icons}</div></div>`;
+      });
+
+      document.getElementById('t1-step-btn').disabled = isDone;
+    }
+
+    function stepT1Distribute() {
+      const pr = t1Problems[curT1Idx];
+      if (t1Remaining < pr.divisor) return;
+      t1Remaining -= pr.divisor;
+      t1StepsDone++;
+      if (pr.type === 'contain') t1GroupsData.push(pr.divisor);
+      else t1GroupsData = t1GroupsData.map(x => x + 1);
+      playTone(540 + t1StepsDone * 65, 'sine', 0.1);
+      renderT1Stage();
+    }
+
+    function autoT1Distribute() {
+      const pr = t1Problems[curT1Idx];
+      while (t1Remaining >= pr.divisor) {
+        t1Remaining -= pr.divisor;
+        t1StepsDone++;
+        if (pr.type === 'contain') t1GroupsData.push(pr.divisor);
+        else t1GroupsData = t1GroupsData.map(x => x + 1);
+      }
+      playTone(880, 'sine', 0.18);
+      renderT1Stage();
+    }
+
+    function checkT1Formula() {
+      const pr = t1Problems[curT1Idx];
+      const sd = document.getElementById('t1-s-divd').value;
+      const ud = document.getElementById('t1-u-divd').value;
+      const sv = document.getElementById('t1-s-divs').value;
+      const uv = document.getElementById('t1-u-divs').value;
+      const sq = document.getElementById('t1-s-quot').value;
+      const uq = document.getElementById('t1-u-quot').value;
+      const sr = document.getElementById('t1-s-rem').value;
+      const ur = document.getElementById('t1-u-rem').value;
+
+      const fb = document.getElementById('t1-feedback');
+      const okNum = (+sd === pr.total && +sv === pr.divisor && +sq === pr.quotient && +sr === pr.rem);
+      const okUnit = (ud === pr.units.divd && uv === pr.units.divs && uq === pr.units.quot && ur === pr.units.rem);
+
+      if (okNum && okUnit) {
+        fb.style.color = '#4ade80';
+        fb.textContent = '🎉 完全正確！數字和單位都翻譯成功了！';
+        playTone(987, 'sine', 0.22);
+        addStar(`t1-${curT1Idx}`);
+      } else if (okNum && !okUnit) {
+        fb.style.color = '#facc15';
+        fb.textContent = '💡 數字對了，但再檢查一下「橘色商的單位」或「除數單位」喔！';
+        playTone(330, 'triangle', 0.15);
+      } else {
+        fb.style.color = '#f87171';
+        fb.textContent = '❌ 再看一次左邊分好的圖，檢查「誰被分」和「分的結果」喔！';
+        playTone(220, 'sawtooth', 0.18);
+      }
+    }
+
+    /* ==================== TAB 2：餘數鐵則與幽靈盤 ==================== */
+    const t2Cases = [
+      {
+        title: '⚠️ 怪獸抗議啦！14 顆草莓每 3 顆裝一盤，只裝 3 盤剩 5 顆？',
+        desc: '盤子還剩下 5 顆草莓，可是每 3 顆就可以再裝滿 1 盤！這樣分完了嗎？',
+        icon: '🍓', unit: '顆', divisor: 3, plates: 3, rem: 5
+      },
+      {
+        title: '⚠️ 課本 P.105 奇奇的錯誤：50 公分緞帶每 8 公分剪一段，剪 5 段剩 10 公分？',
+        desc: '奇奇算出 50 ÷ 8 ＝ 5 … 10。剩下的 10 公分比 8 公分還要長耶！',
+        icon: '🎀', unit: '公分', divisor: 8, plates: 5, rem: 10
+      }
+    ];
+    let curT2Idx = 0;
+    let t2Plates = 3;
+    let t2Rem = 5;
+    let t2GhostFilled = false;
+
+    function loadT2Case(idx) {
+      curT2Idx = idx;
+      document.querySelectorAll('[id^="t2-p"]').forEach((b, i) => b.classList.toggle('btn-active', i === idx));
+      const c = t2Cases[idx];
+      t2Plates = c.plates;
+      t2Rem = c.rem;
+      t2GhostFilled = false;
+      renderT2();
+    }
+
+    function renderT2() {
+      const c = t2Cases[curT2Idx];
+      document.getElementById('t2-err-title').textContent = c.title;
+      document.getElementById('t2-err-desc').textContent = c.desc;
+
+      const pBox = document.getElementById('t2-plates');
+      pBox.innerHTML = '';
+      for (let i = 0; i < t2Plates; i++) {
+        pBox.innerHTML += `<div class="plate-card"><span class="plate-label">第 ${i+1} 份</span><div style="font-size:18px;font-weight:800;">${c.icon} × ${c.divisor}</div></div>`;
+      }
+
+      document.getElementById('t2-rem-label').textContent = `目前剩下：${t2Rem} ${c.unit}（除數需要 ${c.divisor} ${c.unit} 才夠分 1 次）`;
+      const rv = document.getElementById('t2-rem-visual');
+      rv.innerHTML = '';
+      for (let i = 0; i < Math.min(t2Rem, 10); i++) {
+        rv.innerHTML += `<span class="token-chip" style="border-color: var(--c-rem);">${c.icon}</span>`;
+      }
+
+      const canMore = t2Rem >= c.divisor;
+      document.getElementById('t2-more-btn').disabled = !canMore;
+      document.getElementById('t2-rule-badge').style.color = canMore ? '#f87171' : '#4ade80';
+      document.getElementById('t2-rule-badge').textContent = canMore
+        ? `❌ 還夠分！因為 ${t2Rem} ≧ ${c.divisor}`
+        : `🔒 不夠再分了！餘數 ${t2Rem} ＜ 除數 ${c.divisor}`;
+
+      // 幽靈盤子
+      document.getElementById('t2-ghost-cap').textContent = `${c.divisor} ${c.unit}`;
+      const gp = document.getElementById('t2-ghost-plate');
+      gp.innerHTML = '';
+      if (!canMore) {
+        for (let i = 0; i < c.divisor; i++) {
+          if (i < t2Rem) gp.innerHTML += `<div class="ghost-slot filled">${c.icon}</div>`;
+          else if (t2GhostFilled) gp.innerHTML += `<div class="ghost-slot added">${c.icon}</div>`;
+          else gp.innerHTML += `<div class="ghost-slot">?</div>`;
+        }
+        const need = c.divisor - t2Rem;
+        const gq = document.getElementById('t2-ghost-quiz');
+        if (t2GhostFilled) {
+          gq.innerHTML = `<span style="color:#4ade80; font-weight:800;">🎉 補上 ${need} ${c.unit}就剛好湊滿 ${c.divisor} ${c.unit}，可以再分 1 份囉！</span>`;
+        } else {
+          const opts = [need, Math.max(1, need - 1), need + 1];
+          const uniq = [...new Set(opts)].sort((a,b) => a - b);
+          gq.innerHTML = '<span style="font-weight:700;">還差幾個能再分 1 份？</span>' +
+            uniq.map(v => `<button class="btn" onclick="answerGhost(${v}, ${need})">${v} ${c.unit}</button>`).join('');
+        }
+      } else {
+        gp.innerHTML = '<span style="color: var(--c-yellow);">👈 請先按左邊「⚡ 還夠分！再分一輪！」把剩下的先分到不能分為止！</span>';
+        document.getElementById('t2-ghost-quiz').innerHTML = '';
+      }
+    }
+
+    function t2DistributeMore() {
+      const c = t2Cases[curT2Idx];
+      if (t2Rem >= c.divisor) {
+        t2Rem -= c.divisor;
+        t2Plates++;
+        playTone(740, 'sine', 0.14);
+        if (t2Rem < c.divisor) addStar(`t2-${curT2Idx}`);
+        renderT2();
+      }
+    }
+
+    function answerGhost(val, need) {
+      if (val === need) {
+        t2GhostFilled = true;
+        playTone(987, 'sine', 0.2);
+        addStar(`t2-ghost-${curT2Idx}`);
+        renderT2();
+      } else {
+        playTone(240, 'sawtooth', 0.14);
+      }
+    }
+
+    function checkT2Myth(card, isCorrect) {
+      if (card.classList.contains('ok') || card.classList.contains('bad')) return;
+      card.classList.add(isCorrect ? 'ok' : 'bad');
+      card.querySelector('.myth-ans').style.display = 'block';
+      playTone(isCorrect ? 880 : 230, isCorrect ? 'sine' : 'sawtooth', 0.18);
+      if (isCorrect) addStar('t2-myth');
+    }
+
+    /* ==================== TAB 3：除法直式定位板 ==================== */
+    const t3Problems = [
+      { title: '1. 7 個點心，每人分 3 個，最多分幾人？剩幾個？', divd: 7, divs: 3, q: 2, prod: 6, rem: 1, isExact: false },
+      { title: '2. 29 顆小番茄，每人分 6 顆，最多分幾人？剩幾顆？', divd: 29, divs: 6, q: 4, prod: 24, rem: 5, isExact: false },
+      { title: '3. 40 片餅乾平分到 5 個盤子，每盤幾片？（整除）', divd: 40, divs: 5, q: 8, prod: 40, rem: 0, isExact: true },
+      { title: '4. 50 公分緞帶每 8 公分剪一段，最多剪幾段？剩幾公分？', divd: 50, divs: 8, q: 6, prod: 48, rem: 2, isExact: false }
+    ];
+    let curT3Idx = 0;
+    let t3Stage = 0; // 0:選位置, 1:選商, 2:選相減餘數
+
+    function loadT3Problem(idx) {
+      curT3Idx = idx;
+      t3Stage = 0;
+      document.querySelectorAll('[id^="t3-q"]').forEach((b, i) => b.classList.toggle('btn-active', i === idx));
+      const p = t3Problems[idx];
+      document.getElementById('t3-title').textContent = p.title;
+      document.getElementById('v-divisor').textContent = p.divs;
+      document.getElementById('v-divd-tens').textContent = p.divd >= 10 ? Math.floor(p.divd / 10) : '';
+      document.getElementById('v-divd-ones').textContent = p.divd % 10;
+
+      ['v-q-tens', 'v-q-ones', 'v-prod-tens', 'v-prod-ones', 'v-rem-tens', 'v-rem-ones'].forEach(id => {
+        const el = document.getElementById(id);
+        el.textContent = '';
+        el.style.borderColor = '#475569';
+        el.style.background = 'transparent';
+      });
+      document.getElementById('v-q-ones').style.borderColor = '#facc15';
+      document.getElementById('t3-step-msg').style.color = 'var(--c-dividend)';
+      document.getElementById('t3-step-msg').textContent = '步驟 1：商應該寫在哪一位？請點擊直式上方的「十位」或「個位」空格！';
+      document.getElementById('t3-controls-area').innerHTML = '<div style="color: var(--text-sub); font-size: 16px;">👈 請先點擊左側直式的「十位」或「個位」空格來決定商的位置。</div>';
+      document.getElementById('t3-meaning-lines').textContent = '完成步驟後將逐行顯示意義解析。';
+    }
+
+    function clickQuotientPos(pos) {
+      if (t3Stage !== 0) return;
+      if (pos === 'tens') {
+        playTone(220, 'sawtooth', 0.16);
+        document.getElementById('t3-step-msg').style.color = '#f87171';
+        document.getElementById('t3-step-msg').textContent = '⚠️ 十位數字不夠除數分喔！請點選「個位」空格！';
+      } else {
+        t3Stage = 1;
+        playTone(740, 'sine', 0.12);
+        document.getElementById('v-q-ones').style.background = 'rgba(251,146,60,0.22)';
+        document.getElementById('v-q-ones').textContent = '?';
+        document.getElementById('t3-step-msg').style.color = '#4ade80';
+        document.getElementById('t3-step-msg').textContent = '✅ 對了！商要寫在「個位」！現在請選出正確的商：';
+        renderT3Step1Controls();
+      }
+    }
+
+    function renderT3Step1Controls() {
+      const p = t3Problems[curT3Idx];
+      const candidates = [p.q - 1, p.q, p.q + 1].filter(x => x >= 1 && x <= 9);
+      const area = document.getElementById('t3-controls-area');
+      area.innerHTML = `
+        <div style="font-size:17px; font-weight:700;">步驟 2：用 ${p.divs} 的九九乘法，找出最接近 ${p.divd} 且不超過的商：</div>
+        <div class="btn-group">
+          ${candidates.map(k => `<button class="btn btn-orange" onclick="pickT3Quotient(${k})">${p.divs} × ${k} ＝ ${p.divs * k}（商 ${k}）</button>`).join('')}
+        </div>
+      `;
+    }
+
+    function pickT3Quotient(k) {
+      const p = t3Problems[curT3Idx];
+      if (k !== p.q) {
+        playTone(230, 'sawtooth', 0.16);
+        const msg = k < p.q ? `還剩 ${p.divd - p.divs * k} ≧ ${p.divs}，還可以再分喔！` : `${p.divs} × ${k} ＝ ${p.divs * k} 超過 ${p.divd} 了！`;
+        document.getElementById('t3-step-msg').style.color = '#f87171';
+        document.getElementById('t3-step-msg').textContent = `❌ ${msg}`;
+        return;
+      }
+      t3Stage = 2;
+      playTone(880, 'sine', 0.15);
+      document.getElementById('v-q-ones').textContent = p.q;
+      document.getElementById('v-q-ones').style.color = '#fb923c';
+      document.getElementById('v-prod-tens').textContent = p.prod >= 10 ? Math.floor(p.prod / 10) : '';
+      document.getElementById('v-prod-ones').textContent = p.prod % 10;
+
+      document.getElementById('t3-step-msg').style.color = 'var(--c-yellow)';
+      document.getElementById('t3-step-msg').textContent = `步驟 3：一共分掉了 ${p.prod}，最後相減剩下多少（餘數）？`;
+
+      const remCands = [...new Set([p.rem, p.rem + 1, Math.max(0, p.rem - 1)])].sort((a,b) => a - b);
+      document.getElementById('t3-controls-area').innerHTML = `
+        <div style="font-size:17px; font-weight:700;">計算 ${p.divd} － ${p.prod} ＝ ？</div>
+        <div class="btn-group">
+          ${remCands.map(r => `<button class="btn btn-purple" onclick="pickT3Rem(${r})">餘數 ＝ ${r}</button>`).join('')}
+        </div>
+      `;
+    }
+
+    function pickT3Rem(r) {
+      const p = t3Problems[curT3Idx];
+      if (r !== p.rem) {
+        playTone(230, 'sawtooth', 0.15);
+        return;
+      }
+      t3Stage = 3;
+      playTone(1046, 'sine', 0.25);
+      addStar(`t3-${curT3Idx}`);
+      document.getElementById('v-rem-ones').textContent = p.rem;
+      document.getElementById('t3-step-msg').style.color = '#4ade80';
+      document.getElementById('t3-step-msg').textContent = p.isExact
+        ? `🎉 整除完成！橫式記成：${p.divd} ÷ ${p.divs} ＝ ${p.q}（省略 …0）`
+        : `🎉 直式完成！橫式記成：${p.divd} ÷ ${p.divs} ＝ ${p.q} … ${p.rem}`;
+
+      document.getElementById('t3-controls-area').innerHTML = `<div style="color:#4ade80; font-size:17px; font-weight:800;">✅ 四步驟（定位 → 估商 → 乘積 → 相減）完成！</div>`;
+      document.getElementById('t3-meaning-lines').innerHTML = `
+        • <span style="color:var(--c-quotient)">商 ${p.q}</span>：最多可以分給 ${p.q} 份<br/>
+        • 乘積 ${p.prod}：${p.divs} × ${p.q} ＝ ${p.prod}，代表共分掉 ${p.prod}<br/>
+        • <span style="color:var(--c-rem)">餘數 ${p.rem}</span>：${p.divd} － ${p.prod} ＝ ${p.rem}${p.isExact ? '（餘數為 0 就是整除！）' : '（比除數小，不能再分！）'}
+      `;
+    }
+
+    /* ==================== TAB 4：應用決策王 ==================== */
+    function switchT4Mode(m) {
+      document.getElementById('t4-m0').classList.toggle('btn-active', m === 0);
+      document.getElementById('t4-m1').classList.toggle('btn-active', m === 1);
+      document.getElementById('t4-mode-a').style.display = m === 0 ? 'grid' : 'none';
+      document.getElementById('t4-mode-b').style.display = m === 1 ? 'flex' : 'none';
+      playTone(622, 'sine', 0.08);
+    }
+
+    function answerT4Card(side, ok) {
+      const el = document.getElementById(side === 'left' ? 't4-left-res' : 't4-right-res');
+      if (ok) {
+        playTone(987, 'sine', 0.22);
+        addStar(`t4-${side}`);
+        el.style.color = '#4ade80';
+        el.textContent = side === 'left'
+          ? '🎉 答對！剩下的 2 個小朋友也要坐船，所以商要加 1：需要 9 艘船！'
+          : '🎉 答對！剩下的 2 個不夠裝滿 1 盒，所以最多只能裝滿 5 盒！';
+      } else {
+        playTone(230, 'sawtooth', 0.18);
+        el.style.color = '#f87171';
+        el.textContent = side === 'left'
+          ? '❌ 哎呀，不能把 2 位小朋友留在岸邊喔！'
+          : '❌ 題目問「最多可以裝滿幾盒」，剩下的 2 個不夠裝滿一盒喔！';
+      }
+    }
+
+    // 企鵝分魚模擬器
+    let fishLeft = 18;
+    let pCounts = [0, 0, 0, 0, 0];
+    let nextPIdx = 0;
+
+    function renderPenguin() {
+      const ring = document.getElementById('penguin-ring');
+      ring.innerHTML = '';
+      pCounts.forEach((cnt, idx) => {
+        const isTop = fishLeft === 0 && cnt === 4;
+        let fishIcons = '';
+        for (let i = 0; i < cnt; i++) fishIcons += '🐟';
+        ring.innerHTML += `
+          <div class="penguin-box ${isTop ? 'top-winner' : ''}">
+            <div style="font-size: 30px;">🐧</div>
+            <div style="font-weight: 800; color: var(--c-yellow);">${idx + 1} 號企鵝</div>
+            <div style="min-height: 28px; margin-top: 4px; font-size: 18px;">${fishIcons || '（0）'}</div>
+            <div style="font-weight: 700; color: var(--c-dividend);">共 ${cnt} 條</div>
+          </div>
+        `;
+      });
+      document.getElementById('penguin-status').textContent = `目前剩餘魚數：${fishLeft} 條 ｜ 已發輪數：${Math.floor((18 - fishLeft) / 5)} 輪`;
+      document.getElementById('penguin-conclusion').style.display = fishLeft === 0 ? 'block' : 'none';
+      if (fishLeft === 0) addStar('t4-penguin');
+    }
+
+    function stepPenguinFish(n) {
+      if (fishLeft <= 0) return;
+      const take = Math.min(n, fishLeft);
+      for (let i = 0; i < take; i++) {
+        pCounts[nextPIdx]++;
+        nextPIdx = (nextPIdx + 1) % 5;
+        fishLeft--;
+      }
+      playTone(fishLeft === 0 ? 1046 : 660, 'sine', 0.14);
+      renderPenguin();
+    }
+
+    function resetPenguin() {
+      fishLeft = 18;
+      pCounts = [0, 0, 0, 0, 0];
+      nextPIdx = 0;
+      playTone(440, 'sine', 0.08);
+      renderPenguin();
+    }
+
+    // 初始化
+    loadT1Problem(0);
+    loadT2Case(0);
+    loadT3Problem(0);
+    renderPenguin();
+  </script>
+</body>
+</html>
