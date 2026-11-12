@@ -237,8 +237,8 @@
     }
 
     .items-pool {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
       gap: 8px;
       padding: 12px;
       background: rgba(15,23,42,0.65);
@@ -246,6 +246,14 @@
       border: 1.5px dashed var(--c-dividend);
       min-height: 82px;
       align-items: center;
+      justify-items: center;
+    }
+
+    .items-pool .token-chip {
+      width: 100%;
+      max-width: 44px;
+      height: auto;
+      aspect-ratio: 1 / 1;
     }
 
     .token-chip {
@@ -943,14 +951,14 @@
         for (let i = 0; i < t1Remaining; i++) {
           remItems.innerHTML += `<span class="token-chip" style="border-color: var(--c-rem); background: rgba(192,132,252,0.2);">${pr.icon}</span>`;
         }
-        pool.innerHTML = '<span style="color: var(--text-sub); font-size: 16px;">已全部能分的都分完了！剩下的移到下方紫色區域。</span>';
+        pool.innerHTML = '<span style="grid-column: 1 / -1; justify-self: start; color: var(--text-sub); font-size: 16px;">已全部能分的都分完了！剩下的移到下方紫色區域。</span>';
       } else {
         remBox.style.display = 'none';
         for (let i = 0; i < t1Remaining; i++) {
           pool.innerHTML += `<span class="token-chip">${pr.icon}</span>`;
         }
         if (t1Remaining === 0) {
-          pool.innerHTML = '<span style="color: var(--c-divisor); font-weight: 800;">✅ 全部剛好分完，沒有剩下！</span>';
+          pool.innerHTML = '<span style="grid-column: 1 / -1; justify-self: start; color: var(--c-divisor); font-weight: 800;">✅ 全部剛好分完，沒有剩下！</span>';
         }
       }
 
