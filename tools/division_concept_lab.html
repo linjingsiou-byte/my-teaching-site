@@ -350,6 +350,46 @@
       border-right: 3px dashed #fbbf24 !important;
     }
 
+    .mul-track {
+      background: rgba(251,146,60,0.08);
+      border: 1.5px solid rgba(251,146,60,0.45);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mul-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mul-chip {
+      font-size: 18px;
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: #1e293b;
+      border: 1.5px solid #475569;
+      color: #e2e8f0;
+      transition: all 0.2s;
+    }
+
+    .mul-chip.latest {
+      border-color: var(--c-quotient);
+      background: rgba(251,146,60,0.22);
+      color: #fff;
+    }
+
+    .mul-var {
+      color: var(--c-quotient);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     /* 四色算式翻譯卡 */
     .eq-builder {
       display: flex;
@@ -589,6 +629,11 @@
           <div class="rem-tray" id="t1-rem-box" style="display: none;">
             <span style="font-weight: 800; color: var(--c-rem);">🟪 剩下來不夠分：</span>
             <div id="t1-rem-items" style="display: flex; gap: 6px;"></div>
+          </div>
+
+          <div class="mul-track" id="t1-mul-box">
+            <div style="font-size: 16px; font-weight: 800; color: var(--c-quotient);" id="t1-mul-title">🟧 乘法動態紀錄：</div>
+            <div class="mul-chips" id="t1-mul-chips"></div>
           </div>
 
           <div class="btn-group">
@@ -1004,6 +1049,29 @@
         for (let k = 0; k < cnt; k++) icons += `<span style="font-size: 22px;">${pr.icon}</span>`;
         grp.innerHTML += `<div class="plate-card"><span class="plate-label">${lbl} (${cnt})</span><div class="plate-items">${icons}</div></div>`;
       });
+
+      // 動態乘法算式紀錄（包含除：除數×(k)=積；等分除：(k)×除數=積）
+      const mulTitle = document.getElementById('t1-mul-title');
+      const mulChips = document.getElementById('t1-mul-chips');
+      mulTitle.textContent = pr.type === 'contain'
+        ? `🟧 乘法動態紀錄（每盤 ${pr.divisor} ${pr.units.divd} × 幾盤）：`
+        : `🟧 乘法動態紀錄（每${pr.units.divs === '人' ? '人' : '盤'}幾${pr.units.divd} × ${pr.divisor} ${pr.units.divs}）：`;
+      if (t1StepsDone === 0) {
+        mulChips.innerHTML = `<span style="font-size: 16px; color: var(--text-sub);">點擊下方「${pr.type === 'contain' ? '裝一盤' : '發一輪'}」就會一筆一筆出現乘法算式喔！</span>`;
+      } else {
+        let html = '';
+        for (let k = 1; k <= t1StepsDone; k++) {
+          const isLast = k === t1StepsDone;
+          const expr = pr.type === 'contain'
+            ? `<span style="color:var(--c-divisor)">${pr.divisor}</span> × ( <span class="mul-var">${k}</span> ) ＝ ${pr.divisor * k}`
+            : `( <span class="mul-var">${k}</span> ) × <span style="color:var(--c-divisor)">${pr.divisor}</span> ＝ ${k * pr.divisor}`;
+          html += `<span class="mul-chip ${isLast ? 'latest' : ''}">${expr}</span>`;
+        }
+        if (isDone && t1Remaining > 0) {
+          html += `<span class="mul-chip" style="border-color: var(--c-rem); color: var(--c-rem);">＋ 剩 ${t1Remaining} ＝ ${pr.total}</span>`;
+        }
+        mulChips.innerHTML = html;
+      }
 
       document.getElementById('t1-step-btn').disabled = isDone;
     }
