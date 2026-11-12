@@ -313,6 +313,43 @@
       flex-wrap: wrap;
     }
 
+    .ribbon-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .ribbon-bar {
+      position: relative;
+      display: inline-flex;
+      height: 36px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid;
+      background: #0f172a;
+    }
+
+    .ribbon-cell {
+      width: 24px;
+      height: 100%;
+      border-right: 1px dashed rgba(255,255,255,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      user-select: none;
+    }
+
+    .ribbon-cell:last-child { border-right: none; }
+
+    .ribbon-cut {
+      position: relative;
+      border-right: 3px dashed #fbbf24 !important;
+    }
+
     /* 四色算式翻譯卡 */
     .eq-builder {
       display: flex;
@@ -1055,49 +1092,97 @@
       renderT2();
     }
 
+    function renderRibbonBar(cm, theme, cutAt = 0) {
+      const bg = theme === 'green' ? 'rgba(74,222,128,0.28)' : 'rgba(192,132,252,0.32)';
+      const bd = theme === 'green' ? 'var(--c-divisor)' : 'var(--c-rem)';
+      let cells = '';
+      for (let i = 1; i <= cm; i++) {
+        const isCut = cutAt > 0 && i === cutAt && cm > cutAt;
+        const cellBg = (cutAt > 0 && i <= cutAt) ? 'rgba(251,191,36,0.25)' : bg;
+        cells += `<div class="ribbon-cell ${isCut ? 'ribbon-cut' : ''}" style="background:${cellBg};">${i}</div>`;
+      }
+      return `<div class="ribbon-wrap">
+        <div class="ribbon-bar" style="border-color:${bd};">${cells}</div>
+        <div style="font-size:16px; font-weight:800; color:${bd};">${cutAt > 0 && cm >= cutAt ? `✂️ 前面 ${cutAt} 公分還夠再剪 1 段！（共 ${cm} 公分）` : `📏 長度：${cm} 公分`}</div>
+      </div>`;
+    }
+
     function renderT2() {
       const c = t2Cases[curT2Idx];
+      const isRibbon = c.unit === '公分';
       document.getElementById('t2-err-title').textContent = c.title;
       document.getElementById('t2-err-desc').textContent = c.desc;
 
       const pBox = document.getElementById('t2-plates');
       pBox.innerHTML = '';
       for (let i = 0; i < t2Plates; i++) {
-        pBox.innerHTML += `<div class="plate-card"><span class="plate-label">第 ${i+1} 份</span><div style="font-size:18px;font-weight:800;">${c.icon} × ${c.divisor}</div></div>`;
+        if (isRibbon) {
+          let segCells = '';
+          for (let k = 1; k <= c.divisor; k++) {
+            segCells += `<div class="ribbon-cell" style="width:18px; background:rgba(74,222,128,0.25);">${k}</div>`;
+          }
+          pBox.innerHTML += `<div class="plate-card" style="min-width:168px;">
+            <span class="plate-label">第 ${i+1} 段（${c.divisor} cm）</span>
+            <div class="ribbon-bar" style="height:30px; border-color:var(--c-divisor);">${segCells}</div>
+          </div>`;
+        } else {
+          pBox.innerHTML += `<div class="plate-card"><span class="plate-label">第 ${i+1} 份</span><div style="font-size:18px;font-weight:800;">${c.icon} × ${c.divisor}</div></div>`;
+        }
       }
 
-      document.getElementById('t2-rem-label').textContent = `目前剩下：${t2Rem} ${c.unit}（除數需要 ${c.divisor} ${c.unit} 才夠分 1 次）`;
+      document.getElementById('t2-rem-label').textContent = `目前剩下：${t2Rem} ${c.unit}（除數需要 ${c.divisor} ${c.unit} 才夠${isRibbon ? '剪 1 段' : '分 1 次'}）`;
       const rv = document.getElementById('t2-rem-visual');
       rv.innerHTML = '';
-      for (let i = 0; i < Math.min(t2Rem, 10); i++) {
-        rv.innerHTML += `<span class="token-chip" style="border-color: var(--c-rem);">${c.icon}</span>`;
+      if (isRibbon) {
+        rv.innerHTML = renderRibbonBar(t2Rem, 'purple', t2Rem >= c.divisor ? c.divisor : 0);
+      } else {
+        for (let i = 0; i < Math.min(t2Rem, 10); i++) {
+          rv.innerHTML += `<span class="token-chip" style="border-color: var(--c-rem);">${c.icon}</span>`;
+        }
       }
 
       const canMore = t2Rem >= c.divisor;
       document.getElementById('t2-more-btn').disabled = !canMore;
       document.getElementById('t2-rule-badge').style.color = canMore ? '#f87171' : '#4ade80';
       document.getElementById('t2-rule-badge').textContent = canMore
-        ? `❌ 還夠分！因為 ${t2Rem} ≧ ${c.divisor}`
-        : `🔒 不夠再分了！餘數 ${t2Rem} ＜ 除數 ${c.divisor}`;
+        ? `❌ 還夠${isRibbon ? '剪' : '分'}！因為 ${t2Rem} ≧ ${c.divisor}`
+        : `🔒 不夠再${isRibbon ? '剪' : '分'}了！餘數 ${t2Rem} ＜ 除數 ${c.divisor}`;
 
       // 幽靈盤子
       document.getElementById('t2-ghost-cap').textContent = `${c.divisor} ${c.unit}`;
       const gp = document.getElementById('t2-ghost-plate');
       gp.innerHTML = '';
       if (!canMore) {
-        for (let i = 0; i < c.divisor; i++) {
-          if (i < t2Rem) gp.innerHTML += `<div class="ghost-slot filled">${c.icon}</div>`;
-          else if (t2GhostFilled) gp.innerHTML += `<div class="ghost-slot added">${c.icon}</div>`;
-          else gp.innerHTML += `<div class="ghost-slot">?</div>`;
+        if (isRibbon) {
+          let barCells = '';
+          for (let i = 1; i <= c.divisor; i++) {
+            if (i <= t2Rem) {
+              barCells += `<div class="ribbon-cell" style="width:32px; background:rgba(192,132,252,0.35); color:#fff;">${i}</div>`;
+            } else if (t2GhostFilled) {
+              barCells += `<div class="ribbon-cell" style="width:32px; background:rgba(74,222,128,0.35); color:#4ade80;">+${i - t2Rem}</div>`;
+            } else {
+              barCells += `<div class="ribbon-cell" style="width:32px; background:rgba(251,191,36,0.12); color:var(--c-yellow);">?</div>`;
+            }
+          }
+          gp.innerHTML = `<div class="ribbon-wrap">
+            <div style="font-size:16px; color:var(--text-sub);">目標 1 段緞帶（共 ${c.divisor} 公分）：</div>
+            <div class="ribbon-bar" style="height:40px; border-style:dashed; border-color:var(--c-yellow);">${barCells}</div>
+          </div>`;
+        } else {
+          for (let i = 0; i < c.divisor; i++) {
+            if (i < t2Rem) gp.innerHTML += `<div class="ghost-slot filled">${c.icon}</div>`;
+            else if (t2GhostFilled) gp.innerHTML += `<div class="ghost-slot added">${c.icon}</div>`;
+            else gp.innerHTML += `<div class="ghost-slot">?</div>`;
+          }
         }
         const need = c.divisor - t2Rem;
         const gq = document.getElementById('t2-ghost-quiz');
         if (t2GhostFilled) {
-          gq.innerHTML = `<span style="color:#4ade80; font-weight:800;">🎉 補上 ${need} ${c.unit}就剛好湊滿 ${c.divisor} ${c.unit}，可以再分 1 份囉！</span>`;
+          gq.innerHTML = `<span style="color:#4ade80; font-weight:800;">🎉 補上 ${need} ${c.unit}就剛好湊滿 ${c.divisor} ${c.unit}，可以再${isRibbon ? '剪 1 段' : '分 1 份'}囉！</span>`;
         } else {
           const opts = [need, Math.max(1, need - 1), need + 1];
           const uniq = [...new Set(opts)].sort((a,b) => a - b);
-          gq.innerHTML = '<span style="font-weight:700;">還差幾個能再分 1 份？</span>' +
+          gq.innerHTML = `<span style="font-weight:700;">還差${isRibbon ? '幾公分' : '幾個'}能再${isRibbon ? '剪 1 段' : '分 1 份'}？</span>` +
             uniq.map(v => `<button class="btn" onclick="answerGhost(${v}, ${need})">${v} ${c.unit}</button>`).join('');
         }
       } else {
