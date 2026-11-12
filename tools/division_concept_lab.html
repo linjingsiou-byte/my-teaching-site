@@ -1068,7 +1068,8 @@
           html += `<span class="mul-chip ${isLast ? 'latest' : ''}">${expr}</span>`;
         }
         if (isDone && t1Remaining > 0) {
-          html += `<span class="mul-chip" style="border-color: var(--c-rem); color: var(--c-rem);">＋ 剩 ${t1Remaining} ＝ ${pr.total}</span>`;
+          const used = pr.total - t1Remaining;
+          html += `<span class="mul-chip" style="border-color: var(--c-rem); color: #e2e8f0;">驗算：${used} ＋ <span style="color: var(--c-rem);">${t1Remaining}</span> ＝ <span style="color: var(--c-dividend);">${pr.total}</span><span style="font-size: 16px; color: var(--text-sub); font-weight: 600;">（分掉 ${used} ${pr.units.divd}，剩 ${t1Remaining} ${pr.units.divd}）</span></span>`;
         }
         mulChips.innerHTML = html;
       }
