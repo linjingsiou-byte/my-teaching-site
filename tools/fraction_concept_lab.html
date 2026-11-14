@@ -430,7 +430,7 @@
             <div class="ctrl-label">
               <span>分母（平分成幾份）：<strong id="den-display" style="color:var(--c-den); font-size:22px;">4</strong> 份</span>
             </div>
-            <div class="btn-row">
+            <div class="btn-row" id="den-btn-group">
               <button class="btn-action" onclick="setDen(2)">2</button>
               <button class="btn-action" onclick="setDen(3)">3</button>
               <button class="btn-action active" id="den-btn-4" onclick="setDen(4)">4</button>
@@ -505,7 +505,7 @@
 
           <div class="ctrl-group">
             <div class="ctrl-label">選擇檢驗題目案例：</div>
-            <div class="btn-row">
+            <div class="btn-row" id="sandbox-case-group">
               <button class="btn-action active" id="case-btn-1" onclick="loadSandboxCase(1)">1. 隨便亂切 (不等分)</button>
               <button class="btn-action" id="case-btn-2" onclick="loadSandboxCase(2)">2. 十字平分 (四等分)</button>
               <button class="btn-action" id="case-btn-3" onclick="loadSandboxCase(3)">3. 平行橫切 (不等分)</button>
@@ -664,7 +664,7 @@
 
           <div class="ctrl-group">
             <div class="ctrl-label">常用對照題目：</div>
-            <div class="btn-row">
+            <div class="btn-row" id="compare-btn-group">
               <button class="btn-action active" id="cmp-btn-1" onclick="setupCompare(3, 8, 5, 8, 1)">課本題：<span class="mfrac"><span class="num">3</span><span class="den">8</span></span> vs <span class="mfrac"><span class="num">5</span><span class="den">8</span></span></button>
               <button class="btn-action" id="cmp-btn-2" onclick="setupCompare(1, 2, 1, 8, 2)">迷思題：<span class="mfrac"><span class="num">1</span><span class="den">2</span></span> vs <span class="mfrac"><span class="num">1</span><span class="den">8</span></span></button>
               <button class="btn-action" id="cmp-btn-3" onclick="setupCompare(4, 6, 2, 6, 3)">同分母：<span class="mfrac"><span class="num">4</span><span class="den">6</span></span> vs <span class="mfrac"><span class="num">2</span><span class="den">6</span></span></button>
@@ -769,9 +769,12 @@
       makerDen = d;
       document.getElementById('den-display').textContent = d;
       document.getElementById('den-slider').value = d;
-      document.querySelectorAll('#tab-maker .ctrl-group:nth-child(2) .btn-action').forEach(b => {
+      
+      // 準確切換分母按鈕的 active 狀態
+      document.querySelectorAll('#den-btn-group .btn-action').forEach(b => {
         b.classList.toggle('active', b.textContent.trim() === d.toString());
       });
+
       // 保持合理的選取數
       makerSelected = makerSelected.filter(idx => idx < d);
       if (makerSelected.length === 0) makerSelected = [0];
@@ -979,7 +982,7 @@
     function loadSandboxCase(c) {
       currentCase = c;
       isChecked = false;
-      document.querySelectorAll('#tab-sandbox .ctrl-group .btn-action').forEach((b, idx) => {
+      document.querySelectorAll('#sandbox-case-group .btn-action').forEach((b, idx) => {
         b.classList.toggle('active', (idx + 1) === c);
       });
       document.getElementById('sandbox-lens-feedback').textContent = "請按下下方按鈕啟動檢驗鏡";
@@ -1109,7 +1112,7 @@
       cmpB = { num: n2, den: d2 };
 
       // 更新按鈕 active 高亮樣式
-      document.querySelectorAll('#tab-wall .ctrl-group .btn-action').forEach((btn, idx) => {
+      document.querySelectorAll('#compare-btn-group .btn-action').forEach((btn, idx) => {
         btn.classList.toggle('active', btnIdx !== null && (idx + 1) === btnIdx);
       });
 
@@ -1121,7 +1124,7 @@
       // 點選長度牆時，更新比大小 A 端
       cmpA = { num: num, den: den };
       // 解除 3 個預設題目的 active 樣式
-      document.querySelectorAll('#tab-wall .ctrl-group .btn-action').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('#compare-btn-group .btn-action').forEach(btn => btn.classList.remove('active'));
       playBeep(600, 'triangle', 0.1);
       renderBalance();
     }
