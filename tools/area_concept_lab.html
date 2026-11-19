@@ -668,6 +668,160 @@
         align-items: stretch;
       }
     }
+
+    /* ==================== TAB 4 專用樣式 ==================== */
+    .tab4-toolbar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+    .palette-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(18, 23, 33, 0.7);
+      padding: 4px 12px;
+      border-radius: 24px;
+      border: 1px solid var(--panel-border);
+    }
+    .color-chip {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .color-chip:hover {
+      transform: scale(1.2);
+    }
+    .color-chip.active {
+      transform: scale(1.22);
+      border-color: #ffffff;
+      box-shadow: 0 0 10px #ffffff, 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .tab4-layout {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      align-items: flex-start;
+    }
+    .tab4-canvas-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tab4-side-panel {
+      width: 320px;
+      flex-shrink: 0;
+      background: var(--panel-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    @media (max-width: 1080px) {
+      .tab4-layout {
+        flex-direction: column;
+      }
+      .tab4-side-panel {
+        width: 100%;
+      }
+    }
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .key-btn {
+      min-height: 48px;
+      background: #242f44;
+      border: 1px solid #3c4d6d;
+      border-radius: 8px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #f5f7fa;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .key-btn:hover {
+      background: #344362;
+      border-color: #00e5ff;
+      transform: translateY(-2px);
+    }
+    .key-btn:active {
+      transform: translateY(1px);
+    }
+    .key-btn.action-clear {
+      background: #4a2830;
+      border-color: #7b3846;
+      color: #ff8a80;
+    }
+    .key-btn.action-submit {
+      grid-column: span 3;
+      background: #1b5e20;
+      border-color: #00e676;
+      color: #ffffff;
+      font-size: 19px;
+      min-height: 52px;
+      box-shadow: 0 4px 12px rgba(0, 230, 118, 0.3);
+    }
+    .key-btn.action-submit:hover {
+      background: #2e7d32;
+      box-shadow: 0 6px 18px rgba(0, 230, 118, 0.45);
+    }
+    .task-badge-pill {
+      background: linear-gradient(135deg, rgba(251, 192, 45, 0.15), rgba(255, 122, 26, 0.2));
+      border: 1.5px solid var(--accent-yellow);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 16px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .modal-celebrate {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 15, 26, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-celebrate.show {
+      display: flex;
+    }
+    .celebrate-card {
+      background: #182233;
+      border: 3px solid var(--accent-green);
+      box-shadow: 0 0 35px rgba(0, 230, 118, 0.45);
+      border-radius: 20px;
+      max-width: 560px;
+      width: 100%;
+      padding: 28px 24px;
+      text-align: center;
+      animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
   </style>
 </head>
 <body>
@@ -683,6 +837,7 @@
       <button class="tab-btn active" onclick="switchTab(0)">1. 觀念澄清：什麼是 1 cm²？</button>
       <button class="tab-btn" onclick="switchTab(1)">2. 動態鋪排與平方公分板</button>
       <button class="tab-btn" onclick="switchTab(2)">3. 切割・旋轉・翻轉算面積</button>
+      <button class="tab-btn" onclick="switchTab(3)">4. 面積創意拼圖室 🎨</button>
     </div>
 
     <div class="header-actions">
@@ -953,6 +1108,185 @@
         </svg>
       </div>
     </section>
+
+    <!-- ==================== TAB 4：面積創意拼圖室 ==================== -->
+    <section class="view-panel" id="panel-3">
+      <div class="toolbar-panel">
+        <div class="tab4-toolbar-wrap">
+          <!-- 上排：積木選擇、顏色、變形與功能 -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div class="btn-group">
+              <span style="font-size: 16px; font-weight: 700; color: var(--accent-cyan);">🧩 選積木：</span>
+              <button class="btn btn-active-mode" id="btn-piece-rect" onclick="selectPieceType('rect')">🟦 完整方格 (1cm²)</button>
+              <button class="btn" id="btn-piece-tri-half" onclick="selectPieceType('tri_half')">📐 半格小三角 (0.5cm²)</button>
+              <button class="btn" id="btn-piece-tri-large" onclick="selectPieceType('tri_large')">📏 跨兩格大三角 (1cm²)</button>
+            </div>
+
+            <!-- 調色盤 -->
+            <div class="palette-group">
+              <span style="font-size: 15px; font-weight: 700; color: #cbd5e1;">🎨 顏色：</span>
+              <div class="color-chip active" style="background: #00e5ff;" onclick="selectColor('#00e5ff', this)" title="青藍色"></div>
+              <div class="color-chip" style="background: #ff7a1a;" onclick="selectColor('#ff7a1a', this)" title="活力橘"></div>
+              <div class="color-chip" style="background: #00e676;" onclick="selectColor('#00e676', this)" title="萊姆綠"></div>
+              <div class="color-chip" style="background: #fbc02d;" onclick="selectColor('#fbc02d', this)" title="陽光黃"></div>
+              <div class="color-chip" style="background: #ff4081;" onclick="selectColor('#ff4081', this)" title="櫻花粉"></div>
+              <div class="color-chip" style="background: #b388ff;" onclick="selectColor('#b388ff', this)" title="薰衣草紫"></div>
+              <div class="color-chip" style="background: #ff5252;" onclick="selectColor('#ff5252', this)" title="珊瑚紅"></div>
+              <div class="color-chip" style="background: #f8fafc;" onclick="selectColor('#f8fafc', this)" title="雪亮白"></div>
+            </div>
+          </div>
+
+          <!-- 下排：操作與工具（點子 B 任務卡、點子 C 範本庫、我拼好了） -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div class="btn-group">
+              <span style="font-size: 15px; color: var(--text-sub);">選取調整：</span>
+              <button class="btn btn-cyan" onclick="transformSelectedTab4('rotCCW')" title="逆時針轉 90 度">↺ 左轉 90°</button>
+              <button class="btn btn-cyan" onclick="transformSelectedTab4('rotCW')" title="順時針轉 90 度">↻ 右轉 90°</button>
+              <button class="btn btn-cyan" onclick="transformSelectedTab4('flipH')" title="水平翻轉">↔️ 水平翻轉</button>
+              <button class="btn btn-cyan" onclick="transformSelectedTab4('flipV')" title="垂直翻轉">↕️ 垂直翻轉</button>
+              <button class="btn" style="border-color: #ff5252; color: #ff8a80;" onclick="deleteSelectedTab4()" title="刪除選取積木">🗑️ 刪除</button>
+              <button class="btn" onclick="clearAllTab4()" title="清除畫布所有積木">🧹 清空</button>
+            </div>
+
+            <div class="btn-group">
+              <!-- 點子 B：任務卡 -->
+              <button class="btn btn-cyan" onclick="drawTaskCard()">🎯 抽任務卡</button>
+              <!-- 點子 C：範本庫 -->
+              <button class="btn" style="border-color: var(--accent-yellow); color: var(--accent-yellow);" onclick="toggleTemplateMenu()">🖼️ 載入範本 ▾</button>
+              <!-- 核心：我拼好了 -->
+              <button class="btn btn-green" id="btn-finish-create" style="font-size: 18px; padding: 8px 18px;" onclick="finishCreation()">✅ 我拼好了！</button>
+              <button class="btn" id="btn-back-to-edit" style="display: none;" onclick="backToEditMode()">✏️ 繼續修改創作</button>
+            </div>
+          </div>
+
+          <!-- 範本展開列（點子 C） -->
+          <div id="tab4-template-bar" style="display: none; background: rgba(30, 41, 59, 0.95); border: 1.5px solid var(--accent-yellow); border-radius: 10px; padding: 10px 14px; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 15px; font-weight: 700; color: var(--accent-yellow);">🌟 點選立即載入範本：</span>
+            <button class="btn" onclick="loadTemplate('fish')">🐠 可愛小魚 (4 cm²)</button>
+            <button class="btn" onclick="loadTemplate('house')">🏠 溫馨小屋 (6 cm²)</button>
+            <button class="btn" onclick="loadTemplate('rocket')">🚀 衝天火箭 (5 cm²)</button>
+            <button class="btn" onclick="loadTemplate('tree')">🌲 森林小樹 (4 cm²)</button>
+            <button class="btn" style="margin-left: auto; padding: 4px 10px;" onclick="toggleTemplateMenu(false)">✖ 關閉</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 狀態與任務橫條 -->
+      <div class="status-banner" style="border-color: var(--accent-cyan);">
+        <div id="tab4-status-info" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span style="font-size: 16px; color: var(--text-sub);">💡 提示：</span>
+          <span style="font-size: 17px; font-weight: 700; color: #f5f7fa;" id="tab4-status-text">點選上方積木並在畫布上點擊擺放，也可以直接拖拉移動！完成後請按「✅ 我拼好了」！</span>
+        </div>
+        <div id="tab4-counter-info" style="font-size: 18px; font-weight: 700; color: var(--accent-green);">
+          目前積木：<span id="tab4-brick-count">0</span> 塊（總面積：？ cm²）
+        </div>
+      </div>
+
+      <!-- 主體版面：畫布 ＋ 作答面板 -->
+      <div class="tab4-layout">
+        <!-- 左/中：畫布欄 -->
+        <div class="tab4-canvas-col">
+          <div class="board-container" style="position: relative;">
+            <div id="tab4-toast" class="toast-msg">提示訊息</div>
+            <svg class="canvas-svg" id="svg-tab4" viewBox="0 0 1000 480" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <pattern id="grid-bg-4" width="60" height="60" patternUnits="userSpaceOnUse">
+                  <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#243045" stroke-width="1.5"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid-bg-4)" />
+
+              <!-- 1cm 比例尺標示 -->
+              <g transform="translate(30, 25)">
+                <rect x="0" y="0" width="160" height="36" rx="8" fill="rgba(18, 22, 31, 0.85)" stroke="#2e384d" stroke-width="1.5" />
+                <rect x="12" y="8" width="20" height="20" fill="rgba(0, 229, 255, 0.3)" stroke="#00e5ff" stroke-width="2" />
+                <text x="42" y="24" font-size="16" font-weight="bold" fill="#f5f7fa">1 格 ＝ 1 cm²</text>
+              </g>
+
+              <!-- 積木圖層 -->
+              <g id="tab4-bricks-layer"></g>
+
+              <!-- 選取框圖層 -->
+              <g id="tab4-highlight-layer"></g>
+
+              <!-- 記號筆標籤圖層（點子 A） -->
+              <g id="tab4-markers-layer"></g>
+
+              <!-- 答對視覺拆解標記圖層 -->
+              <g id="tab4-explain-layer"></g>
+            </svg>
+
+            <!-- 答對大慶祝 Modal -->
+            <div class="modal-celebrate" id="tab4-celebrate-modal">
+              <div class="celebrate-card">
+                <div style="font-size: 54px; margin-bottom: 8px;">🎉🏆🌟</div>
+                <h2 style="font-size: 26px; font-weight: 800; color: var(--accent-green); margin-bottom: 12px;">太棒了！你算得完全正確！</h2>
+                <div id="tab4-explain-content" style="background: rgba(18, 23, 33, 0.9); border: 1.5px solid var(--accent-cyan); border-radius: 12px; padding: 16px; margin: 16px 0; text-align: left; font-size: 17px; line-height: 1.7; color: #cbd5e1;">
+                  <!-- 動態注入拆解與算式 -->
+                </div>
+                <div style="display: flex; justify-content: center; gap: 14px; margin-top: 18px;">
+                  <button class="btn btn-green" style="font-size: 18px; padding: 8px 24px;" onclick="closeCelebrateModal(true)">✏️ 繼續創作新作品</button>
+                  <button class="btn btn-cyan" style="font-size: 18px; padding: 8px 24px;" onclick="closeCelebrateModal(false)">👀 留在畫面看圖解</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：作答與記號筆控制側邊欄（在按下「我拼好了」時重點引導） -->
+        <div class="tab4-side-panel" id="tab4-side-panel">
+          <div style="font-size: 18px; font-weight: 700; color: var(--accent-yellow); display: flex; align-items: center; justify-content: space-between;">
+            <span>🔢 點數與作答</span>
+            <span id="tab4-mode-badge" style="font-size: 14px; padding: 2px 8px; border-radius: 6px; background: #263238; color: #90a4ae;">創作模式中</span>
+          </div>
+
+          <!-- 點子 A：標記編號工具 -->
+          <div style="background: rgba(18, 23, 33, 0.6); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 15px; font-weight: 700; color: var(--accent-cyan);">防漏數小幫手：</span>
+              <button class="btn" id="btn-toggle-marker" style="padding: 4px 10px; min-height: 32px; font-size: 14px;" onclick="toggleMarkerMode()">
+                <span>✏️ 記號筆：關</span>
+              </button>
+            </div>
+            <p style="font-size: 14px; color: var(--text-sub); margin: 0;">
+              開啟後點選圖形中的方格或三角形，會依序蓋上 <strong>①、②、③...</strong> 編號，再點一次可清除。
+            </p>
+          </div>
+
+          <!-- 答案輸入與大螢幕鍵盤 -->
+          <div id="tab4-quiz-box" style="opacity: 0.5; pointer-events: none; transition: opacity 0.2s ease;">
+            <div style="font-size: 15px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">輸入算出的總面積：</div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <div id="tab4-input-display" style="flex: 1; height: 50px; background: #0c1017; border: 2px solid var(--accent-cyan); border-radius: 8px; font-size: 28px; font-weight: 800; color: var(--accent-cyan); display: flex; align-items: center; justify-content: center; letter-spacing: 2px;">
+                0
+              </div>
+              <span style="font-size: 18px; font-weight: 700; color: #cbd5e1;">cm²</span>
+            </div>
+
+            <!-- 數字鍵盤 -->
+            <div class="keypad-grid">
+              <button class="key-btn" onclick="pressKey(1)">1</button>
+              <button class="key-btn" onclick="pressKey(2)">2</button>
+              <button class="key-btn" onclick="pressKey(3)">3</button>
+              <button class="key-btn" onclick="pressKey(4)">4</button>
+              <button class="key-btn" onclick="pressKey(5)">5</button>
+              <button class="key-btn" onclick="pressKey(6)">6</button>
+              <button class="key-btn" onclick="pressKey(7)">7</button>
+              <button class="key-btn" onclick="pressKey(8)">8</button>
+              <button class="key-btn" onclick="pressKey(9)">9</button>
+              <button class="key-btn action-clear" onclick="pressKey('C')">⌫ 清除</button>
+              <button class="key-btn" onclick="pressKey(0)">0</button>
+              <button class="key-btn" onclick="pressKey('DEL')" title="退格">←</button>
+              <button class="key-btn action-submit" onclick="submitAnswer()">🚀 送出答案驗證</button>
+            </div>
+          </div>
+
+          <!-- 迷思回饋小卡 -->
+          <div id="tab4-feedback-card" style="display: none; padding: 12px 14px; border-radius: 8px; font-size: 15px; line-height: 1.55;">
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- 實體直尺校準彈窗 -->
@@ -1059,6 +1393,7 @@
       });
       if (index === 1) renderTab2();
       if (index === 2) renderCutLevel();
+      if (index === 3) renderTab4();
     }
 
     function toggleTipAnswer(tabNum) {
@@ -1583,7 +1918,7 @@
     // 網格一格 = 60px × 60px，代表 1 cm²
     // 三角形幾何輔助：以局部網格單位 (0~1 或 0~2) 定義多邊形頂點，並計算旋轉與翻轉後的規格化形狀
     const G = 60;
-    const GRID_OX = 260;
+    const GRID_OX = 300;
     const GRID_OY = 120;
 
     // 預定義標準半格類型（相對於單一 1x1 方格，便於精確判斷拼合）
@@ -1722,10 +2057,10 @@
       isCutDone = true;
       playTone(784, 'triangle', 0.12);
       setTimeout(() => playTone(987, 'triangle', 0.14), 100);
-      // 切割後碎片自動微幅向外跳開，提示可拖曳操作
+      // 切割後碎片自動外移整數格，對齊格線並提示可拖曳操作
       activePieces.forEach((p, idx) => {
-        p.x += (idx === 0 ? 50 : 90);
-        p.y -= 20;
+        p.x += (idx === 0 ? G : 2 * G);
+        p.y -= G;
       });
       if (activePieces.length > 0) selectedPieceId = activePieces[0].id;
       document.getElementById('btn-cut-start').disabled = true;
@@ -1913,11 +2248,19 @@
             document.getElementById('tab3-status-text').textContent = '🎉 全部拼合完成！請按「🔢 2. 重新點數面積」數出共有幾個 1 cm²！';
           }
           renderCutLevel();
+          return;
         } else {
           playTone(260, 'sawtooth', 0.15);
           showToast('💡 位置對了，但方向還沒對齊喔！請試試看按上方【旋轉】或【翻轉】！');
         }
       }
+
+      // 未拼入目標時，自動貼齊最近的網格整數點，確保永不卡在格子與格子之間
+      p.x = Math.round((p.x - GRID_OX) / G) * G + GRID_OX;
+      p.y = Math.round((p.y - GRID_OY) / G) * G + GRID_OY;
+      p.x = Math.max(60, Math.min(880, p.x));
+      p.y = Math.max(60, Math.min(360, p.y));
+      renderCutLevel();
     });
 
     function recountCutArea() {
@@ -2108,6 +2451,673 @@
     renderTab2();
     loadCutLevel(0);
     applyScaleMode();
+
+    /* ==================== TAB 4：面積創意拼圖室 JS 模組 ==================== */
+    const TAB4_G = 60;
+    let tab4Bricks = [];
+    let tab4SelectedId = null;
+    let tab4PieceType = 'rect'; // 'rect' | 'tri_half' | 'tri_large'
+    let tab4Color = '#00e5ff';
+    let tab4DraggingId = null;
+    let tab4DragOffset = { x: 0, y: 0 };
+    let tab4IsQuizMode = false;
+    let tab4IsMarkerMode = false;
+    let tab4NextMarker = 1;
+    let tab4UserInput = '0';
+    let tab4ActiveTask = null;
+    let tab4ToastTimer = null;
+
+    // 大三角形朝向定義
+    // D2 (1x2): D2_BL, D2_TL, D2_TR, D2_BR
+    // H2 (2x1): H2_BL, H2_TL, H2_TR, H2_BR
+    const TAB4_LARGE_TRI = {
+      'D2_BL': [[0,0], [0,2], [1,2]],
+      'D2_TL': [[0,0], [1,0], [0,2]],
+      'D2_TR': [[0,0], [1,0], [1,2]],
+      'D2_BR': [[1,0], [0,2], [1,2]],
+      'H2_BL': [[0,0], [0,1], [2,1]],
+      'H2_TL': [[0,0], [2,0], [0,1]],
+      'H2_TR': [[0,0], [2,0], [2,1]],
+      'H2_BR': [[2,0], [0,1], [2,1]]
+    };
+
+    function showTab4Toast(msg) {
+      const el = document.getElementById('tab4-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add('show');
+      if (tab4ToastTimer) clearTimeout(tab4ToastTimer);
+      tab4ToastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+    }
+
+    function selectPieceType(type) {
+      tab4PieceType = type;
+      document.getElementById('btn-piece-rect').classList.toggle('btn-active-mode', type === 'rect');
+      document.getElementById('btn-piece-tri-half').classList.toggle('btn-active-mode', type === 'tri_half');
+      document.getElementById('btn-piece-tri-large').classList.toggle('btn-active-mode', type === 'tri_large');
+      playTone(520, 'sine', 0.06);
+    }
+
+    function selectColor(color, el) {
+      tab4Color = color;
+      document.querySelectorAll('#panel-3 .color-chip').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+      playTone(600, 'sine', 0.06);
+
+      // 若當前有選取的積木，直接換色
+      if (tab4SelectedId) {
+        const b = tab4Bricks.find(item => item.id === tab4SelectedId);
+        if (b) {
+          b.color = color;
+          renderTab4();
+        }
+      }
+    }
+
+    function toggleTemplateMenu(force) {
+      const bar = document.getElementById('tab4-template-bar');
+      if (!bar) return;
+      const show = (force !== undefined) ? force : (bar.style.display === 'none');
+      bar.style.display = show ? 'flex' : 'none';
+      if (show) playTone(587, 'sine', 0.08);
+    }
+
+    // 點子 B：任務卡題庫
+    const TAB4_TASKS = [
+      { text: '【初級任務】請拼出總面積剛好是 4 cm² 的造型（至少包含 2 個小三角形）！', targetArea: 4, reqTriHalf: 2 },
+      { text: '【進階挑戰】請拼出總面積剛好是 5 cm² 的造型（必須同時包含方格、小三角與大三角）！', targetArea: 5, reqAllTypes: true },
+      { text: '【等積異形挑戰】請拼出一隻動物或交通工具，總面積剛好是 6 cm²！', targetArea: 6 },
+      { text: '【拼湊達人】請只用三角形（小三角與大三角），拼出總面積剛好是 4 cm² 的圖案！', targetArea: 4, onlyTri: true },
+      { text: '【大空間探索】請拼出一個漂亮的房屋或城堡，總面積剛好是 8 cm²！', targetArea: 8 }
+    ];
+
+    function drawTaskCard() {
+      const idx = Math.floor(Math.random() * TAB4_TASKS.length);
+      tab4ActiveTask = TAB4_TASKS[idx];
+      playTone(659, 'triangle', 0.15);
+      setTimeout(() => playTone(880, 'sine', 0.2), 120);
+
+      document.getElementById('tab4-status-text').innerHTML = `
+        <span style="color: var(--accent-yellow); font-weight: 800;">🎯 挑戰中：</span> ${tab4ActiveTask.text}
+        <button class="btn" style="padding: 2px 8px; font-size: 13px; margin-left: 8px;" onclick="cancelTask()">放棄任務</button>
+      `;
+      showTab4Toast('🎯 抽中新任務卡！請依目標進行面積創作！');
+    }
+
+    function cancelTask() {
+      tab4ActiveTask = null;
+      document.getElementById('tab4-status-text').textContent = '點選上方積木並在畫布上點擊擺放，也可以直接拖拉移動！完成後請按「✅ 我拼好了」！';
+      showTab4Toast('已切回自由創作模式');
+      playTone(440, 'sine', 0.08);
+    }
+
+    // 點子 C：載入範本庫
+    function loadTemplate(name) {
+      tab4Bricks = [];
+      tab4SelectedId = null;
+      backToEditMode();
+      toggleTemplateMenu(false);
+
+      if (name === 'fish') {
+        // 可愛小魚 (4 cm²): 魚身 2 方格, 魚頭 1 小三角, 魚尾 2 小三角, 魚鰭 1 小三角 (小三角 4 個=2 cm², 方格 2 個=2 cm²)
+        tab4Bricks = [
+          { id: 'b1', type: 'rect', c: 7, r: 3, color: '#ff7a1a', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b2', type: 'rect', c: 8, r: 3, color: '#ff7a1a', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b3', type: 'tri_half', c: 9, r: 3, color: '#fbc02d', shape: 'TR', spanC: 1, spanR: 1, markerNum: null }, // 魚頭
+          { id: 'b4', type: 'tri_half', c: 6, r: 2, color: '#ff4081', shape: 'BL', spanC: 1, spanR: 1, markerNum: null }, // 尾巴上
+          { id: 'b5', type: 'tri_half', c: 6, r: 4, color: '#ff4081', shape: 'TL', spanC: 1, spanR: 1, markerNum: null }, // 尾巴下
+          { id: 'b6', type: 'tri_half', c: 7, r: 2, color: '#00e5ff', shape: 'BR', spanC: 1, spanR: 1, markerNum: null }  // 背鰭
+        ];
+      } else if (name === 'house') {
+        // 溫馨小屋 (6 cm²): 屋身 4 方格 (4cm²), 屋頂 2 小三角 + 1 大三角 (2cm²)
+        tab4Bricks = [
+          { id: 'b1', type: 'rect', c: 7, r: 3, color: '#fbc02d', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b2', type: 'rect', c: 8, r: 3, color: '#fbc02d', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b3', type: 'rect', c: 7, r: 4, color: '#ff7a1a', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b4', type: 'rect', c: 8, r: 4, color: '#ff7a1a', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b5', type: 'tri_half', c: 6, r: 3, color: '#ff5252', shape: 'BL', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b6', type: 'tri_half', c: 9, r: 3, color: '#ff5252', shape: 'BR', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b7', type: 'tri_large', c: 7, r: 2, color: '#ff5252', shape: 'H2_BL', spanC: 2, spanR: 1, markerNum: null }
+        ];
+      } else if (name === 'rocket') {
+        // 衝天火箭 (5 cm²): 機身 3 方格, 尖頭 2 小三角, 機翼 2 小三角 (共 4 小三角=2cm², 3 方格=3cm²)
+        tab4Bricks = [
+          { id: 'b1', type: 'rect', c: 7, r: 2, color: '#f8fafc', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b2', type: 'rect', c: 7, r: 3, color: '#00e5ff', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b3', type: 'rect', c: 7, r: 4, color: '#f8fafc', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b4', type: 'tri_half', c: 7, r: 1, color: '#ff5252', shape: 'BR', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b5', type: 'tri_half', c: 8, r: 1, color: '#ff5252', shape: 'BL', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b6', type: 'tri_half', c: 6, r: 4, color: '#ff7a1a', shape: 'BL', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b7', type: 'tri_half', c: 8, r: 4, color: '#ff7a1a', shape: 'BR', spanC: 1, spanR: 1, markerNum: null }
+        ];
+      } else if (name === 'tree') {
+        // 森林小樹 (4 cm²): 樹冠 4 小三角 (2cm²), 樹幹 2 方格 (2cm²)
+        tab4Bricks = [
+          { id: 'b1', type: 'tri_half', c: 7, r: 2, color: '#00e676', shape: 'BR', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b2', type: 'tri_half', c: 8, r: 2, color: '#00e676', shape: 'BL', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b3', type: 'tri_half', c: 6, r: 3, color: '#00e676', shape: 'BL', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b4', type: 'tri_half', c: 9, r: 3, color: '#00e676', shape: 'BR', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b5', type: 'rect', c: 7, r: 4, color: '#ff7a1a', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null },
+          { id: 'b6', type: 'rect', c: 8, r: 4, color: '#ff7a1a', shape: 'RECT', spanC: 1, spanR: 1, markerNum: null }
+        ];
+      }
+
+      playTone(784, 'triangle', 0.15);
+      showTab4Toast('已載入造型範本！你可以更換顏色或點選「✅ 我拼好了」練習點數！');
+      renderTab4();
+    }
+
+    // 點擊畫布空白處放置積木
+    const svgTab4 = document.getElementById('svg-tab4');
+    if (svgTab4) {
+      svgTab4.addEventListener('pointerdown', (e) => {
+        // 如果是點擊在已有積木上，由積木自帶的 pointerdown 處理
+        if (e.target.closest('.tab4-brick-shape')) return;
+
+        if (tab4IsQuizMode) {
+          // 作答模式不放新積木
+          return;
+        }
+
+        const rect = svgTab4.getBoundingClientRect();
+        const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+        const ptY = (e.clientY - rect.top) * (480 / rect.height);
+        const c = Math.floor(ptX / TAB4_G);
+        const r = Math.floor(ptY / TAB4_G);
+
+        if (c < 0 || c > 15 || r < 0 || r > 7) return;
+
+        // 放置新積木
+        const newId = 'b_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+        let spanC = 1, spanR = 1, shape = 'RECT';
+
+        if (tab4PieceType === 'rect') {
+          shape = 'RECT';
+        } else if (tab4PieceType === 'tri_half') {
+          shape = 'BL';
+        } else if (tab4PieceType === 'tri_large') {
+          shape = 'D2_BL';
+          spanC = 1;
+          spanR = 2;
+        }
+
+        // 檢查是否超出底格
+        if (c + spanC > 16 || r + spanR > 8) {
+          showTab4Toast('位置太靠邊界囉，放不下這個積木！');
+          playTone(280, 'sawtooth', 0.12);
+          return;
+        }
+
+        tab4Bricks.push({
+          id: newId,
+          type: tab4PieceType,
+          c: c,
+          r: r,
+          color: tab4Color,
+          shape: shape,
+          spanC: spanC,
+          spanR: spanR,
+          markerNum: null
+        });
+
+        tab4SelectedId = newId;
+        playTone(550, 'sine', 0.08);
+        renderTab4();
+      });
+    }
+
+    function renderTab4() {
+      const bricksLayer = document.getElementById('tab4-bricks-layer');
+      const highlightLayer = document.getElementById('tab4-highlight-layer');
+      const markersLayer = document.getElementById('tab4-markers-layer');
+      if (!bricksLayer) return;
+
+      bricksLayer.innerHTML = '';
+      highlightLayer.innerHTML = '';
+      markersLayer.innerHTML = '';
+
+      // 更新計數
+      const countEl = document.getElementById('tab4-brick-count');
+      if (countEl) countEl.textContent = tab4Bricks.length;
+
+      tab4Bricks.forEach(b => {
+        const x0 = b.c * TAB4_G;
+        const y0 = b.r * TAB4_G;
+        let el = null;
+
+        if (b.type === 'rect') {
+          el = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          el.setAttribute('x', x0);
+          el.setAttribute('y', y0);
+          el.setAttribute('width', TAB4_G);
+          el.setAttribute('height', TAB4_G);
+          el.setAttribute('fill', b.color);
+          el.setAttribute('fill-opacity', '0.75');
+          el.setAttribute('stroke', b.color);
+          el.setAttribute('stroke-width', '2.5');
+        } else if (b.type === 'tri_half') {
+          const pts = TRI_VERTS[b.shape].map(([vx, vy]) => `${x0 + vx * TAB4_G},${y0 + vy * TAB4_G}`).join(' ');
+          el = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          el.setAttribute('points', pts);
+          el.setAttribute('fill', b.color);
+          el.setAttribute('fill-opacity', '0.75');
+          el.setAttribute('stroke', b.color);
+          el.setAttribute('stroke-width', '2.5');
+        } else if (b.type === 'tri_large') {
+          const verts = TAB4_LARGE_TRI[b.shape] || [[0,0],[0,2],[1,2]];
+          const pts = verts.map(([vx, vy]) => `${x0 + vx * TAB4_G},${y0 + vy * TAB4_G}`).join(' ');
+          el = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          el.setAttribute('points', pts);
+          el.setAttribute('fill', b.color);
+          el.setAttribute('fill-opacity', '0.75');
+          el.setAttribute('stroke', b.color);
+          el.setAttribute('stroke-width', '2.5');
+        }
+
+        if (el) {
+          el.classList.add('tab4-brick-shape');
+          el.style.cursor = tab4IsMarkerMode ? 'pointer' : 'grab';
+
+          // 點選與拖曳事件
+          el.addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+            if (tab4IsMarkerMode) {
+              // 點子 A：標記模式，點擊打上編號或清除
+              if (b.markerNum !== null) {
+                b.markerNum = null;
+                playTone(400, 'sine', 0.08);
+              } else {
+                b.markerNum = tab4NextMarker++;
+                playTone(650 + b.markerNum * 25, 'sine', 0.1);
+              }
+              renderTab4();
+              return;
+            }
+
+            // 創作模式下：選取與開始拖曳
+            tab4SelectedId = b.id;
+            tab4DraggingId = b.id;
+            e.target.setPointerCapture(e.pointerId);
+
+            const rect = svgTab4.getBoundingClientRect();
+            const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+            const ptY = (e.clientY - rect.top) * (480 / rect.height);
+            tab4DragOffset = { x: ptX - x0, y: ptY - y0 };
+
+            playTone(480, 'sine', 0.05);
+            renderTab4();
+          });
+
+          bricksLayer.appendChild(el);
+        }
+
+        // 選取高光外框
+        if (b.id === tab4SelectedId && !tab4IsQuizMode) {
+          const hl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          hl.setAttribute('x', x0 - 3);
+          hl.setAttribute('y', y0 - 3);
+          hl.setAttribute('width', b.spanC * TAB4_G + 6);
+          hl.setAttribute('height', b.spanR * TAB4_G + 6);
+          hl.setAttribute('fill', 'none');
+          hl.setAttribute('stroke', '#fbc02d');
+          hl.setAttribute('stroke-width', '3');
+          hl.setAttribute('stroke-dasharray', '6 3');
+          hl.setAttribute('rx', '6');
+          highlightLayer.appendChild(hl);
+        }
+
+        // 點子 A：繪製編號圓圈記號 (1, 2, 3...)
+        if (b.markerNum !== null) {
+          let cx = x0 + (b.spanC * TAB4_G) / 2;
+          let cy = y0 + (b.spanR * TAB4_G) / 2;
+
+          // 三角形記號微調中心
+          if (b.type === 'tri_half') {
+            if (b.shape === 'BL') { cx = x0 + 20; cy = y0 + 40; }
+            if (b.shape === 'BR') { cx = x0 + 40; cy = y0 + 40; }
+            if (b.shape === 'TL') { cx = x0 + 20; cy = y0 + 20; }
+            if (b.shape === 'TR') { cx = x0 + 40; cy = y0 + 20; }
+          }
+
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', cx);
+          circle.setAttribute('cy', cy);
+          circle.setAttribute('r', '16');
+          circle.setAttribute('fill', '#fbc02d');
+          circle.setAttribute('stroke', '#12161f');
+          circle.setAttribute('stroke-width', '2');
+          markersLayer.appendChild(circle);
+
+          const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          txt.setAttribute('x', cx);
+          txt.setAttribute('y', cy + 6);
+          txt.setAttribute('font-size', '17');
+          txt.setAttribute('font-weight', 'bold');
+          txt.setAttribute('fill', '#12161f');
+          txt.setAttribute('text-anchor', 'middle');
+          txt.textContent = b.markerNum;
+          markersLayer.appendChild(txt);
+        }
+      });
+    }
+
+    // Tab 4 全域拖曳移動與 Snap to Grid
+    window.addEventListener('pointermove', (e) => {
+      if (!tab4DraggingId || !svgTab4) return;
+      const b = tab4Bricks.find(item => item.id === tab4DraggingId);
+      if (!b) return;
+
+      const rect = svgTab4.getBoundingClientRect();
+      const ptX = (e.clientX - rect.left) * (1000 / rect.width);
+      const ptY = (e.clientY - rect.top) * (480 / rect.height);
+
+      const targetX = ptX - tab4DragOffset.x;
+      const targetY = ptY - tab4DragOffset.y;
+
+      const newC = Math.round(targetX / TAB4_G);
+      const newR = Math.round(targetY / TAB4_G);
+
+      const boundedC = Math.max(0, Math.min(16 - b.spanC, newC));
+      const boundedR = Math.max(0, Math.min(8 - b.spanR, newR));
+
+      if (b.c !== boundedC || b.r !== boundedR) {
+        b.c = boundedC;
+        b.r = boundedR;
+        renderTab4();
+      }
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (tab4DraggingId) {
+        tab4DraggingId = null;
+        playTone(500, 'sine', 0.05);
+        renderTab4();
+      }
+    });
+
+    // 積木旋轉與翻轉
+    function transformSelectedTab4(op) {
+      if (!tab4SelectedId) {
+        showTab4Toast('請先點選畫布上的一塊積木！');
+        return;
+      }
+      const b = tab4Bricks.find(item => item.id === tab4SelectedId);
+      if (!b) return;
+
+      playTone(620, 'sine', 0.08);
+
+      if (b.type === 'rect') {
+        showTab4Toast('完整方格旋轉後形狀一樣喔！');
+        return;
+      }
+
+      if (b.type === 'tri_half') {
+        const rotCWMap = { 'BL': 'TL', 'TL': 'TR', 'TR': 'BR', 'BR': 'BL' };
+        const rotCCWMap = { 'BL': 'BR', 'BR': 'TR', 'TR': 'TL', 'TL': 'BL' };
+        const flipHMap = { 'BL': 'BR', 'BR': 'BL', 'TL': 'TR', 'TR': 'TL' };
+        const flipVMap = { 'BL': 'TL', 'TL': 'BL', 'BR': 'TR', 'TR': 'BR' };
+
+        if (op === 'rotCW') b.shape = rotCWMap[b.shape];
+        if (op === 'rotCCW') b.shape = rotCCWMap[b.shape];
+        if (op === 'flipH') b.shape = flipHMap[b.shape];
+        if (op === 'flipV') b.shape = flipVMap[b.shape];
+      } else if (b.type === 'tri_large') {
+        // 大三角形 D2 (1x2) <-> H2 (2x1) 循環
+        const d2RotCW = { 'D2_BL': 'H2_TL', 'H2_TL': 'D2_TR', 'D2_TR': 'H2_BR', 'H2_BR': 'D2_BL' };
+        const d2RotCCW = { 'D2_BL': 'H2_BR', 'H2_BR': 'D2_TR', 'D2_TR': 'H2_TL', 'H2_TL': 'D2_BL' };
+        const flipHMap = {
+          'D2_BL': 'D2_BR', 'D2_BR': 'D2_BL', 'D2_TL': 'D2_TR', 'D2_TR': 'D2_TL',
+          'H2_BL': 'H2_BR', 'H2_BR': 'H2_BL', 'H2_TL': 'H2_TR', 'H2_TR': 'H2_TL'
+        };
+        const flipVMap = {
+          'D2_BL': 'D2_TL', 'D2_TL': 'D2_BL', 'D2_TR': 'D2_BR', 'D2_BR': 'D2_TR',
+          'H2_BL': 'H2_TL', 'H2_TL': 'H2_BL', 'H2_TR': 'H2_BR', 'H2_BR': 'H2_TR'
+        };
+
+        if (op === 'rotCW') {
+          b.shape = d2RotCW[b.shape] || 'D2_BL';
+        } else if (op === 'rotCCW') {
+          b.shape = d2RotCCW[b.shape] || 'D2_BL';
+        } else if (op === 'flipH') {
+          b.shape = flipHMap[b.shape] || b.shape;
+        } else if (op === 'flipV') {
+          b.shape = flipVMap[b.shape] || b.shape;
+        }
+
+        // 更新跨度
+        if (b.shape.startsWith('D2')) {
+          b.spanC = 1;
+          b.spanR = 2;
+        } else {
+          b.spanC = 2;
+          b.spanR = 1;
+        }
+        b.c = Math.min(16 - b.spanC, b.c);
+        b.r = Math.min(8 - b.spanR, b.r);
+      }
+
+      renderTab4();
+    }
+
+    function deleteSelectedTab4() {
+      if (!tab4SelectedId) {
+        showTab4Toast('請先點選想刪除的積木！');
+        return;
+      }
+      tab4Bricks = tab4Bricks.filter(item => item.id !== tab4SelectedId);
+      tab4SelectedId = null;
+      playTone(330, 'sine', 0.1);
+      renderTab4();
+      showTab4Toast('已刪除選取積木');
+    }
+
+    function clearAllTab4() {
+      if (tab4Bricks.length === 0) return;
+      tab4Bricks = [];
+      tab4SelectedId = null;
+      backToEditMode();
+      playTone(280, 'sine', 0.12);
+      renderTab4();
+      showTab4Toast('畫布已全部清空');
+    }
+
+    // 核心：按下「✅ 我拼好了！」
+    function finishCreation() {
+      if (tab4Bricks.length === 0) {
+        showTab4Toast('畫布上還沒有積木喔！請先挑選積木創作～');
+        playTone(300, 'sawtooth', 0.15);
+        return;
+      }
+
+      // 方案 1 檢驗：檢查小三角形是否為偶數個
+      const triHalfCount = tab4Bricks.filter(b => b.type === 'tri_half').length;
+      if (triHalfCount % 2 !== 0) {
+        playTone(320, 'sawtooth', 0.2);
+        showTab4Toast('💡 還有 1 個小三角形落單囉！請再加 1 個小三角形，讓它們湊成完整的 1 cm² 吧！');
+        document.getElementById('tab4-status-text').innerHTML = `
+          <strong style="color: var(--accent-orange);">⚠️ 提醒：</strong>
+          目前有 ${triHalfCount} 個小三角形，還有 1 個落單！請再放 1 個小三角形湊成整數平方公分喔！
+        `;
+        return;
+      }
+
+      // 通過檢驗，進入點數與作答模式
+      tab4IsQuizMode = true;
+      tab4SelectedId = null;
+      tab4UserInput = '0';
+      document.getElementById('tab4-input-display').textContent = '0';
+
+      document.getElementById('btn-finish-create').style.display = 'none';
+      document.getElementById('btn-back-to-edit').style.display = 'inline-flex';
+      document.getElementById('tab4-mode-badge').textContent = '作答點數中';
+      document.getElementById('tab4-mode-badge').style.background = '#1b5e20';
+      document.getElementById('tab4-mode-badge').style.color = '#00e676';
+
+      const quizBox = document.getElementById('tab4-quiz-box');
+      quizBox.style.opacity = '1';
+      quizBox.style.pointerEvents = 'auto';
+
+      document.getElementById('tab4-status-text').innerHTML = `
+        <strong style="color: var(--accent-yellow);">🔢 點數時間：</strong>
+        請數一數你創作的圖形總面積是多少，並在右側小鍵盤輸入答案送出！
+      `;
+
+      playTone(659, 'sine', 0.12);
+      setTimeout(() => playTone(880, 'sine', 0.18), 120);
+      showTab4Toast('✅ 造型很棒！請數出總面積並在右側輸入作答！');
+      renderTab4();
+    }
+
+    function backToEditMode() {
+      tab4IsQuizMode = false;
+      tab4IsMarkerMode = false;
+      document.getElementById('btn-toggle-marker').classList.remove('btn-active-mode');
+      document.getElementById('btn-toggle-marker').innerHTML = '<span>✏️ 記號筆：關</span>';
+
+      document.getElementById('btn-finish-create').style.display = 'inline-flex';
+      document.getElementById('btn-back-to-edit').style.display = 'none';
+      document.getElementById('tab4-mode-badge').textContent = '創作模式中';
+      document.getElementById('tab4-mode-badge').style.background = '#263238';
+      document.getElementById('tab4-mode-badge').style.color = '#90a4ae';
+
+      const quizBox = document.getElementById('tab4-quiz-box');
+      quizBox.style.opacity = '0.5';
+      quizBox.style.pointerEvents = 'none';
+
+      const fb = document.getElementById('tab4-feedback-card');
+      fb.style.display = 'none';
+
+      document.getElementById('tab4-status-text').textContent = '點選上方積木並在畫布上點擊擺放，也可以直接拖拉移動！完成後請按「✅ 我拼好了」！';
+      renderTab4();
+    }
+
+    // 點子 A：記號筆切換
+    function toggleMarkerMode() {
+      tab4IsMarkerMode = !tab4IsMarkerMode;
+      const btn = document.getElementById('btn-toggle-marker');
+      btn.classList.toggle('btn-active-mode', tab4IsMarkerMode);
+      btn.innerHTML = tab4IsMarkerMode ? '<span>✏️ 記號筆：開 ✅</span>' : '<span>✏️ 記號筆：關</span>';
+      playTone(550, 'sine', 0.08);
+
+      if (tab4IsMarkerMode) {
+        showTab4Toast('記號筆已開啟！直接點擊畫布上的方格或三角形即可標上 ①、②、③...！');
+      }
+      renderTab4();
+    }
+
+    // 數字小鍵盤操作
+    function pressKey(key) {
+      playTone(500, 'sine', 0.05);
+      if (key === 'C') {
+        tab4UserInput = '0';
+      } else if (key === 'DEL') {
+        if (tab4UserInput.length > 1) {
+          tab4UserInput = tab4UserInput.slice(0, -1);
+        } else {
+          tab4UserInput = '0';
+        }
+      } else {
+        if (tab4UserInput === '0') {
+          tab4UserInput = String(key);
+        } else if (tab4UserInput.length < 3) {
+          tab4UserInput += String(key);
+        }
+      }
+      document.getElementById('tab4-input-display').textContent = tab4UserInput;
+    }
+
+    // 送出答案與迷思診斷回饋
+    function submitAnswer() {
+      const userAns = parseInt(tab4UserInput, 10);
+      if (isNaN(userAns) || userAns <= 0) {
+        showTab4Toast('請先輸入大於 0 的面積數字喔！');
+        playTone(300, 'sawtooth', 0.15);
+        return;
+      }
+
+      // 統計積木
+      const nFull = tab4Bricks.filter(b => b.type === 'rect').length;
+      const nHalf = tab4Bricks.filter(b => b.type === 'tri_half').length;
+      const nLarge = tab4Bricks.filter(b => b.type === 'tri_large').length;
+
+      // 正確面積 (依方案 1，nHalf 必為偶數)
+      const correctArea = nFull + (nHalf / 2) + nLarge;
+      const fb = document.getElementById('tab4-feedback-card');
+
+      if (userAns === correctArea) {
+        // 答對！
+        playTone(523, 'triangle', 0.15);
+        setTimeout(() => playTone(659, 'triangle', 0.15), 110);
+        setTimeout(() => playTone(784, 'triangle', 0.15), 220);
+        setTimeout(() => playTone(1046, 'sine', 0.35), 330);
+
+        let taskBonus = '';
+        if (tab4ActiveTask) {
+          let passTask = (correctArea === tab4ActiveTask.targetArea);
+          if (tab4ActiveTask.reqTriHalf && nHalf < tab4ActiveTask.reqTriHalf) passTask = false;
+          if (tab4ActiveTask.reqAllTypes && (nFull === 0 || nHalf === 0 || nLarge === 0)) passTask = false;
+          if (tab4ActiveTask.onlyTri && nFull > 0) passTask = false;
+
+          taskBonus = passTask
+            ? `<div style="margin-top: 10px; color: var(--accent-yellow); font-weight: 700;">🌟 恭喜！同時達成任務卡條件：【${tab4ActiveTask.text}】！</div>`
+            : `<div style="margin-top: 10px; color: #90a4ae;">面積算對了！但任務卡條件差一點點（目標：${tab4ActiveTask.targetArea} cm²），下次可以再挑戰喔！</div>`;
+        }
+
+        const explainHtml = `
+          <div style="font-size: 20px; font-weight: 800; color: #00e676; margin-bottom: 8px;">
+            🎉 答對了！你的作品總面積就是 <strong>${correctArea} 平方公分</strong>！
+          </div>
+          <div>🟦 完整方格：<strong>${nFull}</strong> 格 ＝ <strong>${nFull} cm²</strong></div>
+          <div>📐 半格小三角形：<strong>${nHalf}</strong> 個（每 2 個湊 1 格）＝ <strong>${nHalf / 2} cm²</strong></div>
+          <div>📏 跨兩格大三角形：<strong>${nLarge}</strong> 個（每個面積 1 格）＝ <strong>${nLarge} cm²</strong></div>
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--accent-cyan); font-weight: 700; color: var(--accent-cyan);">
+            🧮 面積算式：${nFull} ＋ ${nHalf / 2} ＋ ${nLarge} ＝ ${correctArea} cm²
+          </div>
+          ${taskBonus}
+        `;
+
+        document.getElementById('tab4-explain-content').innerHTML = explainHtml;
+        document.getElementById('tab4-celebrate-modal').classList.add('show');
+
+        fb.style.display = 'block';
+        fb.style.background = 'rgba(27, 94, 32, 0.4)';
+        fb.style.border = '1.5px solid #00e676';
+        fb.style.color = '#e8f5e9';
+        fb.innerHTML = `✅ <strong>太厲害了！</strong> 你輸入的 ${userAns} cm² 完全正確！`;
+      } else {
+        // 答錯，進行迷思分析引導
+        playTone(280, 'sawtooth', 0.2);
+        fb.style.display = 'block';
+        fb.style.background = 'rgba(92, 40, 48, 0.5)';
+        fb.style.border = '1.5px solid #ff5252';
+        fb.style.color = '#ffebee';
+
+        let tip = '';
+        if (userAns === nFull + nHalf + nLarge) {
+          // 迷思 1：把所有積木都直接當成 1 格數
+          tip = `💡 你輸入了 <strong>${userAns}</strong>，是不是把每塊積木都當成 1 格來數了？<br/>要注意：小三角形只有「半格」，<strong>每 2 個小三角形才能湊成 1 cm²</strong> 喔！請把三角形兩兩配對再算一次！`;
+        } else if (nLarge > 0 && userAns === nFull + (nHalf / 2) + (nLarge * 2)) {
+          // 迷思 2：把跨兩格大三角形當成 2 cm²
+          tip = `💡 請特別注意長長的大三角形！它雖然佔了 2 格的範圍，但它只有「2 格的一半」，所以 <strong>1 個大三角形面積剛好是 1 cm²</strong> 喔！`;
+        } else if (userAns === nFull && (nHalf > 0 || nLarge > 0)) {
+          // 迷思 3：只數了正方形方格
+          tip = `💡 你輸入的 <strong>${userAns}</strong> 剛好只有完整方格！別忘了旁邊的三角形積木也要算進去喔！`;
+        } else {
+          // 一般錯誤
+          tip = `💡 你輸入的答案是 <strong>${userAns} cm²</strong>，差了一點點喔！<br/>建議開啟上方的「✏️ 記號筆」，邊數邊點擊標上 ①、②、③，就不會漏掉或重複數囉！`;
+        }
+
+        fb.innerHTML = `❌ <strong>再數數看喔！</strong><br/>${tip}`;
+      }
+    }
+
+    function closeCelebrateModal(resetNew) {
+      document.getElementById('tab4-celebrate-modal').classList.remove('show');
+      if (resetNew) {
+        clearAllTab4();
+      }
+    }
+
   </script>
 </body>
 </html>
