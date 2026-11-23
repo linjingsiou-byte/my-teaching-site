@@ -1,0 +1,2286 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>數學練習小程式（含除法練習）｜敬修老師教學網</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-page: #20242c;
+      --bg-surface: #282c34;
+      --bg-elevated: #313742;
+      --bg-hover: #3a414e;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-green: #22c55e;
+      --accent-green-hover: #16a34a;
+      --accent-cyan: #0ea5e9;
+      --accent-cyan-bg: #0369a1;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --border-subtle: rgba(255, 255, 255, 0.12);
+      --focus-ring: #38bdf8;
+      --choice-bg: #f1f5f9;
+      --choice-text: #0f172a;
+      --choice-border: #38bdf8;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-pill: 9999px;
+      --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button, input {
+      font-family: inherit;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    a:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 640px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+      margin-bottom: 12px;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-elevated);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .icon-btn:hover {
+      background-color: var(--bg-hover);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.97);
+    }
+
+    .close-btn {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px 22px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* 首頁選單 */
+    .home-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .home-header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 5vw, 34px);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .home-subtitle {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .menu-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .menu-btn {
+      width: 100%;
+      min-height: 52px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-green);
+      color: #052e16;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .menu-btn:hover {
+      background-color: #4ade80;
+    }
+
+    .menu-btn:active {
+      transform: scale(0.98);
+    }
+
+    .badge-new {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      background-color: #fef08a;
+      color: #713f12;
+    }
+
+    .home-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .home-credit {
+      display: block;
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+      color: #cbd5e1;
+    }
+
+    .home-credit a {
+      color: #38bdf8;
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .home-credit a:hover {
+      color: #7dd3fc;
+    }
+
+    /* 設定頁面 */
+    .setup-title {
+      margin: 0 0 20px;
+      font-size: 24px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .setup-section {
+      margin-bottom: 22px;
+    }
+
+    .setup-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .setup-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .setup-hint {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-elevated);
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .pill-btn:hover:not(:disabled) {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .pill-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .pill-btn.active {
+      background-color: var(--accent-cyan-bg);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    .pill-check {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: var(--accent-green);
+      color: #052e16;
+      font-size: 12px;
+      font-weight: 900;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pill-btn.active .pill-check {
+      display: inline-flex;
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-elevated);
+    }
+
+    .slider-wrap.is-disabled {
+      opacity: 0.45;
+    }
+
+    .slider-wrap input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent-cyan);
+      height: 6px;
+      cursor: pointer;
+    }
+
+    .slider-value {
+      min-width: 72px;
+      text-align: right;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+    }
+
+    .switch-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      user-select: none;
+    }
+
+    .switch-label input[type="checkbox"] {
+      accent-color: var(--accent-green);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .primary-action-btn {
+      width: 100%;
+      min-height: 52px;
+      margin-top: 8px;
+      border: none;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-green);
+      color: #052e16;
+      font-size: 19px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .primary-action-btn:hover {
+      background-color: #4ade80;
+    }
+
+    .primary-action-btn:active {
+      transform: scale(0.98);
+    }
+
+    .setup-warning {
+      margin-top: 10px;
+      color: #fca5a5;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      min-height: 20px;
+    }
+
+    /* 練習進行畫面 */
+    .quiz-status-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-elevated);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 100%;
+      height: 100%;
+      background-color: var(--accent-green);
+      transform-origin: left center;
+      transition: background-color 0.2s ease;
+    }
+
+    .progress-fill.warning {
+      background-color: var(--accent-amber);
+    }
+
+    .progress-fill.danger {
+      background-color: var(--accent-red);
+    }
+
+    .quiz-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .counter-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-cyan-bg);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-pill {
+      font-size: 14px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-secondary);
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-elevated);
+    }
+
+    .question-stage {
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .equation-text {
+      font-size: clamp(36px, 8vw, 56px);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fill-blank-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 92px;
+      min-height: 60px;
+      padding: 4px 16px;
+      margin-left: 10px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--accent-cyan);
+      background-color: var(--bg-elevated);
+      color: #38bdf8;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clock-canvas {
+      width: 220px;
+      height: 220px;
+      display: block;
+    }
+
+    .feedback-banner {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .feedback-banner.is-empty {
+      visibility: hidden;
+    }
+
+    .feedback-banner.is-wrong {
+      background-color: rgba(239, 68, 68, 0.18);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #fecaca;
+    }
+
+    /* 單選題 2x3 選項網格 */
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .choice-btn {
+      min-height: 64px;
+      padding: 12px 10px;
+      border: 3px solid var(--choice-border);
+      border-radius: var(--radius-md);
+      background-color: var(--choice-bg);
+      color: var(--choice-text);
+      font-size: clamp(20px, 4.2vw, 26px);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      cursor: pointer;
+      transition: transform 0.08s ease, background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      background-color: #e0f2fe;
+      transform: translateY(-1px);
+    }
+
+    .choice-btn:disabled {
+      cursor: default;
+    }
+
+    .choice-btn.is-correct {
+      background-color: #dcfce7;
+      border-color: var(--accent-green);
+      color: #14532d;
+    }
+
+    .choice-btn.is-wrong {
+      background-color: #fee2e2;
+      border-color: var(--accent-red);
+      color: #7f1d1d;
+    }
+
+    /* 填充題 3x4 數字鍵盤 */
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    .keypad-btn {
+      min-height: 56px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-elevated);
+      color: var(--text-primary);
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.12s ease, transform 0.08s ease;
+    }
+
+    .keypad-btn:hover:not(:disabled) {
+      background-color: var(--bg-hover);
+    }
+
+    .keypad-btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .keypad-btn.keypad-submit {
+      background-color: var(--accent-green);
+      color: #052e16;
+      border-color: transparent;
+      font-weight: 900;
+    }
+
+    .keypad-btn.keypad-submit:hover:not(:disabled) {
+      background-color: #4ade80;
+    }
+
+    .keypad-btn.keypad-back {
+      background-color: #475569;
+    }
+
+    .next-btn-wrap {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .next-btn {
+      min-width: 180px;
+      min-height: 48px;
+      padding: 10px 26px;
+      border: none;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-cyan);
+      color: #082f49;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .next-btn:hover {
+      background-color: #38bdf8;
+    }
+
+    /* 舒爾特方格 */
+    .schulte-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .schulte-target {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .schulte-target span {
+      display: inline-block;
+      min-width: 40px;
+      padding: 2px 10px;
+      border-radius: var(--radius-md);
+      background-color: var(--accent-cyan-bg);
+      color: #ffffff;
+      text-align: center;
+    }
+
+    .schulte-grid {
+      display: grid;
+      gap: 6px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .schulte-cell {
+      aspect-ratio: 1 / 1;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-radius: 10px;
+      background-color: #1e293b;
+      color: var(--text-primary);
+      font-weight: 800;
+      font-size: clamp(14px, 3.6vw, 24px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.12s ease, transform 0.08s ease;
+    }
+
+    .schulte-cell:hover:not(:disabled) {
+      background-color: #334155;
+    }
+
+    .schulte-cell.is-done {
+      background-color: rgba(34, 197, 94, 0.22);
+      border-color: var(--accent-green);
+      color: #86efac;
+      cursor: default;
+    }
+
+    .schulte-cell.is-wrong {
+      background-color: rgba(239, 68, 68, 0.4);
+      border-color: var(--accent-red);
+    }
+
+    /* 原生 <dialog> 結算彈窗 (遵循 modern-web-guidance dialog + responsive-table) */
+    dialog#resultDialog {
+      width: min(94vw, 560px);
+      max-height: 88dvh;
+      margin: auto;
+      padding: 0;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    dialog#resultDialog[open] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    dialog#resultDialog:modal {
+      overscroll-behavior: contain;
+    }
+
+    dialog#resultDialog::backdrop {
+      background-color: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      overflow: hidden;
+      overscroll-behavior: contain;
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .dialog-header h2 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .dialog-body {
+      padding: 20px 22px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat-box {
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-elevated);
+      text-align: center;
+    }
+
+    .stat-box-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .stat-box-val {
+      font-size: 22px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-box-val.good {
+      color: #4ade80;
+    }
+
+    .stat-box-val.bad {
+      color: #f87171;
+    }
+
+    /* 錯題檢視表 (responsive-table 規範) */
+    .table-wrapper {
+      overflow: auto;
+      max-inline-size: 100%;
+      max-block-size: min(280px, 40vh);
+      container-type: inline-size;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-page);
+    }
+
+    .wrong-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 14px;
+      text-align: left;
+      --label-1: "題目";
+      --label-2: "正確答案";
+      --label-3: "你的作答";
+      --label-4: "耗時(秒)";
+    }
+
+    .wrong-table caption {
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: left;
+      color: #fca5a5;
+      background-color: var(--bg-elevated);
+    }
+
+    .wrong-table thead {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 1;
+      background-color: var(--bg-elevated);
+    }
+
+    .wrong-table th,
+    .wrong-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      font-variant-numeric: tabular-nums;
+    }
+
+    @container (width < 420px) {
+      .wrong-table,
+      .wrong-table thead,
+      .wrong-table tbody,
+      .wrong-table tr,
+      .wrong-table th,
+      .wrong-table td {
+        display: block;
+      }
+
+      .wrong-table thead {
+        display: none;
+      }
+
+      .wrong-table tr {
+        margin: 8px;
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        background-color: var(--bg-surface);
+      }
+
+      .wrong-table td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .wrong-table td:last-child {
+        border-bottom: none;
+      }
+
+      .wrong-table td:nth-child(1)::before {
+        content: var(--label-1) "：";
+        color: var(--text-secondary);
+        font-weight: 700;
+      }
+      .wrong-table td:nth-child(2)::before {
+        content: var(--label-2) "：";
+        color: var(--text-secondary);
+        font-weight: 700;
+      }
+      .wrong-table td:nth-child(3)::before {
+        content: var(--label-3) "：";
+        color: var(--text-secondary);
+        font-weight: 700;
+      }
+      .wrong-table td:nth-child(4)::before {
+        content: var(--label-4) "：";
+        color: var(--text-secondary);
+        font-weight: 700;
+      }
+    }
+
+    .dialog-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 22px 20px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .dialog-actions button {
+      flex: 1;
+      min-width: 120px;
+      min-height: 44px;
+      border-radius: var(--radius-pill);
+      border: none;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-retry {
+      background-color: var(--accent-green);
+      color: #052e16;
+    }
+
+    .btn-settings {
+      background-color: var(--accent-cyan-bg);
+      color: #ffffff;
+    }
+
+    .btn-home {
+      background-color: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      .card {
+        padding: 20px 14px;
+      }
+      .choice-grid {
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <a href="../index.html" class="icon-btn" id="backToSiteBtn" style="text-decoration:none;">← 回教學網站</a>
+      </div>
+      <div class="top-bar-right">
+        <button type="button" class="icon-btn" id="soundToggleBtn" aria-pressed="true">🔊 音效開</button>
+        <button type="button" class="icon-btn close-btn hidden" id="closeModuleBtn" aria-label="返回主選單">✕</button>
+      </div>
+    </header>
+
+    <!-- 畫面 1：主選單 -->
+    <main id="homeView" class="card">
+      <div class="home-header">
+        <h1>數學練習小程式</h1>
+        <p class="home-subtitle">純繁體中文即時互動練習・新增 1–100 整除除法</p>
+      </div>
+      <nav class="menu-stack" aria-label="數學練習項目">
+        <button type="button" class="menu-btn" data-module="schulte">舒爾特方格</button>
+        <button type="button" class="menu-btn" data-module="addition">加法練習</button>
+        <button type="button" class="menu-btn" data-module="subtraction">減法練習</button>
+        <button type="button" class="menu-btn" data-module="mult9">九九乘法練習</button>
+        <button type="button" class="menu-btn" data-module="mult19">19 × 19 乘法練習</button>
+        <button type="button" class="menu-btn" data-module="division">除法練習 <span class="badge-new">NEW</span></button>
+        <button type="button" class="menu-btn" data-module="clock">時鐘練習</button>
+      </nav>
+      <p class="home-footer">
+        支援電腦鍵盤與 iPad 觸控作答・可切換限時或不限時模式
+        <span class="home-credit">本網頁引用自 <a href="https://math-exercise.johnwu.cc/zh-tw/" target="_blank" rel="noopener noreferrer">John Wu 數學練習小程式</a> 加以編修，並新增「被除數 1–100、除數 1–10 整除除法」練習模組。</span>
+      </p>
+    </main>
+
+    <!-- 畫面 2：模組設定 -->
+    <section id="setupView" class="card hidden" aria-labelledby="setupTitle">
+      <h2 id="setupTitle" class="setup-title">模組設定</h2>
+      <div id="setupFields"></div>
+      <div id="setupWarning" class="setup-warning" role="alert"></div>
+      <button type="button" id="startQuizBtn" class="primary-action-btn">開始練習</button>
+    </section>
+
+    <!-- 畫面 3：算術 / 時鐘練習中 -->
+    <section id="quizView" class="card hidden" aria-label="練習區">
+      <div class="quiz-status-bar">
+        <div class="progress-track" id="progressTrack">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="quiz-meta-row">
+          <span class="counter-badge" id="quizCounter">1 / 20</span>
+          <span class="timer-pill" id="quizTimerLabel">剩餘 10.0 秒</span>
+        </div>
+      </div>
+
+      <div class="question-stage" id="questionStage"></div>
+
+      <div class="feedback-banner is-empty" id="feedbackBanner" role="status" aria-live="polite"></div>
+
+      <div id="answerArea"></div>
+
+      <div class="next-btn-wrap hidden" id="nextBtnWrap">
+        <button type="button" class="next-btn" id="nextQuestionBtn">下一題</button>
+      </div>
+    </section>
+
+    <!-- 畫面 4：舒爾特方格進行中 -->
+    <section id="schulteView" class="card hidden" aria-label="舒爾特方格練習區">
+      <div class="schulte-header">
+        <div class="schulte-target">按下：<span id="schulteTargetChar">1</span></div>
+        <div class="timer-pill" id="schulteTimer">0.00 秒</div>
+      </div>
+      <div class="schulte-grid" id="schulteGrid"></div>
+    </section>
+  </div>
+
+  <!-- 結算彈窗 (Native <dialog>) -->
+  <dialog id="resultDialog" aria-labelledby="resultTitle" closedby="any">
+    <div class="dialog-header">
+      <h2 id="resultTitle">練習結果</h2>
+      <button type="button" class="icon-btn close-btn" id="dialogCloseXBtn" aria-label="關閉">✕</button>
+    </div>
+    <div class="dialog-body">
+      <div class="stats-grid" id="resultStatsGrid"></div>
+      <div class="table-wrapper hidden" id="wrongTableWrapper" tabindex="0" role="region" aria-labelledby="wrongTableCaption">
+        <table class="wrong-table">
+          <caption id="wrongTableCaption">答錯題目一覽</caption>
+          <thead>
+            <tr>
+              <th>題目</th>
+              <th>正確答案</th>
+              <th>你的作答</th>
+              <th>耗時(秒)</th>
+            </tr>
+          </thead>
+          <tbody id="wrongTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button type="button" class="btn-retry" id="dialogRetryBtn">再練一次</button>
+      <button type="button" class="btn-settings" id="dialogSettingsBtn">調整設定</button>
+      <button type="button" class="btn-home" id="dialogHomeBtn">回主選單</button>
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      'use strict';
+
+      // ============================================================
+      // 1. 音效模組 (Web Audio API，免外部音檔)
+      // ============================================================
+      const AudioFX = {
+        enabled: true,
+        ctx: null,
+        ensureCtx() {
+          if (!this.enabled) return null;
+          if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new Ctx();
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          return this.ctx;
+        },
+        playTone(freq, duration, type = 'sine', gainVal = 0.12, delay = 0) {
+          const ctx = this.ensureCtx();
+          if (!ctx) return;
+          const now = ctx.currentTime + delay;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(gainVal, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration);
+        },
+        correct() {
+          this.playTone(660, 0.11, 'sine', 0.12, 0);
+          this.playTone(880, 0.14, 'sine', 0.12, 0.08);
+        },
+        wrong() {
+          this.playTone(240, 0.16, 'triangle', 0.14, 0);
+          this.playTone(180, 0.22, 'triangle', 0.14, 0.12);
+        },
+        finish() {
+          this.playTone(523.25, 0.12, 'sine', 0.12, 0);
+          this.playTone(659.25, 0.12, 'sine', 0.12, 0.1);
+          this.playTone(783.99, 0.22, 'sine', 0.13, 0.2);
+        }
+      };
+
+      // ============================================================
+      // 2. 模組定義與預設狀態
+      // ============================================================
+      const ZHUYIN_CHARS = 'ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ'.split('');
+      const HIRAGANA_CHARS = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん'.split('');
+      const KATAKANA_CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン'.split('');
+      const UPPER_ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+      const LOWER_ABC = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+      const MODULE_CONFIG = {
+        schulte: {
+          title: '舒爾特方格',
+          sizes: [3, 4, 5, 6, 7, 8, 9],
+          charsets: [
+            { id: '123', label: '123', maxSize: 9 },
+            { id: 'zhuyin', label: 'ㄅㄆㄇ', maxSize: 6 },
+            { id: 'ABC', label: 'ABC', maxSize: 5 },
+            { id: 'abc', label: 'abc', maxSize: 5 },
+            { id: 'hira', label: 'あいう', maxSize: 6 },
+            { id: 'kata', label: 'アイウ', maxSize: 6 }
+          ]
+        },
+        addition: {
+          title: '加法練習',
+          topics: [
+            { id: 'within10', label: '10 以內加法' },
+            { id: 'within20', label: '20 以內加法' },
+            { id: '2digit', label: '兩位數加法' },
+            { id: '3digit', label: '三位數加法' },
+            { id: '4digit', label: '四位數加法' }
+          ],
+          hasAnswerMode: true,
+          hasQuestionCount: true
+        },
+        subtraction: {
+          title: '減法練習',
+          topics: [
+            { id: 'within10', label: '10 以內減法' },
+            { id: 'within20', label: '20 以內減法' },
+            { id: '2digit', label: '兩位數減法' },
+            { id: '3digit', label: '三位數減法' },
+            { id: '4digit', label: '四位數減法' }
+          ],
+          hasAnswerMode: true,
+          hasQuestionCount: true
+        },
+        mult9: {
+          title: '九九乘法練習',
+          topics: [2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({ id: String(n), label: `${n} × 9` })),
+          hasAnswerMode: true,
+          hasQuestionCount: false
+        },
+        mult19: {
+          title: '19 × 19 乘法練習',
+          topics: [11, 12, 13, 14, 15, 16, 17, 18, 19].map((n) => ({ id: String(n), label: `${n} × 19` })),
+          hasAnswerMode: true,
+          hasQuestionCount: false
+        },
+        division: {
+          title: '除法練習（僅整除）',
+          scopes: [
+            { id: 'table9', label: '九九乘法表內（商 1–9）' },
+            { id: 'advanced100', label: '100 以內進階（商 ≥ 10）' },
+            { id: 'all100', label: '全部（被除數 1–100）' }
+          ],
+          topics: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({ id: String(n), label: `÷ ${n}` })),
+          hasAnswerMode: true,
+          hasQuestionCount: true
+        },
+        clock: {
+          title: '時鐘練習',
+          topics: [
+            { id: 'hour', label: '整點鐘' },
+            { id: 'half', label: '半點鐘' },
+            { id: 'fiveMin', label: '五分鐘' },
+            { id: 'oneMin', label: '一分鐘' },
+            { id: 'oneSec', label: '一秒鐘' }
+          ],
+          hasAnswerMode: false,
+          hasQuestionCount: true
+        }
+      };
+
+      const state = {
+        currentModule: null,
+        settings: {
+          schulte: { size: 5, charset: '123' },
+          addition: { topics: ['within10'], answerMode: 'choice', timeLimit: 10, unlimited: false, count: 20 },
+          subtraction: { topics: ['within10'], answerMode: 'choice', timeLimit: 10, unlimited: false, count: 20 },
+          mult9: { topics: ['2'], answerMode: 'choice', timeLimit: 10, unlimited: false },
+          mult19: { topics: ['11'], answerMode: 'choice', timeLimit: 10, unlimited: false },
+          division: { scope: 'all100', topics: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], answerMode: 'choice', timeLimit: 10, unlimited: false, count: 20 },
+          clock: { topics: ['hour'], timeLimit: 10, unlimited: false, count: 20 }
+        },
+        quiz: null,
+        schulte: null,
+        rafId: null
+      };
+
+      // ============================================================
+      // 3. DOM 參照與視圖切換
+      // ============================================================
+      const dom = {
+        backToSiteBtn: document.getElementById('backToSiteBtn'),
+        soundToggleBtn: document.getElementById('soundToggleBtn'),
+        closeModuleBtn: document.getElementById('closeModuleBtn'),
+        homeView: document.getElementById('homeView'),
+        setupView: document.getElementById('setupView'),
+        setupTitle: document.getElementById('setupTitle'),
+        setupFields: document.getElementById('setupFields'),
+        setupWarning: document.getElementById('setupWarning'),
+        startQuizBtn: document.getElementById('startQuizBtn'),
+        quizView: document.getElementById('quizView'),
+        progressTrack: document.getElementById('progressTrack'),
+        progressFill: document.getElementById('progressFill'),
+        quizCounter: document.getElementById('quizCounter'),
+        quizTimerLabel: document.getElementById('quizTimerLabel'),
+        questionStage: document.getElementById('questionStage'),
+        feedbackBanner: document.getElementById('feedbackBanner'),
+        answerArea: document.getElementById('answerArea'),
+        nextBtnWrap: document.getElementById('nextBtnWrap'),
+        nextQuestionBtn: document.getElementById('nextQuestionBtn'),
+        schulteView: document.getElementById('schulteView'),
+        schulteTargetChar: document.getElementById('schulteTargetChar'),
+        schulteTimer: document.getElementById('schulteTimer'),
+        schulteGrid: document.getElementById('schulteGrid'),
+        resultDialog: document.getElementById('resultDialog'),
+        resultTitle: document.getElementById('resultTitle'),
+        resultStatsGrid: document.getElementById('resultStatsGrid'),
+        wrongTableWrapper: document.getElementById('wrongTableWrapper'),
+        wrongTableBody: document.getElementById('wrongTableBody'),
+        dialogCloseXBtn: document.getElementById('dialogCloseXBtn'),
+        dialogRetryBtn: document.getElementById('dialogRetryBtn'),
+        dialogSettingsBtn: document.getElementById('dialogSettingsBtn'),
+        dialogHomeBtn: document.getElementById('dialogHomeBtn')
+      };
+
+      function stopAnimationLoop() {
+        if (state.rafId !== null) {
+          cancelAnimationFrame(state.rafId);
+          state.rafId = null;
+        }
+      }
+
+      function showView(viewName) {
+        stopAnimationLoop();
+        dom.homeView.classList.toggle('hidden', viewName !== 'home');
+        dom.setupView.classList.toggle('hidden', viewName !== 'setup');
+        dom.quizView.classList.toggle('hidden', viewName !== 'quiz');
+        dom.schulteView.classList.toggle('hidden', viewName !== 'schulte');
+        dom.closeModuleBtn.classList.toggle('hidden', viewName === 'home');
+        dom.backToSiteBtn.classList.toggle('hidden', viewName !== 'home');
+      }
+
+      // ============================================================
+      // 4. 工具函式
+      // ============================================================
+      function randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function shuffleArray(arr) {
+        const copy = arr.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function pickRandom(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      // ============================================================
+      // 5. 設定頁面動態渲染
+      // ============================================================
+      function openSetup(moduleId) {
+        state.currentModule = moduleId;
+        const cfg = MODULE_CONFIG[moduleId];
+        dom.setupTitle.textContent = cfg.title;
+        dom.setupWarning.textContent = '';
+        renderSetupFields(moduleId);
+        showView('setup');
+      }
+
+      function createPillButton(label, isActive, onClick, disabled = false) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `pill-btn${isActive ? ' active' : ''}`;
+        btn.disabled = disabled;
+        btn.innerHTML = `<span class="pill-check" aria-hidden="true">✓</span><span>${label}</span>`;
+        btn.addEventListener('click', onClick);
+        return btn;
+      }
+
+      function renderSetupFields(moduleId) {
+        const cfg = MODULE_CONFIG[moduleId];
+        const s = state.settings[moduleId];
+        const container = dom.setupFields;
+        container.innerHTML = '';
+
+        if (moduleId === 'schulte') {
+          // 字符集
+          const charSec = document.createElement('div');
+          charSec.className = 'setup-section';
+          charSec.innerHTML = '<div class="setup-label-row"><span class="setup-label">字符類型</span></div>';
+          const charGroup = document.createElement('div');
+          charGroup.className = 'pill-group';
+          cfg.charsets.forEach((cs) => {
+            charGroup.appendChild(createPillButton(cs.label, s.charset === cs.id, () => {
+              s.charset = cs.id;
+              if (s.size > cs.maxSize) s.size = cs.maxSize;
+              renderSetupFields(moduleId);
+            }));
+          });
+          charSec.appendChild(charGroup);
+          container.appendChild(charSec);
+
+          // 方格大小
+          const activeCharset = cfg.charsets.find((c) => c.id === s.charset);
+          const sizeSec = document.createElement('div');
+          sizeSec.className = 'setup-section';
+          sizeSec.innerHTML = `<div class="setup-label-row"><span class="setup-label">方格大小</span><span class="setup-hint">此字符最多支援 ${activeCharset.maxSize} × ${activeCharset.maxSize}</span></div>`;
+          const sizeGroup = document.createElement('div');
+          sizeGroup.className = 'pill-group';
+          cfg.sizes.forEach((sz) => {
+            const disabled = sz > activeCharset.maxSize;
+            sizeGroup.appendChild(createPillButton(`${sz} × ${sz} 格`, s.size === sz, () => {
+              s.size = sz;
+              renderSetupFields(moduleId);
+            }, disabled));
+          });
+          sizeSec.appendChild(sizeGroup);
+          container.appendChild(sizeSec);
+          return;
+        }
+
+        // 除法專屬：程度範圍單選
+        if (moduleId === 'division') {
+          const scopeSec = document.createElement('div');
+          scopeSec.className = 'setup-section';
+          scopeSec.innerHTML = '<div class="setup-label-row"><span class="setup-label">程度範圍（被除數 1–100，皆為整除）</span></div>';
+          const scopeGroup = document.createElement('div');
+          scopeGroup.className = 'pill-group';
+          cfg.scopes.forEach((sc) => {
+            scopeGroup.appendChild(createPillButton(sc.label, s.scope === sc.id, () => {
+              s.scope = sc.id;
+              renderSetupFields(moduleId);
+            }));
+          });
+          scopeSec.appendChild(scopeGroup);
+          container.appendChild(scopeSec);
+        }
+
+        // 題目選擇（複選 + 全選）
+        const topicSec = document.createElement('div');
+        topicSec.className = 'setup-section';
+        const topicLabelText = moduleId === 'division' ? '除數選擇（可複選）' : '題目選擇（可複選）';
+        const topicHint = (moduleId === 'mult9' || moduleId === 'mult19')
+          ? `目前共 ${s.topics.length * (moduleId === 'mult9' ? 9 : 19)} 題`
+          : '';
+        topicSec.innerHTML = `<div class="setup-label-row"><span class="setup-label">${topicLabelText}</span><span class="setup-hint">${topicHint}</span></div>`;
+        const topicGroup = document.createElement('div');
+        topicGroup.className = 'pill-group';
+
+        cfg.topics.forEach((t) => {
+          const active = s.topics.includes(t.id);
+          topicGroup.appendChild(createPillButton(t.label, active, () => {
+            if (s.topics.includes(t.id)) {
+              s.topics = s.topics.filter((x) => x !== t.id);
+            } else {
+              s.topics.push(t.id);
+            }
+            dom.setupWarning.textContent = '';
+            renderSetupFields(moduleId);
+          }));
+        });
+
+        const allSelected = s.topics.length === cfg.topics.length;
+        topicGroup.appendChild(createPillButton('全選', allSelected, () => {
+          s.topics = allSelected ? [] : cfg.topics.map((t) => t.id);
+          dom.setupWarning.textContent = '';
+          renderSetupFields(moduleId);
+        }));
+
+        topicSec.appendChild(topicGroup);
+        container.appendChild(topicSec);
+
+        // 答題方式
+        if (cfg.hasAnswerMode) {
+          const modeSec = document.createElement('div');
+          modeSec.className = 'setup-section';
+          modeSec.innerHTML = '<div class="setup-label-row"><span class="setup-label">答題方式</span></div>';
+          const modeGroup = document.createElement('div');
+          modeGroup.className = 'pill-group';
+          modeGroup.appendChild(createPillButton('單選題', s.answerMode === 'choice', () => {
+            s.answerMode = 'choice';
+            renderSetupFields(moduleId);
+          }));
+          modeGroup.appendChild(createPillButton('填充題', s.answerMode === 'fill', () => {
+            s.answerMode = 'fill';
+            renderSetupFields(moduleId);
+          }));
+          modeSec.appendChild(modeGroup);
+          container.appendChild(modeSec);
+        }
+
+        // 答題限時（滑桿 + 不限時）
+        const timerSec = document.createElement('div');
+        timerSec.className = 'setup-section';
+        const timerHeader = document.createElement('div');
+        timerHeader.className = 'setup-label-row';
+        const timerTitle = document.createElement('span');
+        timerTitle.className = 'setup-label';
+        timerTitle.textContent = '答題限時';
+
+        const unlimLabel = document.createElement('label');
+        unlimLabel.className = 'switch-label';
+        const unlimCb = document.createElement('input');
+        unlimCb.type = 'checkbox';
+        unlimCb.checked = s.unlimited;
+        unlimCb.addEventListener('change', () => {
+          s.unlimited = unlimCb.checked;
+          renderSetupFields(moduleId);
+        });
+        unlimLabel.appendChild(unlimCb);
+        unlimLabel.append('不限時');
+
+        timerHeader.append(timerTitle, unlimLabel);
+        timerSec.appendChild(timerHeader);
+
+        const sliderWrap = document.createElement('div');
+        sliderWrap.className = `slider-wrap${s.unlimited ? ' is-disabled' : ''}`;
+        const timeInput = document.createElement('input');
+        timeInput.type = 'range';
+        timeInput.min = '3';
+        timeInput.max = '60';
+        timeInput.step = '1';
+        timeInput.value = String(s.timeLimit);
+        timeInput.disabled = s.unlimited;
+        timeInput.setAttribute('aria-label', '答題限時秒數');
+
+        const timeVal = document.createElement('span');
+        timeVal.className = 'slider-value';
+        timeVal.textContent = s.unlimited ? '不限時' : `${s.timeLimit} 秒`;
+
+        timeInput.addEventListener('input', () => {
+          s.timeLimit = Number(timeInput.value);
+          timeVal.textContent = `${s.timeLimit} 秒`;
+        });
+        sliderWrap.append(timeInput, timeVal);
+        timerSec.appendChild(sliderWrap);
+        container.appendChild(timerSec);
+
+        // 題目數量
+        if (cfg.hasQuestionCount) {
+          const countSec = document.createElement('div');
+          countSec.className = 'setup-section';
+          countSec.innerHTML = '<div class="setup-label-row"><span class="setup-label">題目數量</span></div>';
+          const countWrap = document.createElement('div');
+          countWrap.className = 'slider-wrap';
+          const countInput = document.createElement('input');
+          countInput.type = 'range';
+          countInput.min = '10';
+          countInput.max = '100';
+          countInput.step = '5';
+          countInput.value = String(s.count);
+          countInput.setAttribute('aria-label', '題目數量');
+
+          const countVal = document.createElement('span');
+          countVal.className = 'slider-value';
+          countVal.textContent = `${s.count} 題`;
+
+          countInput.addEventListener('input', () => {
+            s.count = Number(countInput.value);
+            countVal.textContent = `${s.count} 題`;
+          });
+          countWrap.append(countInput, countVal);
+          countSec.appendChild(countWrap);
+          container.appendChild(countSec);
+        }
+      }
+
+      // ============================================================
+      // 6. 題庫產生器
+      // ============================================================
+      function buildNumericChoices(correct, minVal = 0, nearSpan = 6) {
+        const set = new Set([correct]);
+        const candidates = [
+          correct - 1, correct + 1,
+          correct - 2, correct + 2,
+          correct - 3, correct + 3,
+          correct - 10, correct + 10
+        ];
+        for (const c of shuffleArray(candidates)) {
+          if (set.size >= 6) break;
+          if (c >= minVal && c !== correct) set.add(c);
+        }
+        let guard = 0;
+        while (set.size < 6 && guard < 200) {
+          guard++;
+          const delta = randInt(-Math.max(nearSpan, Math.ceil(correct * 0.25)), Math.max(nearSpan, Math.ceil(correct * 0.25)));
+          const cand = correct + delta;
+          if (cand >= minVal && cand !== correct) set.add(cand);
+        }
+        let fallback = minVal;
+        while (set.size < 6) {
+          if (!set.has(fallback)) set.add(fallback);
+          fallback++;
+        }
+        return shuffleArray(Array.from(set));
+      }
+
+      function generateAdditionQuestion(topics) {
+        const t = pickRandom(topics);
+        let a = 0;
+        let b = 0;
+        if (t === 'within10') {
+          a = randInt(0, 10);
+          b = randInt(0, 10 - a);
+        } else if (t === 'within20') {
+          a = randInt(1, 19);
+          b = randInt(Math.max(1, 11 - a), 20 - a);
+        } else if (t === '2digit') {
+          a = randInt(10, 99);
+          b = randInt(10, 99);
+        } else if (t === '3digit') {
+          a = randInt(100, 999);
+          b = randInt(100, 999);
+        } else {
+          a = randInt(1000, 9999);
+          b = randInt(1000, 9999);
+        }
+        const ans = a + b;
+        return {
+          type: 'math',
+          prompt: `${a} + ${b}`,
+          answer: String(ans),
+          choices: buildNumericChoices(ans, 0, t === 'within10' ? 4 : 8).map(String)
+        };
+      }
+
+      function generateSubtractionQuestion(topics) {
+        const t = pickRandom(topics);
+        let a = 0;
+        let b = 0;
+        if (t === 'within10') {
+          a = randInt(1, 10);
+          b = randInt(0, a);
+        } else if (t === 'within20') {
+          a = randInt(11, 20);
+          b = randInt(1, a);
+        } else if (t === '2digit') {
+          a = randInt(10, 99);
+          b = randInt(10, a);
+        } else if (t === '3digit') {
+          a = randInt(100, 999);
+          b = randInt(100, a);
+        } else {
+          a = randInt(1000, 9999);
+          b = randInt(1000, a);
+        }
+        const ans = a - b;
+        return {
+          type: 'math',
+          prompt: `${a} - ${b}`,
+          answer: String(ans),
+          choices: buildNumericChoices(ans, 0, t === 'within10' ? 4 : 8).map(String)
+        };
+      }
+
+      function generateMultDeck(topics, maxMultiplier) {
+        const deck = [];
+        topics.forEach((tStr) => {
+          const a = Number(tStr);
+          for (let b = 1; b <= maxMultiplier; b++) {
+            const ans = a * b;
+            const distractorPool = new Set([ans]);
+            [a * (b - 1), a * (b + 1), (a - 1) * b, (a + 1) * b, ans + 1, ans - 1, ans + 10, ans - 10].forEach((cand) => {
+              if (distractorPool.size < 6 && cand > 0) distractorPool.add(cand);
+            });
+            while (distractorPool.size < 6) {
+              const randCand = ans + randInt(-12, 12);
+              if (randCand > 0) distractorPool.add(randCand);
+            }
+            deck.push({
+              type: 'math',
+              prompt: `${a} × ${b}`,
+              answer: String(ans),
+              choices: shuffleArray(Array.from(distractorPool)).map(String)
+            });
+          }
+        });
+        return shuffleArray(deck);
+      }
+
+      function buildDivisionPool(scope, divisorIds) {
+        const pool = [];
+        divisorIds.forEach((dStr) => {
+          const d = Number(dStr);
+          const maxQ = Math.floor(100 / d);
+          for (let q = 1; q <= maxQ; q++) {
+            const dividend = d * q;
+            if (dividend < 1 || dividend > 100) continue;
+            if (scope === 'table9' && q > 9) continue;
+            if (scope === 'advanced100' && q < 10) continue;
+            pool.push({ dividend, divisor: d, quotient: q });
+          }
+        });
+        return pool;
+      }
+
+      function generateDivisionQuestions(scope, divisorIds, count) {
+        const pool = buildDivisionPool(scope, divisorIds);
+        const questions = [];
+        let lastKey = '';
+        for (let i = 0; i < count; i++) {
+          let item = pickRandom(pool);
+          if (pool.length > 1) {
+            let guard = 0;
+            while (`${item.dividend}/${item.divisor}` === lastKey && guard < 15) {
+              item = pickRandom(pool);
+              guard++;
+            }
+          }
+          lastKey = `${item.dividend}/${item.divisor}`;
+          const q = item.quotient;
+          questions.push({
+            type: 'math',
+            prompt: `${item.dividend} ÷ ${item.divisor}`,
+            answer: String(q),
+            choices: buildNumericChoices(q, 1, 5).map(String)
+          });
+        }
+        return questions;
+      }
+
+      function formatClockTime(h, m, s, showSeconds) {
+        const hh = String(h).padStart(2, '0');
+        const mm = String(m).padStart(2, '0');
+        if (!showSeconds) return `${hh}:${mm}`;
+        const ss = String(s).padStart(2, '0');
+        return `${hh}:${mm}:${ss}`;
+      }
+
+      function generateClockQuestions(topics, count) {
+        const showSeconds = topics.includes('oneSec');
+        const questions = [];
+        for (let i = 0; i < count; i++) {
+          const mode = pickRandom(topics);
+          const hour = randInt(1, 12);
+          let minute = 0;
+          let second = 0;
+
+          if (mode === 'hour') {
+            minute = 0;
+          } else if (mode === 'half') {
+            minute = pickRandom([0, 30]);
+          } else if (mode === 'fiveMin') {
+            minute = randInt(0, 11) * 5;
+          } else if (mode === 'oneMin') {
+            minute = randInt(0, 59);
+          } else {
+            minute = randInt(0, 59);
+            second = randInt(0, 59);
+          }
+
+          const correctStr = formatClockTime(hour, minute, second, showSeconds);
+          const choicesSet = new Set([correctStr]);
+          let guard = 0;
+          while (choicesSet.size < 6 && guard < 200) {
+            guard++;
+            const dh = (hour - 1 + randInt(-2, 2) + 12) % 12 + 1;
+            let dm = minute;
+            let ds = second;
+            if (mode === 'half') {
+              dm = pickRandom([0, 30]);
+            } else if (mode === 'fiveMin') {
+              dm = (minute + pickRandom([-10, -5, 0, 5, 10]) + 60) % 60;
+            } else if (mode === 'oneMin' || mode === 'oneSec') {
+              dm = (minute + randInt(-6, 6) + 60) % 60;
+            }
+            if (showSeconds) {
+              ds = mode === 'oneSec' ? (second + randInt(-10, 10) + 60) % 60 : second;
+            }
+            choicesSet.add(formatClockTime(dh, dm, ds, showSeconds));
+          }
+          while (choicesSet.size < 6) {
+            choicesSet.add(formatClockTime(randInt(1, 12), randInt(0, 59), showSeconds ? randInt(0, 59) : 0, showSeconds));
+          }
+
+          questions.push({
+            type: 'clock',
+            hour,
+            minute,
+            second,
+            showSeconds,
+            prompt: showSeconds ? `時鐘 ${correctStr}` : `時鐘 ${correctStr}`,
+            answer: correctStr,
+            choices: shuffleArray(Array.from(choicesSet))
+          });
+        }
+        return questions;
+      }
+
+      // ============================================================
+      // 7. 類比時鐘 Canvas 繪製
+      // ============================================================
+      function drawAnalogClock(canvas, hour, minute, second, showSeconds) {
+        const size = 220;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const cx = size / 2;
+        const cy = size / 2;
+        const r = size / 2 - 10;
+
+        // 錶面
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fill();
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#38bdf8';
+        ctx.stroke();
+
+        // 刻度
+        for (let i = 0; i < 60; i++) {
+          const angle = (i * Math.PI) / 30 - Math.PI / 2;
+          const isHour = i % 5 === 0;
+          const inner = isHour ? r - 14 : r - 7;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
+          ctx.lineTo(cx + Math.cos(angle) * (r - 2), cy + Math.sin(angle) * (r - 2));
+          ctx.lineWidth = isHour ? 3 : 1.2;
+          ctx.strokeStyle = isHour ? '#0f172a' : '#64748b';
+          ctx.stroke();
+        }
+
+        // 數字 1~12
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (let num = 1; num <= 12; num++) {
+          const ang = (num * Math.PI) / 6 - Math.PI / 2;
+          const nr = r - 27;
+          ctx.fillText(String(num), cx + Math.cos(ang) * nr, cy + Math.sin(ang) * nr);
+        }
+
+        // 時針
+        const hourAngle = ((hour % 12) + minute / 60 + second / 3600) * (Math.PI / 6) - Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(hourAngle) * (r * 0.5), cy + Math.sin(hourAngle) * (r * 0.5));
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#0f172a';
+        ctx.stroke();
+
+        // 分針
+        const minAngle = (minute + second / 60) * (Math.PI / 30) - Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(minAngle) * (r * 0.74), cy + Math.sin(minAngle) * (r * 0.74));
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#0284c7';
+        ctx.stroke();
+
+        // 秒針
+        if (showSeconds) {
+          const secAngle = second * (Math.PI / 30) - Math.PI / 2;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(secAngle) * (r * 0.82), cy + Math.sin(secAngle) * (r * 0.82));
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#ef4444';
+          ctx.stroke();
+        }
+
+        // 中心軸點
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#0f172a';
+        ctx.fill();
+      }
+
+      // ============================================================
+      // 8. 算術與時鐘測驗執行引擎
+      // ============================================================
+      function startQuiz() {
+        const mod = state.currentModule;
+        const s = state.settings[mod];
+
+        if (mod === 'schulte') {
+          startSchulte();
+          return;
+        }
+
+        if (!s.topics || s.topics.length === 0) {
+          dom.setupWarning.textContent = '請至少選擇一項題目範圍！';
+          return;
+        }
+
+        let questions = [];
+        if (mod === 'addition') {
+          for (let i = 0; i < s.count; i++) questions.push(generateAdditionQuestion(s.topics));
+        } else if (mod === 'subtraction') {
+          for (let i = 0; i < s.count; i++) questions.push(generateSubtractionQuestion(s.topics));
+        } else if (mod === 'mult9') {
+          questions = generateMultDeck(s.topics, 9);
+        } else if (mod === 'mult19') {
+          questions = generateMultDeck(s.topics, 19);
+        } else if (mod === 'division') {
+          questions = generateDivisionQuestions(s.scope, s.topics, s.count);
+        } else if (mod === 'clock') {
+          questions = generateClockQuestions(s.topics, s.count);
+        }
+
+        state.quiz = {
+          moduleId: mod,
+          answerMode: s.answerMode || 'choice',
+          timeLimit: s.timeLimit,
+          unlimited: Boolean(s.unlimited),
+          questions,
+          index: 0,
+          correctCount: 0,
+          wrongCount: 0,
+          wrongRecords: [],
+          totalElapsedMs: 0,
+          questionStartTime: 0,
+          locked: false,
+          fillInput: ''
+        };
+
+        showView('quiz');
+        renderCurrentQuestion();
+      }
+
+      function renderCurrentQuestion() {
+        stopAnimationLoop();
+        const qz = state.quiz;
+        const q = qz.questions[qz.index];
+        qz.locked = false;
+        qz.fillInput = '';
+        qz.questionStartTime = performance.now();
+
+        dom.quizCounter.textContent = `${qz.index + 1} / ${qz.questions.length}`;
+        dom.feedbackBanner.className = 'feedback-banner is-empty';
+        dom.feedbackBanner.textContent = '';
+        dom.nextBtnWrap.classList.add('hidden');
+
+        // 進度條設定
+        dom.progressTrack.classList.toggle('hidden', qz.unlimited);
+        dom.progressFill.className = 'progress-fill';
+        dom.progressFill.style.transform = 'scaleX(1)';
+
+        // 題目區
+        dom.questionStage.innerHTML = '';
+        if (q.type === 'clock') {
+          const canvas = document.createElement('canvas');
+          canvas.className = 'clock-canvas';
+          canvas.setAttribute('aria-label', '類比時鐘題目');
+          dom.questionStage.appendChild(canvas);
+          drawAnalogClock(canvas, q.hour, q.minute, q.second, q.showSeconds);
+        } else {
+          const eqDiv = document.createElement('div');
+          eqDiv.className = 'equation-text';
+          if (qz.answerMode === 'fill') {
+            eqDiv.innerHTML = `<span>${q.prompt} =</span><span class="fill-blank-box" id="fillBlankDisplay">?</span>`;
+          } else {
+            eqDiv.textContent = q.prompt;
+          }
+          dom.questionStage.appendChild(eqDiv);
+        }
+
+        // 作答區
+        dom.answerArea.innerHTML = '';
+        if (qz.answerMode === 'choice') {
+          const grid = document.createElement('div');
+          grid.className = 'choice-grid';
+          q.choices.forEach((choiceText) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'choice-btn';
+            btn.textContent = choiceText;
+            btn.addEventListener('click', () => submitAnswer(choiceText, btn));
+            grid.appendChild(btn);
+          });
+          dom.answerArea.appendChild(grid);
+        } else {
+          const keypad = document.createElement('div');
+          keypad.className = 'keypad-grid';
+          const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✓'];
+          keys.forEach((k) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'keypad-btn';
+            btn.textContent = k;
+            if (k === '⌫') {
+              btn.classList.add('keypad-back');
+              btn.setAttribute('aria-label', '倒退刪除');
+              btn.addEventListener('click', () => handleFillKey('BACK'));
+            } else if (k === '✓') {
+              btn.classList.add('keypad-submit');
+              btn.setAttribute('aria-label', '送出答案');
+              btn.addEventListener('click', () => handleFillKey('SUBMIT'));
+            } else {
+              btn.addEventListener('click', () => handleFillKey(k));
+            }
+            keypad.appendChild(btn);
+          });
+          dom.answerArea.appendChild(keypad);
+        }
+
+        startQuestionTimer();
+      }
+
+      function updateFillDisplay() {
+        const el = document.getElementById('fillBlankDisplay');
+        if (!el || !state.quiz) return;
+        el.textContent = state.quiz.fillInput === '' ? '?' : state.quiz.fillInput;
+      }
+
+      function handleFillKey(key) {
+        const qz = state.quiz;
+        if (!qz || qz.locked || qz.answerMode !== 'fill') return;
+        if (key === 'BACK') {
+          qz.fillInput = qz.fillInput.slice(0, -1);
+          updateFillDisplay();
+        } else if (key === 'SUBMIT') {
+          if (qz.fillInput === '') return;
+          submitAnswer(qz.fillInput, null);
+        } else if (/^\d$/.test(key) && qz.fillInput.length < 6) {
+          if (qz.fillInput === '0') {
+            qz.fillInput = key;
+          } else {
+            qz.fillInput += key;
+          }
+          updateFillDisplay();
+        }
+      }
+
+      function startQuestionTimer() {
+        const qz = state.quiz;
+        const limitMs = qz.timeLimit * 1000;
+
+        function tick(now) {
+          if (!state.quiz || state.quiz.locked) return;
+          const elapsedMs = now - qz.questionStartTime;
+
+          if (qz.unlimited) {
+            dom.quizTimerLabel.textContent = `不限時｜已用 ${(elapsedMs / 1000).toFixed(1)} 秒`;
+            state.rafId = requestAnimationFrame(tick);
+            return;
+          }
+
+          const remainingMs = Math.max(0, limitMs - elapsedMs);
+          const ratio = remainingMs / limitMs;
+          dom.progressFill.style.transform = `scaleX(${ratio})`;
+          dom.progressFill.classList.toggle('warning', ratio <= 0.4 && ratio > 0.2);
+          dom.progressFill.classList.toggle('danger', ratio <= 0.2);
+          dom.quizTimerLabel.textContent = `剩餘 ${(remainingMs / 1000).toFixed(1)} 秒`;
+
+          if (remainingMs <= 0) {
+            handleTimeout();
+            return;
+          }
+          state.rafId = requestAnimationFrame(tick);
+        }
+
+        state.rafId = requestAnimationFrame(tick);
+      }
+
+      function submitAnswer(userAnswer, clickedBtn) {
+        const qz = state.quiz;
+        if (!qz || qz.locked) return;
+        qz.locked = true;
+        stopAnimationLoop();
+
+        const elapsedSec = (performance.now() - qz.questionStartTime) / 1000;
+        qz.totalElapsedMs += elapsedSec * 1000;
+        const q = qz.questions[qz.index];
+        const isCorrect = userAnswer === q.answer;
+
+        if (isCorrect) {
+          qz.correctCount++;
+          AudioFX.correct();
+          if (clickedBtn) clickedBtn.classList.add('is-correct');
+          setTimeout(() => advanceQuestion(), 180);
+          return;
+        }
+
+        // 答錯處理
+        qz.wrongCount++;
+        AudioFX.wrong();
+        qz.wrongRecords.push({
+          prompt: q.type === 'clock' ? q.prompt : `${q.prompt} =`,
+          answer: q.answer,
+          userAnswer,
+          elapsed: elapsedSec.toFixed(2)
+        });
+
+        if (qz.answerMode === 'choice') {
+          dom.answerArea.querySelectorAll('.choice-btn').forEach((btn) => {
+            btn.disabled = true;
+            if (btn.textContent === q.answer) btn.classList.add('is-correct');
+          });
+          if (clickedBtn) clickedBtn.classList.add('is-wrong');
+        } else {
+          dom.answerArea.querySelectorAll('.keypad-btn').forEach((b) => { b.disabled = true; });
+        }
+
+        dom.feedbackBanner.className = 'feedback-banner is-wrong';
+        dom.feedbackBanner.textContent = `答錯了！ 正確答案：${q.answer}`;
+        dom.nextBtnWrap.classList.remove('hidden');
+        dom.nextQuestionBtn.focus();
+      }
+
+      function handleTimeout() {
+        const qz = state.quiz;
+        if (!qz || qz.locked) return;
+        qz.locked = true;
+        stopAnimationLoop();
+
+        const q = qz.questions[qz.index];
+        qz.totalElapsedMs += qz.timeLimit * 1000;
+        qz.wrongCount++;
+        AudioFX.wrong();
+        qz.wrongRecords.push({
+          prompt: q.type === 'clock' ? q.prompt : `${q.prompt} =`,
+          answer: q.answer,
+          userAnswer: '（逾時未作答）',
+          elapsed: qz.timeLimit.toFixed(2)
+        });
+
+        if (qz.answerMode === 'choice') {
+          dom.answerArea.querySelectorAll('.choice-btn').forEach((btn) => {
+            btn.disabled = true;
+            if (btn.textContent === q.answer) btn.classList.add('is-correct');
+          });
+        } else {
+          dom.answerArea.querySelectorAll('.keypad-btn').forEach((b) => { b.disabled = true; });
+        }
+
+        dom.feedbackBanner.className = 'feedback-banner is-wrong';
+        dom.feedbackBanner.textContent = `時間到！ 正確答案：${q.answer}`;
+        dom.nextBtnWrap.classList.remove('hidden');
+        dom.nextQuestionBtn.focus();
+      }
+
+      function advanceQuestion() {
+        const qz = state.quiz;
+        if (!qz) return;
+        qz.index++;
+        if (qz.index >= qz.questions.length) {
+          finishQuiz();
+        } else {
+          renderCurrentQuestion();
+        }
+      }
+
+      function finishQuiz() {
+        stopAnimationLoop();
+        AudioFX.finish();
+        const qz = state.quiz;
+        const totalQ = qz.questions.length;
+        const totalSec = qz.totalElapsedMs / 1000;
+        const avgSec = totalSec / totalQ;
+        const accuracy = Math.round((qz.correctCount / totalQ) * 100);
+
+        dom.resultTitle.textContent = `${MODULE_CONFIG[qz.moduleId].title} — 練習結果`;
+        dom.resultStatsGrid.innerHTML = `
+          <div class="stat-box">
+            <div class="stat-box-label">答對次數</div>
+            <div class="stat-box-val good">${qz.correctCount} 題（${accuracy}%）</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-label">答錯次數</div>
+            <div class="stat-box-val ${qz.wrongCount > 0 ? 'bad' : ''}">${qz.wrongCount} 題</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-label">平均耗時</div>
+            <div class="stat-box-val">${avgSec.toFixed(2)} 秒</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-label">全部耗時</div>
+            <div class="stat-box-val">${totalSec.toFixed(2)} 秒</div>
+          </div>
+        `;
+
+        if (qz.wrongRecords.length > 0) {
+          dom.wrongTableBody.innerHTML = qz.wrongRecords.map((rec) => `
+            <tr>
+              <td>${rec.prompt}</td>
+              <td>${rec.answer}</td>
+              <td>${rec.userAnswer}</td>
+              <td>${rec.elapsed}</td>
+            </tr>
+          `).join('');
+          dom.wrongTableWrapper.classList.remove('hidden');
+        } else {
+          dom.wrongTableBody.innerHTML = '';
+          dom.wrongTableWrapper.classList.add('hidden');
+        }
+
+        dom.resultDialog.showModal();
+      }
+
+      // ============================================================
+      // 9. 舒爾特方格引擎
+      // ============================================================
+      function getSchulteSequence(size, charsetId) {
+        const total = size * size;
+        if (charsetId === '123') {
+          return Array.from({ length: total }, (_, i) => String(i + 1));
+        }
+        const map = {
+          zhuyin: ZHUYIN_CHARS,
+          ABC: UPPER_ABC,
+          abc: LOWER_ABC,
+          hira: HIRAGANA_CHARS,
+          kata: KATAKANA_CHARS
+        };
+        return map[charsetId].slice(0, total);
+      }
+
+      function startSchulte() {
+        const { size, charset } = state.settings.schulte;
+        const sequence = getSchulteSequence(size, charset);
+        const shuffled = shuffleArray(sequence);
+
+        state.schulte = {
+          size,
+          sequence,
+          nextIdx: 0,
+          mistakes: 0,
+          startTime: performance.now(),
+          finished: false
+        };
+
+        showView('schulte');
+        dom.schulteTargetChar.textContent = sequence[0];
+        dom.schulteTimer.textContent = '0.00 秒';
+        dom.schulteGrid.style.gridTemplateColumns = `repeat(${size}, minmax(0, 1fr))`;
+        dom.schulteGrid.innerHTML = '';
+
+        shuffled.forEach((char) => {
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.className = 'schulte-cell';
+          cell.textContent = char;
+          cell.addEventListener('click', () => handleSchulteTap(char, cell));
+          dom.schulteGrid.appendChild(cell);
+        });
+
+        function tick(now) {
+          if (!state.schulte || state.schulte.finished) return;
+          const elapsed = (now - state.schulte.startTime) / 1000;
+          dom.schulteTimer.textContent = `${elapsed.toFixed(2)} 秒`;
+          state.rafId = requestAnimationFrame(tick);
+        }
+        state.rafId = requestAnimationFrame(tick);
+      }
+
+      function handleSchulteTap(char, cellEl) {
+        const sc = state.schulte;
+        if (!sc || sc.finished) return;
+        const expected = sc.sequence[sc.nextIdx];
+
+        if (char === expected) {
+          AudioFX.correct();
+          cellEl.classList.add('is-done');
+          cellEl.disabled = true;
+          sc.nextIdx++;
+
+          if (sc.nextIdx >= sc.sequence.length) {
+            sc.finished = true;
+            stopAnimationLoop();
+            const totalSec = (performance.now() - sc.startTime) / 1000;
+            dom.schulteTimer.textContent = `${totalSec.toFixed(2)} 秒`;
+            AudioFX.finish();
+
+            dom.resultTitle.textContent = `舒爾特方格（${sc.size} × ${sc.size}）— 完成！`;
+            dom.resultStatsGrid.innerHTML = `
+              <div class="stat-box">
+                <div class="stat-box-label">全部耗時</div>
+                <div class="stat-box-val good">${totalSec.toFixed(2)} 秒</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-label">誤觸次數</div>
+                <div class="stat-box-val ${sc.mistakes > 0 ? 'bad' : ''}">${sc.mistakes} 次</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-label">總格數</div>
+                <div class="stat-box-val">${sc.sequence.length} 格</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-label">平均每格</div>
+                <div class="stat-box-val">${(totalSec / sc.sequence.length).toFixed(2)} 秒</div>
+              </div>
+            `;
+            dom.wrongTableWrapper.classList.add('hidden');
+            dom.resultDialog.showModal();
+          } else {
+            dom.schulteTargetChar.textContent = sc.sequence[sc.nextIdx];
+          }
+        } else {
+          sc.mistakes++;
+          AudioFX.wrong();
+          cellEl.classList.add('is-wrong');
+          setTimeout(() => cellEl.classList.remove('is-wrong'), 260);
+        }
+      }
+
+      // ============================================================
+      // 10. 事件綁定與 Progressive Enhancement
+      // ============================================================
+      document.querySelectorAll('.menu-btn').forEach((btn) => {
+        btn.addEventListener('click', () => openSetup(btn.dataset.module));
+      });
+
+      dom.startQuizBtn.addEventListener('click', startQuiz);
+      dom.nextQuestionBtn.addEventListener('click', advanceQuestion);
+
+      dom.closeModuleBtn.addEventListener('click', () => {
+        state.quiz = null;
+        state.schulte = null;
+        showView('home');
+      });
+
+      dom.soundToggleBtn.addEventListener('click', () => {
+        AudioFX.enabled = !AudioFX.enabled;
+        dom.soundToggleBtn.setAttribute('aria-pressed', String(AudioFX.enabled));
+        dom.soundToggleBtn.textContent = AudioFX.enabled ? '🔊 音效開' : '🔇 靜音';
+      });
+
+      // 實體鍵盤支援（填充題數字鍵、Backspace、Enter 送出或下一題）
+      document.addEventListener('keydown', (e) => {
+        if (dom.resultDialog.open) return;
+        if (dom.quizView.classList.contains('hidden') || !state.quiz) return;
+        const qz = state.quiz;
+
+        if (qz.locked && !dom.nextBtnWrap.classList.contains('hidden')) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            advanceQuestion();
+          }
+          return;
+        }
+
+        if (qz.answerMode === 'fill') {
+          if (/^[0-9]$/.test(e.key)) {
+            e.preventDefault();
+            handleFillKey(e.key);
+          } else if (e.key === 'Backspace') {
+            e.preventDefault();
+            handleFillKey('BACK');
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            handleFillKey('SUBMIT');
+          }
+        }
+      });
+
+      // Dialog 按鈕與關閉處理
+      dom.dialogCloseXBtn.addEventListener('click', () => dom.resultDialog.close('close'));
+      dom.dialogRetryBtn.addEventListener('click', () => {
+        dom.resultDialog.close('retry');
+        startQuiz();
+      });
+      dom.dialogSettingsBtn.addEventListener('click', () => {
+        dom.resultDialog.close('settings');
+        openSetup(state.currentModule);
+      });
+      dom.dialogHomeBtn.addEventListener('click', () => {
+        dom.resultDialog.close('home');
+        state.quiz = null;
+        state.schulte = null;
+        showView('home');
+      });
+
+      dom.resultDialog.addEventListener('close', () => {
+        const reason = dom.resultDialog.returnValue;
+        dom.resultDialog.returnValue = '';
+        if ((reason === '' || reason === 'close') && state.currentModule) {
+          openSetup(state.currentModule);
+        }
+      });
+
+      // Fallback for browsers without <dialog closedby="any"> (e.g., Safari)
+      if (!('closedBy' in HTMLDialogElement.prototype)) {
+        const isOutsideDialog = (e, dialog) => {
+          const r = dialog.getBoundingClientRect();
+          return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+        };
+        let pressedOutside = false;
+        dom.resultDialog.addEventListener('pointerdown', (e) => {
+          pressedOutside = isOutsideDialog(e, dom.resultDialog);
+        });
+        dom.resultDialog.addEventListener('pointerup', (e) => {
+          if (pressedOutside && isOutsideDialog(e, dom.resultDialog)) {
+            dom.resultDialog.close();
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

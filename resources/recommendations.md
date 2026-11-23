@@ -21,7 +21,8 @@ summary: "整理了國小數學互動式教學教具、線上工具，以及學�
 * **[加減法練習](https://jinshuanyu.github.io/add-and-subtract/?fbclid=IwY2xjawMc0pNleHRuA2FlbQIxMABicmlkETFCUWVDZnZTQnVZVFhCb0JuAR5QRkfqn74GT1APXdhuCWEqIh8_S9yYRz8WcXaNTeo6YfLQXNoH0TVcnlZvRQ_aem_T4vlL2VNAbkAX87Gj35kow)** — 線上口算與加減練習小工具。
 * **[數線跳跳糖](tools/number_line_candy.html)** — 自製的數線互動遊戲，支援小數與分數練習，配備「AI 老師求解」與語音提示朗讀功能。
 * **[十十乘法表 & 乘法大挑戰](https://jinshuanyu.github.io/times-table/?fbclid=IwY2xjawMc0ixleHRuA2FlbQIxMABicmlkETFCUWVDZnZTQnVZVFhCb0JuAR6TLkJ22zC8E7ON-7BlBXhb1cZ8f8Em9l9y9nRFFFOaLEDjWV3V5SC9B3yG4A_aem_M-eFQUnHlzG9ffEZ2M70Bw)** — 九九乘法與進階乘法趣味挑戰。
-* **[數學練習小程式](https://math-exercise.johnwu.cc/zh-tw/)** — 提供各年級數學題目生成與線上練習。
+* **[數學練習小程式（含 1–100 除法練習版）](tools/math_exercise.html)** — 引用 [John Wu 數學練習小程式](https://math-exercise.johnwu.cc/zh-tw/) 加以編修為純繁體中文版，新增「被除數 1–100、除數 1–10 整除除法」雙篩選模組，並支援「不限時」開關、鍵盤與觸控作答及錯題統計。
+* **[數學練習小程式（原版）](https://math-exercise.johnwu.cc/zh-tw/)** — 提供各年級加減乘、舒爾特方格與時鐘線上練習。
 * **[康軒數算卡-等值分數](https://digitalmaster.knsh.com.tw/el/math/mental-arithmetic-ef/?utm_source=digitalmaster&utm_medium=mathweb)** — 心算卡與分數運算互動練習。
 * **[翰林線段圖](https://barmodel.hle.com.tw/)** — 線上線段圖布題工具，輔助文字題理解。
 * **[線段圖大冒險](tools/segment_diagram_adventure.html)** — 自製的線段圖學習遊戲，支援 1-6 年級難度，包含「AI 老師求解」與語音提示朗讀功能。
