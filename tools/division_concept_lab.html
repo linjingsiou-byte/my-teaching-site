@@ -1012,10 +1012,12 @@
       t1StepsDone = 0;
       t1GroupsData = pr.type === 'share' ? Array.from({ length: pr.divisor }, () => 0) : [];
       document.getElementById('t1-story').textContent = pr.story;
+      const targetUnit = pr.units.divs;
+      const itemUnit = pr.units.divd;
       document.getElementById('t1-action-hint').textContent =
-        pr.type === 'contain' ? `🟩 怎麼分：每 ${pr.divisor} ${pr.units.divd}裝一盤` : `🟩 怎麼分：平分給 ${pr.divisor} ${pr.units.divs}（每次每人發 1 ${pr.units.divd}）`;
+        pr.type === 'contain' ? `🟩 怎麼分：每 ${pr.divisor} ${itemUnit}裝一盤` : `🟩 怎麼分：平分給 ${pr.divisor} ${targetUnit}（每次每${targetUnit}發 1 ${itemUnit}）`;
       document.getElementById('t1-step-btn').textContent =
-        pr.type === 'contain' ? `📦 裝一盤（拿走 ${pr.divisor} 個）` : `🍽️ 發一輪（每人拿 1 個）`;
+        pr.type === 'contain' ? `📦 裝一盤（拿走 ${pr.divisor} ${itemUnit}）` : `🍽️ 發一輪（每${targetUnit}拿 1 ${itemUnit}）`;
       document.getElementById('t1-step-btn').disabled = false;
       renderT1Stage();
     }
